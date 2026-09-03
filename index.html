@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>NP-404 System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#090a0d;--panel:#111318;--panel2:#181b22;--line:#292e38;--text:#f3f5f7;--muted:#9ba3af;--accent:#54a8fc;--accent2:#173b5d;--danger:#ed6262;--ok:#4fd18b}
+*{box-sizing:border-box;margin:0;padding:0}html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:Prompt,sans-serif}body{display:flex;flex-direction:column;min-height:100vh}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 18px;border-bottom:1px solid var(--line);background:rgba(9,10,13,.94);backdrop-filter:blur(10px)}
+.brand-wrap{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:40px;height:40px;object-fit:cover;border-radius:11px;border:1px solid var(--line);background:var(--panel2)}.brand{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand span{color:var(--accent)}
+.auth-box{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.user-name{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.announcement{display:flex;align-items:center;gap:12px;padding:8px 18px;border-bottom:1px solid var(--line);background:#0e1117;overflow:hidden}.announcement-label{color:var(--accent);font-weight:600;font-size:12px;white-space:nowrap}.ticker{overflow:hidden;white-space:nowrap;flex:1}.ticker span{display:inline-block;padding-left:100%;animation:ticker 18s linear infinite}@keyframes ticker{to{transform:translateX(-100%)}}
+main{flex:1;width:100%;max-width:1500px;margin:0 auto;padding:24px 18px 125px}.page-card{width:100%;min-height:calc(100vh - 210px);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px}.page-card.full-code{padding:0;overflow:hidden}
+.hello-title{font-size:30px;font-weight:600;margin-bottom:8px}.hello-sub{color:var(--muted);line-height:1.8}.empty{text-align:center;color:var(--muted);padding:55px 0}
+.maintenance{min-height:65vh;display:flex;align-items:center;justify-content:center;text-align:center}.maintenance .code{font-size:88px;font-weight:700;color:var(--accent)}.maintenance h1{font-size:25px;margin:5px 0}.maintenance p{color:var(--muted)}
+nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:8px;padding:10px 12px;background:rgba(12,13,17,.97);border-top:1px solid var(--line);overflow-x:auto}nav.menu-bar::-webkit-scrollbar{height:0}
+.menu-item{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:10px 15px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:13px;white-space:nowrap}.menu-item.active{background:var(--accent2);border-color:var(--accent);color:var(--accent)}.menu-item.disabled{opacity:.55}.status-dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}.disabled .status-dot{background:var(--danger)}
+.pill{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 13px;border-radius:999px;font-size:12px}.pill:hover{border-color:var(--accent);color:var(--accent)}.pill.solid{background:var(--accent);border-color:var(--accent);color:#07131e;font-weight:600}
+.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:15px;background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}.overlay.show{display:flex}.modal{width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:18px}.modal.wide{max-width:920px}.modal h3{font-size:18px;margin-bottom:15px}
+.modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions .pill{flex:1}.field{margin-bottom:13px}.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:12px}.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);outline:none}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tabs{display:flex;gap:5px;padding:4px;background:var(--panel2);border-radius:999px;margin-bottom:16px}.tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:8px;border-radius:999px}.tabs button.active{background:var(--accent);color:#07131e;font-weight:600}.err{min-height:18px;color:var(--danger);font-size:12px;margin-bottom:8px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}.admin-info{min-width:0}.admin-info b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.admin-info small{display:block;color:var(--muted);margin-top:3px}.admin-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.admin-actions button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 9px;border-radius:8px;font-size:11px}.admin-actions .danger{color:var(--danger)}
+.badge{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.badge.on{border-color:var(--ok);color:var(--ok)}.badge.off{border-color:var(--danger);color:var(--danger)}
+.switch{position:relative;display:inline-block;width:43px;height:24px}.switch input{display:none}.slider{position:absolute;inset:0;border-radius:20px;background:#30343d;transition:.2s}.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}.switch input:checked+.slider{background:var(--accent)}.switch input:checked+.slider:before{transform:translateX(19px)}
+.setting-card{border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:10px;background:var(--panel2)}.setting-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.setting-head b{font-size:14px}.setting-head small{color:var(--muted)}
+.popup-img{width:100%;max-height:250px;object-fit:cover;border-radius:12px;margin:8px 0 14px}.popup-detail{white-space:pre-wrap;color:#cdd2da;line-height:1.8}.hidden{display:none!important}.builder-page{width:100%;display:flex;flex-direction:column;gap:16px}.content-block{width:100%;overflow:hidden}.content-block.text-block{white-space:pre-wrap;line-height:1.9;color:#e8ebef}.content-block.image-block img{display:block;width:100%;height:auto;max-height:650px;object-fit:contain;border-radius:14px}.content-block.image-block .caption{color:var(--muted);font-size:12px;margin-top:7px;text-align:center}.builder-list{display:flex;flex-direction:column;gap:9px}.builder-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2)}.builder-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.builder-preview{margin-top:9px;padding:10px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);max-height:150px;overflow:hidden}.builder-preview img{max-width:100%;max-height:120px;object-fit:contain;border-radius:7px}.builder-toolbar{display:flex;gap:6px;flex-wrap:wrap}.builder-toolbar button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 9px;border-radius:8px;font-size:11px}.code-page{width:100%;min-height:70vh}.link-page{text-align:center;padding:70px 15px}
+@media(max-width:650px){header{padding:10px 12px}.auth-box .user-name{display:none}main{padding:15px 10px 120px}.page-card{padding:20px}.grid2{grid-template-columns:1fr}.maintenance .code{font-size:65px}.admin-row{align-items:flex-start;flex-direction:column}.admin-actions{width:100%;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<header><div class="brand-wrap"><img id="siteLogo" class="logo hidden" alt="logo"><div class="brand" id="siteName">กำลังโหลด...</div></div><div class="auth-box" id="authBox"><span>กำลังโหลด...</span></div></header>
+<div class="announcement" id="announcementBar"><div class="announcement-label">📢 ประกาศ</div><div class="ticker"><span id="announcementText"></span></div></div>
+<main><div class="page-card" id="pageContent"></div></main><nav class="menu-bar" id="menuBar"></nav>
+
+<div class="overlay" id="authModal"><div class="modal"><div class="tabs"><button id="tabLogin" class="active" onclick="setAuthTab('login')">เข้าสู่ระบบ</button><button id="tabRegister" onclick="setAuthTab('register')">สมัครสมาชิก</button></div>
+<div id="registerFields" class="hidden"><div class="grid2"><div class="field"><label>ชื่อจริง</label><input id="authFirstName"></div><div class="field"><label>นามสกุล</label><input id="authLastName"></div></div><div class="field"><label>ชื่อแอคเค้า</label><input id="authUsername" placeholder="เช่น np_flame"></div></div>
+<div class="field"><label>อีเมล</label><input type="email" id="authEmail" placeholder="you@example.com"></div><div class="field"><label>รหัสผ่าน</label><input type="password" id="authPassword" placeholder="อย่างน้อย 6 ตัวอักษร"></div>
+<div style="text-align:right;margin-top:-4px;margin-bottom:10px"><button class="text-btn" onclick="openForgotPasswordModal()">ลืมรหัสผ่าน?</button></div><div class="err" id="authErr"></div>
+<div class="modal-actions"><button class="pill" onclick="closeOverlay('authModal')">ยกเลิก</button><button class="pill solid" id="authSubmitBtn" onclick="submitAuth()">เข้าสู่ระบบ</button></div></div></div>
+
+<div class="overlay" id="adminModal"><div class="modal wide"><h3>⚙️ แผงควบคุมระบบ <span class="badge on">ADMIN</span></h3>
+<div class="tabs" id="adminTabs"><button class="active" onclick="showAdminTab('system',this)">ระบบ</button><button onclick="showAdminTab('pages',this)">หน้าเมนู</button><button onclick="showAdminTab('links',this)">ลิงก์</button><button onclick="showAdminTab('popup',this)">ป๊อปอัป</button></div>
+<section id="adminSystem"></section><section id="adminPages" class="hidden"></section><section id="adminLinks" class="hidden"></section><section id="adminPopup" class="hidden"></section>
+<div class="modal-actions"><button class="pill" onclick="confirmLogoutAdmin()">ออกจาก Admin / ปิด</button></div></div></div>
+
+<div class="overlay" id="pageModal"><div class="modal"><h3 id="pageModalTitle">เพิ่มหน้าใหม่</h3><div class="field"><label>ชื่อหัวข้อเมนู</label><input id="pageNameInput"></div><div class="field"><label>หมวดหมู่</label><input id="pageCategoryInput"></div>
+<div class="field"><label>ประเภทหน้า</label><select id="pageTypeInput" onchange="togglePageType()"><option value="builder">สร้างหน้าแบบลากจัดเรียง (ข้อความ/ภาพ)</option><option value="code">โค้ด HTML / เนื้อหา</option><option value="link">ลิงก์ภายนอก</option></select></div><div class="setting-card" style="margin-bottom:13px"><div class="setting-head"><div><b>🔐 บังคับเข้าสู่ระบบ</b><small>ถ้าเปิด ผู้ใช้ต้องเข้าสู่ระบบก่อนใช้งานเมนูนี้</small></div><label class="switch"><input id="pageRequireLoginInput" type="checkbox"><span class="slider"></span></label></div></div>
+<div class="field hidden" id="pageBuilderField"><label>เนื้อหาหน้า</label><div id="builderList" class="builder-list"></div><div class="builder-toolbar" style="margin-top:9px"><button onclick="addBuilderBlock('text')">＋ ข้อความ</button><button onclick="addBuilderBlock('image')">🖼️ ภาพ</button></div></div><div class="field hidden" id="pageCodeField"><label>โค้ด HTML</label><textarea id="pageCodeInput"></textarea></div><div class="field hidden" id="pageLinkField"><label>URL</label><input id="pageLinkInput" type="url"></div>
+<div class="modal-actions"><button class="pill" onclick="closeOverlay('pageModal')">ยกเลิก</button><button class="pill solid" onclick="savePage()">บันทึก</button></div></div></div>
+
+<div class="overlay" id="linkModal"><div class="modal"><h3 id="linkModalTitle">เพิ่มลิงก์</h3><div class="field"><label>ชื่อหัวข้อ</label><input id="linkNameInput"></div><div class="field"><label>URL</label><input id="linkUrlInput" type="url"></div><div class="field"><label>หมวดหมู่</label><input id="linkCategoryInput"></div>
+<div class="modal-actions"><button class="pill" onclick="closeOverlay('linkModal')">ยกเลิก</button><button class="pill solid" onclick="saveLink()">บันทึก</button></div></div></div>
+
+<div class="overlay" id="announcementPopup"><div class="modal"><h3 id="popupTitle">ประกาศ</h3><img id="popupImage" class="popup-img hidden" alt="ประกาศ"><div id="popupDetail" class="popup-detail"></div>
+<div class="modal-actions"><button class="pill" onclick="snoozePopup()">ไม่ต้องแสดงอีก 60 นาที</button><button class="pill solid" onclick="closeOverlay('announcementPopup')">รับทราบ</button></div></div></div>
+<div class="overlay" id="confirmModal"><div class="modal" style="max-width:400px"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText" style="color:var(--muted);line-height:1.7"></p><div class="modal-actions"><button class="pill" onclick="closeOverlay('confirmModal')">ยกเลิก</button><button class="pill solid" id="confirmOk">ยืนยัน</button></div></div></div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
+const firebaseConfig={apiKey:"AIzaSyACRixuNmOefWk2vDCgmt0K0-6Kvi1V8C0",authDomain:"np-404.firebaseapp.com",projectId:"np-404",storageBucket:"np-404.firebasestorage.app",messagingSenderId:"535227695851",appId:"1:535227695851:web:12d01c1780c1ec1b0674ae",measurementId:"G-SCP8RDBDS8"};
+const auth=getAuth(initializeApp(firebaseConfig));window.__auth=auth;window.__authFns={signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile};window.__ADMIN_EMAIL="admin@np404.com";
+onAuthStateChanged(auth,u=>{window.__currentUser=u;window.__isAdmin=!!(u?.email&&u.email.toLowerCase()===window.__ADMIN_EMAIL);renderAuth();renderMenu();renderActivePage()});
+window.doLogout=()=>signOut(auth);
+</script>
+<script>
+const API_URL="https://script.google.com/macros/s/AKfycbwNzOPeq1ySwZET-yNLabubjiGx-BsLjTpuWuV6cz0AG1MEBkggvSEh6bCnHq5lH7WB/exec",HOME_ID="home";
+let pages=[],links=[],settings={},activeId=HOME_ID,authTab="login",editingPageRow=null,editingLinkRow=null,builderBlocks=[];
+const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+function apiGet(a){return fetch(API_URL+"?action="+encodeURIComponent(a)).then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x})}
+function apiPost(d){return fetch(API_URL,{method:"POST",body:JSON.stringify(d)}).then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x})}
+function closeOverlay(id){$(id).classList.remove("show")}window.closeOverlay=closeOverlay;
+function toast(m,ok=true){alert((ok?"✓ ":"✕ ")+m)}
+async function loadAll(){try{let a=await apiGet("getAll");pages=a.pages||[];links=a.links||[];settings=a.settings||{};applySettings();renderMenu();renderActivePage();renderAdmin();if(settings.popupEnabled==="true"&&settings.popupDetail)setTimeout(showPopup,700)}catch(e){console.error(e);$("pageContent").innerHTML='<div class="empty">โหลดระบบไม่สำเร็จ กรุณาตรวจสอบ API_URL และ Apps Script</div>'}}
+function applySettings(){$("siteName").innerText=settings.siteName||"เมนูระบบ";document.title=settings.siteName||"NP-404 System";let l=$("siteLogo");if(settings.logoUrl){l.src=settings.logoUrl;l.classList.remove("hidden")}else{l.classList.add("hidden")}$("announcementText").innerText=settings.announcement||"";$("announcementBar").classList.toggle("hidden",!settings.announcement)}
+function renderAuth(){let b=$("authBox"),u=window.__currentUser;if(!u){b.innerHTML='<span>ยังไม่ได้เข้าสู่ระบบ</span><button class="pill solid" onclick="openAuthModal()">เข้าสู่ระบบ</button>';return}let p=JSON.parse(localStorage.getItem("np404_profile")||"{}"),name=p.username||u.displayName||u.email;b.innerHTML='<span class="user-name">'+esc(name)+'</span>'+(window.__isAdmin?'<button class="pill solid" onclick="openAdminPanel()">แผงแอดมิน</button>':"")+'<button class="pill" onclick="logout()">ออกจากระบบ</button>'}
+async function logout(){if(window.__isAdmin){confirmAction("ออกจาก Admin","ต้องการออกจากระบบ Admin ใช่หรือไม่?",async()=>{await window.doLogout();toast("ออกจากระบบแล้ว")})}else await window.doLogout()}window.logout=logout;
+function renderMenu(){let b=$("menuBar");b.innerHTML="";b.appendChild(menu({id:HOME_ID,name:settings.homeTitle||"สวัสดี",active:true}));pages.forEach(p=>b.appendChild(menu(p)));links.forEach(l=>b.appendChild(menu(l)))}
+function menu(x){let e=document.createElement("div"),key=x.id||x.rowIndex,on=x.active!==false;e.className="menu-item "+(key===activeId?"active ":"")+(!on?"disabled":"");e.innerHTML='<span class="status-dot"></span>'+esc(x.name)+(on?"":" 🔒");e.onclick=()=>{if(!on&&!window.__isAdmin)return toast("เมนูนี้ปิดปรับปรุงอยู่",false);if(x.url||x.type==="link"){window.open(x.url||x.content,"_blank");return}activeId=key;renderMenu();renderActivePage()};return e}
+function renderActivePage(){let c=$("pageContent");c.classList.remove("full-code");
+if(settings.maintenance==="true"&&!window.__isAdmin){c.innerHTML='<div class="maintenance"><div><div class="code">503</div><h1>ระบบขัดข้องชั่วคราว</h1><p>ขณะนี้ระบบอยู่ระหว่างการปรับปรุง กรุณาลองใหม่ภายหลัง</p></div></div>';return}
+if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">'+esc(settings.homeTitle||"สวัสดี 👋")+'</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
+let p=pages.find(x=>(x.id||x.rowIndex)===activeId);
+if(p){
+  if(p.active===false&&!window.__isAdmin){c.innerHTML='<div class="empty">หน้านี้ปิดปรับปรุงอยู่</div>';return}
+  if(p.requireLogin && !window.__currentUser && !window.__isAdmin){
+    c.innerHTML='<div class="empty"><div style="font-size:42px">🔐</div><h2 style="margin:8px 0">เมนูนี้ต้องเข้าสู่ระบบ</h2><p>กรุณาเข้าสู่ระบบก่อนใช้งานเมนูนี้</p><button class="pill solid" style="margin-top:14px" onclick="openAuthModal()">เข้าสู่ระบบ</button></div>';return;
+  }
+  if(p.type==="link"){window.open(p.content,"_blank");return}
+  if(p.type==="builder"){
+    let blocks=[];try{blocks=JSON.parse(p.blocks||p.content||"[]")}catch(e){blocks=[]}
+    c.classList.add("builder-page");c.innerHTML="";
+    blocks.forEach(b=>{
+      let w=document.createElement("div");w.className="content-block "+(b.type==="image"?"image-block":"text-block");
+      if(b.type==="image"){let img=document.createElement("img");img.src=b.url||"";img.alt=b.alt||"";w.appendChild(img);if(b.caption){let cap=document.createElement("div");cap.className="caption";cap.innerText=b.caption;w.appendChild(cap)}}
+      else w.innerText=b.text||"";
+      c.appendChild(w);
+    });
+    if(!blocks.length)c.innerHTML='<div class="empty">หน้านี้ยังไม่มีเนื้อหา</div>';
+    return;
+  }
+  c.classList.add("full-code");c.innerHTML="";let w=document.createElement("div");w.className="code-page";w.innerHTML=p.content||"";Array.from(w.childNodes).forEach(n=>{if(n.tagName==="SCRIPT"){let s=document.createElement("script");Array.from(n.attributes).forEach(a=>s.setAttribute(a.name,a.name==="src"?a.value:a.value));s.text=n.textContent;c.appendChild(s)}else c.appendChild(n)});return
+}
+let l=links.find(x=>(x.id||x.rowIndex)===activeId);if(l){if(!l.active&&!window.__isAdmin)return;c.innerHTML='<div class="link-page"><h2>'+esc(l.name)+'</h2><p>กำลังเปิดลิงก์...</p></div>';window.open(l.url,"_blank");return}c.innerHTML='<div class="empty">ไม่พบหน้านี้</div>'}
+window.renderMenu=renderMenu;window.renderActivePage=renderActivePage;
+function openAuthModal(){$("authModal").classList.add("show");setAuthTab("login");$("authErr").innerText=""}window.openAuthModal=openAuthModal;
+function setAuthTab(t){authTab=t;$("tabLogin").classList.toggle("active",t==="login");$("tabRegister").classList.toggle("active",t==="register");$("registerFields").classList.toggle("hidden",t!=="register");$("authSubmitBtn").innerText=t==="login"?"เข้าสู่ระบบ":"สมัครสมาชิก"}window.setAuthTab=setAuthTab;
+async function submitAuth(){let err=$("authErr");err.innerText="";try{let email=$("authEmail").value.trim(),pass=$("authPassword").value;if(!email||!pass)throw Error("กรุณากรอกอีเมลและรหัสผ่าน");if(authTab==="register"){let f=$("authFirstName").value.trim(),l=$("authLastName").value.trim(),u=$("authUsername").value.trim();if(!f||!l||!u)throw Error("กรุณากรอกชื่อจริง นามสกุล และชื่อแอคเค้า");let c=await window.__authFns.createUserWithEmailAndPassword(window.__auth,email,pass);await window.__authFns.updateProfile(c.user,{displayName:f+" "+l});localStorage.setItem("np404_profile",JSON.stringify({firstName:f,lastName:l,username:u,email}))}else await window.__authFns.signInWithEmailAndPassword(window.__auth,email,pass);closeOverlay("authModal");toast(authTab==="login"?"เข้าสู่ระบบสำเร็จ":"สมัครสมาชิกสำเร็จ")}catch(e){err.innerText=({"auth/invalid-email":"อีเมลไม่ถูกต้อง","auth/user-not-found":"ไม่พบบัญชีนี้","auth/wrong-password":"รหัสผ่านไม่ถูกต้อง","auth/invalid-credential":"อีเมลหรือรหัสผ่านไม่ถูกต้อง","auth/email-already-in-use":"อีเมลนี้ถูกใช้ไปแล้ว","auth/weak-password":"รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"}[e.code]||e.message||"เกิดข้อผิดพลาด")}}window.submitAuth=submitAuth;
+
+function openAdminPanel(){if(!window.__isAdmin)return toast("เฉพาะ Admin เท่านั้น",false);renderAdmin();$("adminModal").classList.add("show")}window.openAdminPanel=openAdminPanel;
+function showAdminTab(t,b){["system","pages","links","popup"].forEach(x=>$("admin"+x[0].toUpperCase()+x.slice(1)).classList.toggle("hidden",x!==t));document.querySelectorAll("#adminTabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active")}window.showAdminTab=showAdminTab;
+function renderAdmin(){if(!window.__isAdmin)return;renderSystem();renderPages();renderLinks();renderPopup()}
+function renderSystem(){$("adminSystem").innerHTML='<div class="setting-card"><div class="setting-head"><div><b>Maintenance Mode</b><small> เปิด/ปิดหน้า 503 สำหรับผู้ใช้ทั่วไป</small></div><label class="switch"><input type="checkbox" '+(settings.maintenance==="true"?"checked":"")+' onchange="toggleMaintenance(this.checked)"><span class="slider"></span></label></div></div><div class="setting-card"><div class="setting-head"><div><b>ชื่อเว็บไซต์ / โลโก้</b><small>เปลี่ยนชื่อและ URL รูปโลโก้</small></div></div><div class="field"><label>ชื่อเว็บไซต์</label><input id="setSiteName" value="'+esc(settings.siteName||"")+'"></div><div class="field"><label>URL โลโก้</label><input id="setLogoUrl" value="'+esc(settings.logoUrl||"")+'"></div><button class="pill solid" onclick="saveBrand()">บันทึกชื่อและโลโก้</button></div><div class="setting-card"><div class="setting-head"><div><b>หน้าแรก</b><small>แก้หัวข้อหน้าแรกได้</small></div></div><div class="field"><label>หัวข้อหน้าแรก</label><input id="setHomeTitle" value="'+esc(settings.homeTitle||"")+'"></div><div class="field"><label>รายละเอียดหน้าแรก</label><textarea id="setHomeSubtitle">'+esc(settings.homeSubtitle||"")+'</textarea></div><button class="pill solid" onclick="saveHome()">บันทึกหน้าแรก</button></div><div class="setting-card"><div class="setting-head"><div><b>ข้อความประกาศวิ่ง</b><small>แสดงบนแถบด้านบนและวิ่งอัตโนมัติ</small></div></div><div class="field"><input id="setAnnouncement" value="'+esc(settings.announcement||"")+'"></div><button class="pill solid" onclick="saveAnnouncement()">บันทึกประกาศวิ่ง</button></div>'}
+async function saveSettings(o){await apiPost({action:"saveSettings",settings:o});Object.assign(settings,o);applySettings();renderMenu();renderActivePage();renderAdmin()}
+async function toggleMaintenance(v){try{await saveSettings({maintenance:v?"true":"false"});toast(v?"เปิด Maintenance Mode แล้ว":"ปิด Maintenance Mode แล้ว")}catch(e){toast(e.message,false)}}window.toggleMaintenance=toggleMaintenance;
+async function saveBrand(){try{await saveSettings({siteName:$("setSiteName").value.trim(),logoUrl:$("setLogoUrl").value.trim()});toast("บันทึกชื่อและโลโก้แล้ว")}catch(e){toast(e.message,false)}}window.saveBrand=saveBrand;
+async function saveHome(){try{await saveSettings({homeTitle:$("setHomeTitle").value.trim(),homeSubtitle:$("setHomeSubtitle").value});toast("บันทึกหน้าแรกแล้ว")}catch(e){toast(e.message,false)}}window.saveHome=saveHome;
+async function saveAnnouncement(){try{await saveSettings({announcement:$("setAnnouncement").value});toast("บันทึกข้อความประกาศแล้ว")}catch(e){toast(e.message,false)}}window.saveAnnouncement=saveAnnouncement;
+
+function renderPages(){let b=$("adminPages");b.innerHTML='<button class="pill solid" style="width:100%;margin-bottom:12px" onclick="openPageEditor()">+ เพิ่มหน้าเมนู</button>';if(!pages.length){b.innerHTML+='<div class="empty">ยังไม่มีหน้าเมนู</div>';return}pages.forEach(p=>b.innerHTML+='<div class="admin-row"><div class="admin-info"><b>'+esc(p.name)+' '+(p.requireLogin?'🔐':'')+'</b><small>'+esc(p.category||"ไม่ระบุหมวดหมู่")+' · '+(p.type==="link"?"ลิงก์ภายนอก":p.type==="builder"?"ตัวสร้างหน้า":"โค้ด HTML")+(p.requireLogin?" · ต้องเข้าสู่ระบบ":"")+'</small></div><div class="admin-actions"><span class="badge '+(p.active?"on":"off")+'">'+(p.active?"เปิดใช้งาน":"ปิดปรับปรุง")+'</span><label class="switch"><input type="checkbox" '+(p.active?"checked":"")+' onchange="setPageStatus('+p.rowIndex+',this.checked)"><span class="slider"></span></label><button onclick="openPageEditor('+p.rowIndex+')">แก้ไข</button><button class="danger" onclick="deletePageConfirm('+p.rowIndex+')">ลบ</button></div></div>')}
+function openPageEditor(r){editingPageRow=r||null;let p=r?pages.find(x=>x.rowIndex===r):null;$("pageModalTitle").innerText=p?"แก้ไขเมนู":"เพิ่มหน้าใหม่";$("pageNameInput").value=p?.name||"";$("pageCategoryInput").value=p?.category||"";$("pageTypeInput").value=p?.type||"builder";$("pageRequireLoginInput").checked=!!p?.requireLogin;$("pageCodeInput").value=p?.type==="code"?p.content:"";$("pageLinkInput").value=p?.type==="link"?p.content:"";builderBlocks=[];if(p?.type==="builder"){try{builderBlocks=JSON.parse(p.blocks||p.content||"[]")}catch(e){builderBlocks=[]}}renderBuilder();togglePageType();$("pageModal").classList.add("show")}window.openPageEditor=openPageEditor;
+function togglePageType(){let t=$("pageTypeInput").value;$("pageBuilderField").classList.toggle("hidden",t!=="builder");$("pageCodeField").classList.toggle("hidden",t!=="code");$("pageLinkField").classList.toggle("hidden",t!=="link")}window.togglePageType=togglePageType;
+function renderBuilder(){let box=$("builderList");box.innerHTML="";if(!builderBlocks.length){box.innerHTML='<div class="empty" style="padding:20px 0">ยังไม่มีเนื้อหา กด “＋ ข้อความ” หรือ “🖼️ ภาพ” เพื่อเพิ่ม</div>';return}builderBlocks.forEach((b,i)=>{let d=document.createElement("div");d.className="builder-item";d.innerHTML='<div class="builder-item-head"><b>'+(b.type==="image"?"🖼️ ภาพ":"📝 ข้อความ")+' #'+(i+1)+'</b><div class="builder-toolbar"><button onclick="moveBuilder('+i+',-1)">↑</button><button onclick="moveBuilder('+i+',1)">↓</button><button onclick="editBuilder('+i+')">แก้ไข</button><button onclick="removeBuilder('+i+')">ลบ</button></div></div><div class="builder-preview"></div>';let pv=d.querySelector(".builder-preview");if(b.type==="image"){let img=document.createElement("img");img.src=b.url||"";pv.appendChild(img);if(b.caption)pv.appendChild(document.createTextNode(b.caption))}else pv.innerText=b.text||"ข้อความว่าง";box.appendChild(d)})}window.renderBuilder=renderBuilder;
+function addBuilderBlock(type){if(type==="text"){let text=prompt("พิมพ์ข้อความที่ต้องการแสดงในหน้า:","");if(text===null)return;builderBlocks.push({type:"text",text})}else{let url=prompt("ใส่ URL รูปภาพ:","");if(!url)return;let caption=prompt("คำอธิบายภาพ (ถ้ามี):","")||"";builderBlocks.push({type:"image",url,caption})}renderBuilder()}window.addBuilderBlock=addBuilderBlock;
+function editBuilder(i){let b=builderBlocks[i];if(!b)return;if(b.type==="text"){let v=prompt("แก้ไขข้อความ:",b.text||"");if(v!==null)b.text=v}else{let u=prompt("แก้ไข URL รูปภาพ:",b.url||"");if(u!==null&&u.trim()){b.url=u.trim();let c=prompt("แก้ไขคำอธิบายภาพ:",b.caption||"");if(c!==null)b.caption=c}}renderBuilder()}window.editBuilder=editBuilder;
+function removeBuilder(i){confirmAction("ยืนยันการลบ","ต้องการลบเนื้อหาชิ้นนี้ใช่หรือไม่?",async()=>{builderBlocks.splice(i,1);renderBuilder()})}window.removeBuilder=removeBuilder;
+function moveBuilder(i,dir){let j=i+dir;if(j<0||j>=builderBlocks.length)return;[builderBlocks[i],builderBlocks[j]]=[builderBlocks[j],builderBlocks[i]];renderBuilder()}window.moveBuilder=moveBuilder;
+async function savePage(){try{let n=$("pageNameInput").value.trim(),cat=$("pageCategoryInput").value.trim(),type=$("pageTypeInput").value,content="",blocks="";if(!n)throw Error("กรุณากรอกชื่อเมนู");if(type==="builder"){if(!builderBlocks.length)throw Error("กรุณาเพิ่มข้อความหรือภาพอย่างน้อย 1 รายการ");blocks=JSON.stringify(builderBlocks);content=blocks}else if(type==="code"){content=$("pageCodeInput").value;if(!content)throw Error("กรุณากรอกโค้ด HTML")}else{content=$("pageLinkInput").value.trim();if(!content)throw Error("กรุณากรอก URL")}let d={action:editingPageRow?"updatePage":"addPage",name:n,category:cat,type,content,blocks,requireLogin:$("pageRequireLoginInput").checked,active:true};if(editingPageRow)d.rowIndex=editingPageRow;await apiPost(d);closeOverlay("pageModal");await loadAll();toast("บันทึกเมนูแล้ว")}catch(e){toast(e.message,false)}}window.savePage=savePage;
+async function setPageStatus(r,v){try{await apiPost({action:"setPageActive",rowIndex:r,active:v});let p=pages.find(x=>x.rowIndex===r);if(p)p.active=v;renderMenu();renderPages();toast(v?"เปิดหน้าแล้ว":"ปิดปรับปรุงแล้ว")}catch(e){toast(e.message,false)}}window.setPageStatus=setPageStatus;
+function deletePageConfirm(r){let p=pages.find(x=>x.rowIndex===r);confirmAction("ยืนยันการลบ","ต้องการลบเมนู "+(p?.name||"นี้")+" ใช่หรือไม่?",async()=>{await apiPost({action:"deletePage",rowIndex:r});activeId=HOME_ID;await loadAll();toast("ลบเมนูแล้ว")})}window.deletePageConfirm=deletePageConfirm;
+
+function renderLinks(){let b=$("adminLinks");b.innerHTML='<button class="pill solid" style="width:100%;margin-bottom:12px" onclick="openLinkEditor()">+ เพิ่มลิงก์</button>';if(!links.length){b.innerHTML+='<div class="empty">ยังไม่มีลิงก์</div>';return}links.forEach(l=>b.innerHTML+='<div class="admin-row"><div class="admin-info"><b>'+esc(l.name)+'</b><small>'+esc(l.category||"ไม่ระบุหมวดหมู่")+' · '+esc(l.url)+'</small></div><div class="admin-actions"><span class="badge '+(l.active?"on":"off")+'">'+(l.active?"เปิดใช้งาน":"ปิดปรับปรุง")+'</span><label class="switch"><input type="checkbox" '+(l.active?"checked":"")+' onchange="setLinkStatus('+l.rowIndex+',this.checked)"><span class="slider"></span></label><button onclick="openLinkEditor('+l.rowIndex+')">แก้ไข</button><button class="danger" onclick="deleteLinkConfirm('+l.rowIndex+')">ลบ</button></div></div>')}
+function openLinkEditor(r){editingLinkRow=r||null;let l=r?links.find(x=>x.rowIndex===r):null;$("linkModalTitle").innerText=l?"แก้ไขลิงก์":"เพิ่มลิงก์";$("linkNameInput").value=l?.name||"";$("linkUrlInput").value=l?.url||"";$("linkCategoryInput").value=l?.category||"";$("linkModal").classList.add("show")}window.openLinkEditor=openLinkEditor;
+async function saveLink(){try{let n=$("linkNameInput").value.trim(),u=$("linkUrlInput").value.trim(),c=$("linkCategoryInput").value.trim();if(!n||!u)throw Error("กรุณากรอกชื่อและ URL");let d={action:editingLinkRow?"updateLink":"addLink",name:n,url:u,category:c,active:true};if(editingLinkRow)d.rowIndex=editingLinkRow;await apiPost(d);closeOverlay("linkModal");await loadAll();toast("บันทึกลิงก์แล้ว")}catch(e){toast(e.message,false)}}window.saveLink=saveLink;
+async function setLinkStatus(r,v){try{await apiPost({action:"setLinkActive",rowIndex:r,active:v});let l=links.find(x=>x.rowIndex===r);if(l)l.active=v;renderMenu();renderLinks();toast(v?"เปิดลิงก์แล้ว":"ปิดปรับปรุงแล้ว")}catch(e){toast(e.message,false)}}window.setLinkStatus=setLinkStatus;
+function deleteLinkConfirm(r){let l=links.find(x=>x.rowIndex===r);confirmAction("ยืนยันการลบ","ต้องการลบลิงก์ "+(l?.name||"นี้")+" ใช่หรือไม่?",async()=>{await apiPost({action:"deleteLink",rowIndex:r});activeId=HOME_ID;await loadAll();toast("ลบลิงก์แล้ว")})}window.deleteLinkConfirm=deleteLinkConfirm;
+
+function renderPopup(){$("adminPopup").innerHTML='<div class="setting-card"><div class="setting-head"><div><b>ระบบป๊อปอัปประกาศ</b><small>พักการแสดงได้ 60 นาทีด้วย localStorage</small></div><label class="switch"><input id="popupEnabled" type="checkbox" '+(settings.popupEnabled==="true"?"checked":"")+'><span class="slider"></span></label></div><div class="field"><label>หัวข้อประกาศ</label><input id="popupTitleInput" value="'+esc(settings.popupTitle||"")+'"></div><div class="field"><label>รายละเอียดประกาศ</label><textarea id="popupDetailInput">'+esc(settings.popupDetail||"")+'</textarea></div><div class="field"><label>URL รูปภาพประกอบ</label><input id="popupImageUrlInput" value="'+esc(settings.popupImageUrl||"")+'"></div><button class="pill solid" onclick="savePopup()">บันทึกป๊อปอัป</button></div>'}
+async function savePopup(){try{let o={popupEnabled:$("popupEnabled").checked?"true":"false",popupTitle:$("popupTitleInput").value.trim(),popupDetail:$("popupDetailInput").value,popupImageUrl:$("popupImageUrlInput").value.trim()};await saveSettings(o);toast("บันทึกป๊อปอัปแล้ว")}catch(e){toast(e.message,false)}}window.savePopup=savePopup;
+function showPopup(){if(Number(localStorage.getItem("np404_popup_snooze")||0)>Date.now())return;$("popupTitle").innerText=settings.popupTitle||"ประกาศ";$("popupDetail").innerText=settings.popupDetail||"";let i=$("popupImage");if(settings.popupImageUrl){i.src=settings.popupImageUrl;i.classList.remove("hidden")}else i.classList.add("hidden");$("announcementPopup").classList.add("show")}
+function snoozePopup(){localStorage.setItem("np404_popup_snooze",String(Date.now()+3600000));closeOverlay("announcementPopup")}window.snoozePopup=snoozePopup;
+function confirmAction(t,m,fn){$("confirmTitle").innerText=t;$("confirmText").innerText=m;$("confirmOk").onclick=async()=>{closeOverlay("confirmModal");try{await fn()}catch(e){toast(e.message,false)}};$("confirmModal").classList.add("show")}
+function confirmLogoutAdmin(){confirmAction("ออกจาก Admin","ต้องการออกจากระบบ Admin และปิดแผงควบคุมใช่หรือไม่?",async()=>{closeOverlay("adminModal");await window.doLogout();toast("ออกจากระบบแล้ว")})}window.confirmLogoutAdmin=confirmLogoutAdmin;
+loadAll();
+
+function openForgotPasswordModal(){
+  $("forgotEmailInput").value = $("loginEmail") ? $("loginEmail").value.trim() : "";
+  $("forgotPasswordModal").classList.add("show");
+  setTimeout(()=>{let x=$("forgotEmailInput");if(x)x.focus()},80);
+}
+window.openForgotPasswordModal=openForgotPasswordModal;
+
+async function sendResetEmail(){
+  const email=$("forgotEmailInput").value.trim();
+  if(!email){toast("กรุณากรอกอีเมล",false);return}
+  try{
+    if(typeof firebase==="undefined" || !firebase.auth) throw new Error("ยังไม่ได้เชื่อมต่อระบบบัญชี");
+    await firebase.auth().sendPasswordResetEmail(email);
+    closeOverlay("forgotPasswordModal");
+    toast("ส่งลิงก์รีเซ็ตรหัสผ่านไปยังอีเมลแล้ว");
+  }catch(e){
+    let msg="ไม่สามารถส่งลิงก์รีเซ็ตรหัสผ่านได้";
+    if(e&&e.code==="auth/user-not-found") msg="ไม่พบอีเมลนี้ในระบบ";
+    else if(e&&e.code==="auth/invalid-email") msg="รูปแบบอีเมลไม่ถูกต้อง";
+    else if(e&&e.code==="auth/too-many-requests") msg="มีการขอรีเซ็ตหลายครั้ง กรุณาลองใหม่ภายหลัง";
+    else if(e&&e.message) msg=e.message;
+    toast(msg,false);
+  }
+}
+window.sendResetEmail=sendResetEmail;
+
+</script>
+
+<div class="modal" id="forgotPasswordModal">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div><b>🔑 ลืมรหัสผ่าน</b><small>ส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ไปยังอีเมลของคุณ</small></div>
+      <button class="icon-btn" onclick="closeOverlay('forgotPasswordModal')">✕</button>
+    </div>
+    <div class="field">
+      <label>อีเมลบัญชี</label>
+      <input id="forgotEmailInput" type="email" autocomplete="email" placeholder="กรอกอีเมลที่ใช้สมัคร">
+    </div>
+    <button class="pill solid" style="width:100%;margin-top:8px" onclick="sendResetEmail()">ส่งลิงก์รีเซ็ตรหัสผ่าน</button>
+    <div style="text-align:center;margin-top:12px">
+      <button class="text-btn" onclick="closeOverlay('forgotPasswordModal');openAuthModal()">กลับไปเข้าสู่ระบบ</button>
+    </div>
+  </div>
+</div>
+
+</body></html>
