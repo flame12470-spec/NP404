@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NP-404</title>
+<title>NP-404 System</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -14,7 +14,7 @@ header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-
 .auth-box{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.user-name{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
 .announcement{display:flex;align-items:center;gap:12px;padding:8px 18px;border-bottom:1px solid var(--line);background:#0e1117;overflow:hidden}.announcement-label{color:var(--accent);font-weight:600;font-size:12px;white-space:nowrap}.ticker{overflow:hidden;white-space:nowrap;flex:1}.ticker span{display:inline-block;padding-left:100%;animation:ticker 18s linear infinite}@keyframes ticker{to{transform:translateX(-100%)}}
 main{flex:1;width:100%;max-width:1500px;margin:0 auto;padding:24px 18px 40px}.page-card{width:100%;min-height:calc(100vh - 210px);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px}.page-card.full-code{padding:0;overflow:hidden}
-.hello-title{font-size:30px;font-weight:600;margin-bottom:8px}.hello-sub{color:var(--muted);line-height:1.8}.empty{text-align:center;color:var(--muted);padding:55px 0}
+.hello-title{font-size:30px;font-weight:600;margin-bottom:8px}.hello-sub{color:var(--muted);line-height:1.8;white-space:pre-wrap}.empty{text-align:center;color:var(--muted);padding:55px 0}
 .maintenance{min-height:65vh;display:flex;align-items:center;justify-content:center;text-align:center}.maintenance .code{font-size:88px;font-weight:700;color:var(--accent)}.maintenance h1{font-size:25px;margin:5px 0}.maintenance p{color:var(--muted)}
 nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;gap:8px;padding:10px 12px;background:rgba(12,13,17,.97);border-top:1px solid var(--line);overflow-x:auto}nav.menu-bar::-webkit-scrollbar{height:0}
 .menu-item{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:10px 15px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:13px;white-space:nowrap}.menu-item.active{background:var(--accent2);border-color:var(--accent);color:var(--accent)}.menu-item.disabled{opacity:.55}.status-dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}.disabled .status-dot{background:var(--danger)}
@@ -56,6 +56,7 @@ nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;ga
 
 <div class="overlay" id="announcementPopup"><div class="modal"><h3 id="popupTitle">ประกาศ</h3><img id="popupImage" class="popup-img hidden" alt="ประกาศ"><div id="popupDetail" class="popup-detail"></div>
 <div class="modal-actions"><button class="pill" onclick="snoozePopup()">ไม่ต้องแสดงอีก 60 นาที</button><button class="pill solid" onclick="closeOverlay('announcementPopup')">รับทราบ</button></div></div></div>
+<div class="overlay" id="notificationModal"><div class="modal" style="max-width:420px"><h3 id="notificationTitle">แจ้งเตือน</h3><div id="notificationText" class="popup-detail"></div><div class="modal-actions"><button class="pill solid" onclick="closeOverlay('notificationModal')">รับทราบ</button></div></div></div>
 <div class="overlay" id="confirmModal"><div class="modal" style="max-width:400px"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText" style="color:var(--muted);line-height:1.7"></p><div class="modal-actions"><button class="pill" onclick="closeOverlay('confirmModal')">ยกเลิก</button><button class="pill solid" id="confirmOk">ยืนยัน</button></div></div></div>
 
 <script type="module">
@@ -78,16 +79,16 @@ async function apiPost(d){
     .then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x});
 }
 function closeOverlay(id){$(id).classList.remove("show")}window.closeOverlay=closeOverlay;
-function toast(m,ok=true){alert((ok?"✓ ":"✕ ")+m)}
+function toast(m,ok=true){$("notificationTitle").innerText=ok?"สำเร็จ":"แจ้งเตือน";$("notificationText").innerText=m||"";$("notificationModal").classList.add("show")}
 async function loadAll(){try{let a=await apiGet("getAll");pages=a.pages||[];links=a.links||[];settings=a.settings||{};applySettings();renderMenu();renderActivePage();renderAdmin();if(settings.popupEnabled==="true"&&settings.popupDetail)setTimeout(showPopup,700)}catch(e){console.error(e);$("pageContent").innerHTML='<div class="empty">โหลดระบบไม่สำเร็จ กรุณาตรวจสอบ API_URL และ Apps Script</div>'}}
 function applySettings(){$("siteName").innerText=settings.siteName||"เมนูระบบ";document.title=settings.siteName||"NP-404 System";let l=$("siteLogo");if(settings.logoUrl){l.src=settings.logoUrl;l.classList.remove("hidden")}else{l.classList.add("hidden")}$("announcementText").innerText=settings.announcement||"";$("announcementBar").classList.toggle("hidden",!settings.announcement)}
 function renderAuth(){let b=$("authBox"),u=window.__currentUser;if(!u){b.innerHTML='<span>ยังไม่ได้เข้าสู่ระบบ</span><button class="pill solid" onclick="openAuthModal()">เข้าสู่ระบบ</button>';return}let p=JSON.parse(localStorage.getItem("np404_profile")||"{}"),name=p.username||u.displayName||u.email;b.innerHTML='<span class="user-name">'+esc(name)+'</span>'+(window.__isAdmin?'<button class="pill solid" onclick="openAdminPanel()">แผงแอดมิน</button>':"")+'<button class="pill" onclick="logout()">ออกจากระบบ</button>'}
 async function logout(){if(window.__isAdmin){confirmAction("ออกจาก Admin","ต้องการออกจากระบบ Admin ใช่หรือไม่?",async()=>{await window.doLogout();toast("ออกจากระบบแล้ว")})}else await window.doLogout()}window.logout=logout;
-function renderMenu(){let b=$("menuBar");b.innerHTML="";b.appendChild(menu({id:HOME_ID,name:settings.homeTitle||"สวัสดี",active:true}));pages.forEach(p=>b.appendChild(menu(p)));links.forEach(l=>b.appendChild(menu(l)))}
+function renderMenu(){let b=$("menuBar");b.innerHTML="";b.appendChild(menu({id:HOME_ID,name:"หน้าแรก",active:true}));pages.forEach(p=>b.appendChild(menu(p)));links.forEach(l=>b.appendChild(menu(l)))}
 function menu(x){let e=document.createElement("div"),key=x.id||x.rowIndex,on=x.active!==false;e.className="menu-item "+(key===activeId?"active ":"")+(!on?"disabled":"");e.innerHTML='<span class="status-dot"></span>'+esc(x.name)+(on?"":" 🔒");e.onclick=()=>{if(!on&&!window.__isAdmin)return toast("เมนูนี้ปิดปรับปรุงอยู่",false);if(x.url||x.type==="link"){window.open(x.url||x.content,"_blank");return}activeId=key;renderMenu();renderActivePage()};return e}
 function renderActivePage(){let c=$("pageContent");c.classList.remove("full-code");
 if(settings.maintenance==="true"&&!window.__isAdmin){c.innerHTML='<div class="maintenance"><div><div class="code">503</div><h1>ระบบขัดข้องชั่วคราว</h1><p>ขณะนี้ระบบอยู่ระหว่างการปรับปรุง กรุณาลองใหม่ภายหลัง</p></div></div>';return}
-if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">'+esc(settings.homeTitle||"หน้าหลัก")+'</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
+if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">หน้าแรก</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
 let p=pages.find(x=>(x.id||x.rowIndex)===activeId);
 if(p){
   if(p.active===false&&!window.__isAdmin){c.innerHTML='<div class="empty">หน้านี้ปิดปรับปรุงอยู่</div>';return}
