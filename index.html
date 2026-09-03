@@ -87,7 +87,7 @@ function renderMenu(){let b=$("menuBar");b.innerHTML="";b.appendChild(menu({id:H
 function menu(x){let e=document.createElement("div"),key=x.id||x.rowIndex,on=x.active!==false;e.className="menu-item "+(key===activeId?"active ":"")+(!on?"disabled":"");e.innerHTML='<span class="status-dot"></span>'+esc(x.name)+(on?"":" 🔒");e.onclick=()=>{if(!on&&!window.__isAdmin)return toast("เมนูนี้ปิดปรับปรุงอยู่",false);if(x.url||x.type==="link"){window.open(x.url||x.content,"_blank");return}activeId=key;renderMenu();renderActivePage()};return e}
 function renderActivePage(){let c=$("pageContent");c.classList.remove("full-code");
 if(settings.maintenance==="true"&&!window.__isAdmin){c.innerHTML='<div class="maintenance"><div><div class="code">503</div><h1>ระบบขัดข้องชั่วคราว</h1><p>ขณะนี้ระบบอยู่ระหว่างการปรับปรุง กรุณาลองใหม่ภายหลัง</p></div></div>';return}
-if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">'+esc(settings.homeTitle||"สวัสดี 👋")+'</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
+if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">'+esc(settings.homeTitle||"หน้าหลัก")+'</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
 let p=pages.find(x=>(x.id||x.rowIndex)===activeId);
 if(p){
   if(p.active===false&&!window.__isAdmin){c.innerHTML='<div class="empty">หน้านี้ปิดปรับปรุงอยู่</div>';return}
