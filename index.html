@@ -120,6 +120,91 @@ nav.menu-bar .menu-icon{color:currentColor!important}
 .tabs button.active{background:rgba(255,255,255,.42)!important;color:#333!important;box-shadow:0 4px 12px rgba(0,0,0,.06)}
 .badge,.status,.tag{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 
+
+/* ===== NP-404 Responsive Liquid Glass UI ===== */
+:root{
+  --ui-pink:#fbc5d8;
+  --ui-cream:#fcdcb1;
+  --ui-blue:#b5d6f4;
+  --glass:rgba(255,255,255,.34);
+  --glass-strong:rgba(255,255,255,.56);
+  --glass-border:rgba(255,255,255,.62);
+  --ui-ink:#30313a;
+  --ui-muted:#555a67;
+}
+html,body{width:100%;overflow-x:hidden}
+body{background:linear-gradient(135deg,var(--ui-pink) 0%,var(--ui-cream) 50%,var(--ui-blue) 100%)!important;color:var(--ui-ink)}
+body::before{background:
+  radial-gradient(60% 55% at 0% 100%,rgba(255,255,255,.28),transparent 70%),
+  radial-gradient(55% 50% at 100% 0%,rgba(255,255,255,.30),transparent 70%),
+  linear-gradient(135deg,#fbc5d8 0%,#fcdcb1 50%,#b5d6f4 100%)!important}
+[data-theme="dark"] body{background:linear-gradient(135deg,#2d2030,#39302a,#1d3040)!important}
+[data-theme="dark"] body::before{background:linear-gradient(135deg,#2d2030,#39302a,#1d3040)!important}
+
+header,.announcement,.page-card,.modal,.tabs,.setting-card,.list-card,.chat-box,.admin-card,.builder-card,.profile-card,.info-card,.popup-card{
+  background:rgba(255,255,255,.40)!important;
+  border:1px solid rgba(255,255,255,.64)!important;
+  box-shadow:0 12px 35px rgba(55,55,75,.10),inset 0 1px 1px rgba(255,255,255,.72)!important;
+  backdrop-filter:blur(22px) saturate(175%);-webkit-backdrop-filter:blur(22px) saturate(175%);
+}
+header{padding:10px clamp(12px,2.5vw,28px)!important;min-height:68px}
+.brand-wrap{gap:12px;min-width:0}
+.logo{width:58px!important;height:58px!important;min-width:58px;min-height:58px;border-radius:17px!important;object-fit:cover;box-shadow:0 7px 20px rgba(40,50,80,.15),inset 0 1px 2px rgba(255,255,255,.9)}
+.brand{font-size:clamp(16px,1.7vw,21px)!important;line-height:1.25;max-width:min(48vw,520px);color:#272a34!important;text-shadow:0 1px 0 rgba(255,255,255,.65)}
+.brand span{background:none!important;color:inherit!important}
+.auth-box{font-size:clamp(11px,1.3vw,13px);flex-shrink:0}.user-name{max-width:clamp(85px,18vw,210px)}
+.theme-btn{width:40px;height:40px;flex:0 0 40px;background:rgba(255,255,255,.48)!important;color:#3f4b64!important}
+.announcement{padding:8px clamp(12px,2.5vw,28px)!important;color:#363946!important}.announcement-label{color:#3c4b68!important;font-size:12px}.ticker span{color:#30323b!important;text-shadow:0 1px 0 rgba(255,255,255,.6)}
+
+main{max-width:1440px!important;padding:clamp(12px,2vw,24px) clamp(10px,2vw,24px) 34px!important}
+.page-card{min-height:calc(100vh - 210px)!important;padding:clamp(16px,2.5vw,30px)!important;border-radius:24px!important;color:#30313a!important}
+.page-card *{max-width:100%}
+.hello-title{font-size:clamp(22px,3vw,30px)!important;line-height:1.3;color:#292c36!important;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+.hello-sub{font-size:clamp(13px,1.5vw,15px);color:#4e5360!important;line-height:1.75!important}
+.page-card h1,.page-card h2,.page-card h3,.page-card h4,.page-card h5,.page-card h6,.modal h3{color:#292c36!important;line-height:1.4!important;overflow-wrap:anywhere}
+.page-card p,.page-card li,.page-card label,.page-card small,.modal p,.modal label{color:#4b505d!important;line-height:1.65;overflow-wrap:anywhere}
+
+nav.menu-bar{bottom:max(10px,env(safe-area-inset-bottom))!important;width:auto!important;max-width:calc(100% - 20px)!important;padding:7px!important;gap:4px!important;background:rgba(255,255,255,.30)!important;border-color:rgba(255,255,255,.68)!important;box-shadow:0 12px 35px rgba(40,45,65,.16),inset 0 1px 2px rgba(255,255,255,.8)!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important}
+nav.menu-bar .menu-card{height:46px!important;min-width:52px!important;padding:0 clamp(10px,1.5vw,17px)!important;border-radius:38px!important;color:#555966!important;font-size:clamp(11px,1.25vw,13px)!important}
+nav.menu-bar .menu-card.active{background:rgba(255,255,255,.66)!important;color:#272b35!important;border-color:rgba(255,255,255,.82)!important;box-shadow:0 7px 20px rgba(55,60,80,.13),inset 0 1px 2px rgba(255,255,255,.95)!important}
+nav.menu-bar .menu-icon{width:21px!important;height:21px!important;font-size:16px!important}
+nav.menu-bar .menu-label{font-size:clamp(11px,1.25vw,13px)!important;line-height:1.15!important;max-width:none!important;overflow:visible!important;text-overflow:clip!important}
+
+.pill,.field input,.field textarea,.field select,.tabs{background:rgba(255,255,255,.38)!important;color:#30333d!important;border-color:rgba(255,255,255,.62)!important;box-shadow:inset 0 1px 2px rgba(255,255,255,.65)!important}
+.field input::placeholder,.field textarea::placeholder{color:#6b6f79!important;opacity:1}
+.pill.solid{background:rgba(65,91,145,.78)!important;color:#fff!important;border-color:rgba(255,255,255,.35)!important}
+.tabs button{color:#555a66!important}.tabs button.active{background:rgba(255,255,255,.62)!important;color:#292c35!important}
+
+.chat-fab{width:48px!important;height:48px!important;background:rgba(255,255,255,.48)!important;border:1px solid rgba(255,255,255,.72)!important;color:#3d4658!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+
+/* ป้องกันข้อความเบียด/ล้นทุกอุปกรณ์ */
+img,video,iframe{max-width:100%;height:auto}.page-card pre,.page-card code{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.page-card table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse}.page-card button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.modal{max-width:min(960px,calc(100vw - 20px))!important;max-height:calc(100vh - 24px)!important;padding:clamp(15px,2vw,22px)!important}.modal.wide{width:min(960px,calc(100vw - 20px))!important}.grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+@media (max-width:1024px){
+  header{min-height:62px;padding:8px 14px!important}.logo{width:50px!important;height:50px!important;min-width:50px;min-height:50px;border-radius:15px!important}.brand{font-size:17px!important;max-width:42vw}.auth-box{gap:6px}.theme-btn{width:36px;height:36px;flex-basis:36px}
+  main{padding:12px 12px 28px!important}.page-card{min-height:calc(100vh - 190px)!important;border-radius:20px!important}
+  nav.menu-bar .menu-card{height:44px!important;padding:0 11px!important}.menu-label{font-size:11px!important}
+}
+@media (max-width:700px){
+  body{padding-bottom:86px!important}
+  header{min-height:58px;padding:7px 10px!important;gap:7px}.logo{width:46px!important;height:46px!important;min-width:46px;min-height:46px;border-radius:13px!important}.brand{font-size:15px!important;max-width:45vw}.auth-box{font-size:10px}.user-name{max-width:78px}.theme-btn{width:34px;height:34px;flex-basis:34px;font-size:15px}
+  .announcement{gap:7px;padding:7px 10px!important}.announcement-label{font-size:10px}.ticker span{font-size:11px}
+  main{padding:9px 8px 22px!important}.page-card{padding:15px!important;border-radius:18px!important;min-height:calc(100vh - 175px)!important}
+  .hello-title{font-size:22px!important}.hello-sub{font-size:12px!important}
+  nav.menu-bar{max-width:calc(100% - 12px)!important;bottom:max(6px,env(safe-area-inset-bottom))!important;padding:6px!important;gap:2px!important}
+  nav.menu-bar .menu-card{height:42px!important;min-width:45px!important;padding:0 8px!important;gap:5px!important}.nav.menu-bar .menu-icon{font-size:15px!important}.menu-label{font-size:10px!important}
+  .grid2{grid-template-columns:1fr!important;gap:0}.modal{border-radius:20px!important}.modal-actions{flex-wrap:wrap}.modal-actions .pill{min-width:120px}
+}
+@media (max-width:430px){
+  header{padding:6px 8px!important}.logo{width:42px!important;height:42px!important;min-width:42px;min-height:42px}.brand{font-size:14px!important;max-width:43vw}.user-name{display:none}.theme-btn{width:32px;height:32px;flex-basis:32px}
+  .announcement-label{display:none}.page-card{padding:13px!important}.hello-title{font-size:20px!important}
+  nav.menu-bar .menu-card{min-width:42px!important;padding:0 7px!important}.nav.menu-bar .menu-label{font-size:9.5px!important}.nav.menu-bar .menu-icon{width:19px!important;font-size:14px!important}
+}
+@media (min-width:1200px){
+  header{min-height:72px}.logo{width:64px!important;height:64px!important;min-width:64px;min-height:64px}.brand{font-size:21px!important}.page-card{padding:34px!important}
+}
+
 </style>
 </head>
 <body>
