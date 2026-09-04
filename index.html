@@ -6,34 +6,92 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#090a0d;--panel:#111318;--panel2:#181b22;--line:#292e38;--text:#f3f5f7;--muted:#9ba3af;--accent:#54a8fc;--accent2:#173b5d;--danger:#ed6262;--ok:#4fd18b}
-*{box-sizing:border-box;margin:0;padding:0}html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:Prompt,sans-serif}body{display:flex;flex-direction:column;min-height:100vh;padding-bottom:64px}
+:root{
+  --bg:#f2f3fb;--panel:#ffffff;--panel2:#f5f6fd;--line:#e6e8f7;--text:#1d1e2e;--muted:#6c7189;
+  --accent:#7c5cff;--accent-soft:#efeaff;--accent2:#e9e4ff;--danger:#ff5c7c;--ok:#1fbf87;
+  --shadow:0 10px 30px rgba(110,110,190,.14);--radius:20px;
+  --grad:linear-gradient(135deg,#7c5cff,#ff6bcb);
+}
+[data-theme="dark"]{
+  --bg:#151726;--panel:#1e2036;--panel2:#262943;--line:#343964;--text:#f2f3fb;--muted:#a2a7cc;
+  --accent:#9c8bff;--accent-soft:#2c2c52;--accent2:#33325f;--danger:#ff7a93;--ok:#3fe0a4;
+  --shadow:0 10px 30px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:Prompt,sans-serif;transition:background .25s,color .25s}
+body{display:flex;flex-direction:column;min-height:100vh;padding-bottom:96px}
 button,input,textarea,select{font:inherit}button{cursor:pointer}
-header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 18px;border-bottom:1px solid var(--line);background:rgba(9,10,13,.94);backdrop-filter:blur(10px)}
-.brand-wrap{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:40px;height:40px;object-fit:cover;border-radius:11px;border:1px solid var(--line);background:var(--panel2)}.brand{font-size:18px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand span{color:var(--accent)}
-.auth-box{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.user-name{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
-.announcement{display:flex;align-items:center;gap:12px;padding:8px 18px;border-bottom:1px solid var(--line);background:#0e1117;overflow:hidden}.announcement-label{color:var(--accent);font-weight:600;font-size:12px;white-space:nowrap}.ticker{overflow:hidden;white-space:nowrap;flex:1}.ticker span{display:inline-block;padding-left:100%;animation:ticker 18s linear infinite}@keyframes ticker{to{transform:translateX(-100%)}}
-main{flex:1;width:100%;max-width:1500px;margin:0 auto;padding:24px 18px 40px}.page-card{width:100%;min-height:calc(100vh - 210px);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:30px}.page-card.full-code{padding:0;overflow:hidden}
-.hello-title{font-size:30px;font-weight:600;margin-bottom:8px}.hello-sub{color:var(--muted);line-height:1.8;white-space:pre-wrap}.empty{text-align:center;color:var(--muted);padding:55px 0}
-.maintenance{min-height:65vh;display:flex;align-items:center;justify-content:center;text-align:center}.maintenance .code{font-size:88px;font-weight:700;color:var(--accent)}.maintenance h1{font-size:25px;margin:5px 0}.maintenance p{color:var(--muted)}
-nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;gap:8px;padding:10px 12px;background:rgba(12,13,17,.97);border-top:1px solid var(--line);overflow-x:auto}nav.menu-bar::-webkit-scrollbar{height:0}
-.menu-item{flex:0 0 auto;display:flex;align-items:center;gap:7px;padding:10px 15px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-size:13px;white-space:nowrap}.menu-item.active{background:var(--accent2);border-color:var(--accent);color:var(--accent)}.menu-item.disabled{opacity:.55}.status-dot{width:7px;height:7px;border-radius:50%;background:var(--ok)}.disabled .status-dot{background:var(--danger)}
-.pill{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 13px;border-radius:999px;font-size:12px}.pill:hover{border-color:var(--accent);color:var(--accent)}.pill.solid{background:var(--accent);border-color:var(--accent);color:#07131e;font-weight:600}.text-btn{border:0;background:transparent;color:var(--accent);font-size:12px;cursor:pointer}.text-btn:hover{text-decoration:underline}
-.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:15px;background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}.overlay.show{display:flex}.modal{width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:18px}.modal.wide{max-width:920px}.modal h3{font-size:18px;margin-bottom:15px}
-.modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions .pill{flex:1}.field{margin-bottom:13px}.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:12px}.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);outline:none}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tabs{display:flex;gap:5px;padding:4px;background:var(--panel2);border-radius:999px;margin-bottom:16px}.tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:8px;border-radius:999px}.tabs button.active{background:var(--accent);color:#07131e;font-weight:600}.err{min-height:18px;color:var(--danger);font-size:12px;margin-bottom:8px}
-.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel2)}.admin-info{min-width:0}.admin-info b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.admin-info small{display:block;color:var(--muted);margin-top:3px}.admin-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.admin-actions button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 9px;border-radius:8px;font-size:11px}.admin-actions .danger{color:var(--danger)}
+header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:15px;padding:12px 18px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px)}
+.brand-wrap{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:40px;height:40px;object-fit:cover;border-radius:12px;border:1px solid var(--line);background:var(--panel2)}
+.brand{font-size:18px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.brand span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.auth-box{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.user-name{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font-weight:500}
+.theme-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--panel2);font-size:16px;display:flex;align-items:center;justify-content:center}
+.announcement{display:flex;align-items:center;gap:12px;padding:9px 18px;border-bottom:1px solid var(--line);background:var(--accent-soft);overflow:hidden}
+.announcement-label{color:var(--accent);font-weight:700;font-size:12px;white-space:nowrap}.ticker{overflow:hidden;white-space:nowrap;flex:1}.ticker span{display:inline-block;padding-left:100%;animation:ticker 18s linear infinite;color:var(--text)}@keyframes ticker{to{transform:translateX(-100%)}}
+main{flex:1;width:100%;max-width:1500px;margin:0 auto;padding:24px 18px 40px}
+.page-card{width:100%;min-height:calc(100vh - 230px);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:30px;box-shadow:var(--shadow)}.page-card.full-code{padding:0;overflow:hidden}
+.hello-title{font-size:30px;font-weight:700;margin-bottom:8px}.hello-sub{color:var(--muted);line-height:1.8;white-space:pre-wrap}.empty{text-align:center;color:var(--muted);padding:55px 0}
+.maintenance{min-height:65vh;display:flex;align-items:center;justify-content:center;text-align:center}.maintenance .code{font-size:88px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}.maintenance h1{font-size:25px;margin:5px 0}.maintenance p{color:var(--muted)}
+
+nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;gap:10px;padding:10px 14px;background:var(--panel);border-top:1px solid var(--line);overflow-x:auto;box-shadow:0 -6px 20px rgba(0,0,0,.06)}nav.menu-bar::-webkit-scrollbar{height:0}
+.menu-card{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;width:68px;padding:9px 4px;border-radius:16px;border:1px solid transparent;background:var(--panel2);color:var(--muted);position:relative}
+.menu-icon{font-size:21px;line-height:1}.menu-label{font-size:10.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62px}
+.menu-card.active{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(124,92,255,.35)}
+.menu-card.disabled{opacity:.5}.menu-lock{position:absolute;top:3px;right:6px;font-size:10px}
+
+.pill{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 13px;border-radius:999px;font-size:12px}.pill:hover{border-color:var(--accent);color:var(--accent)}
+.pill.solid{background:var(--grad);border-color:transparent;color:#fff;font-weight:600}.text-btn{border:0;background:transparent;color:var(--accent);font-size:12px;cursor:pointer}.text-btn:hover{text-decoration:underline}
+.overlay{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:15px;background:rgba(20,20,40,.45);backdrop-filter:blur(5px)}.overlay.show{display:flex}
+.modal{width:100%;max-width:560px;max-height:90vh;overflow:auto;padding:22px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}.modal.wide{max-width:960px}.modal h3{font-size:18px;margin-bottom:15px}
+.modal-actions{display:flex;gap:8px;margin-top:12px}.modal-actions .pill{flex:1}.field{margin-bottom:13px}.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:12px}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);outline:none}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tabs{display:flex;gap:5px;padding:4px;background:var(--panel2);border-radius:999px;margin-bottom:16px;flex-wrap:wrap}.tabs button{flex:1 1 auto;border:0;background:transparent;color:var(--muted);padding:8px 10px;border-radius:999px;font-size:12px}.tabs button.active{background:var(--grad);color:#fff;font-weight:600}
+.err{min-height:18px;color:var(--danger);font-size:12px;margin-bottom:8px}
+.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}.admin-info{min-width:0}.admin-info b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.admin-info small{display:block;color:var(--muted);margin-top:3px}
+.admin-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.admin-actions button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 9px;border-radius:9px;font-size:11px}.admin-actions .danger{color:var(--danger)}
+.conv-row{cursor:pointer}.conv-row:hover{border-color:var(--accent)}
 .badge{font-size:10px;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}.badge.on{border-color:var(--ok);color:var(--ok)}.badge.off{border-color:var(--danger);color:var(--danger)}
-.switch{position:relative;display:inline-block;width:43px;height:24px}.switch input{display:none}.slider{position:absolute;inset:0;border-radius:20px;background:#30343d;transition:.2s}.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}.switch input:checked+.slider{background:var(--accent)}.switch input:checked+.slider:before{transform:translateX(19px)}
-.setting-card{border:1px solid var(--line);border-radius:13px;padding:14px;margin-bottom:10px;background:var(--panel2)}.setting-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.setting-head b{font-size:14px}.setting-head small{color:var(--muted)}
-.popup-img{width:100%;max-height:250px;object-fit:cover;border-radius:12px;margin:8px 0 14px}.popup-detail{white-space:pre-wrap;color:#cdd2da;line-height:1.8}.hidden{display:none!important}.builder-page{width:100%;display:flex;flex-direction:column;gap:16px}.content-block{width:100%;overflow:hidden}.content-block.text-block{white-space:pre-wrap;line-height:1.9;color:#e8ebef}.content-block.image-block img{display:block;width:100%;height:auto;max-height:650px;object-fit:contain;border-radius:14px}.content-block.image-block .caption{color:var(--muted);font-size:12px;margin-top:7px;text-align:center}.builder-list{display:flex;flex-direction:column;gap:9px}.builder-item{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel2)}.builder-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.builder-preview{margin-top:9px;padding:10px;border:1px dashed var(--line);border-radius:9px;color:var(--muted);max-height:150px;overflow:hidden}.builder-preview img{max-width:100%;max-height:120px;object-fit:contain;border-radius:7px}.builder-toolbar{display:flex;gap:6px;flex-wrap:wrap}.builder-toolbar button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 9px;border-radius:8px;font-size:11px}.code-page{width:100%;min-height:70vh}.code-frame{display:block;width:100%;min-height:calc(100vh - 180px);height:70vh;border:0;background:transparent}.link-page{text-align:center;padding:70px 15px}
-@media(max-width:650px){header{padding:10px 12px}.auth-box .user-name{display:none}main{padding:15px 10px 40px}.page-card{padding:20px}.grid2{grid-template-columns:1fr}.maintenance .code{font-size:65px}.admin-row{align-items:flex-start;flex-direction:column}.admin-actions{width:100%;justify-content:flex-start}}
+.switch{position:relative;display:inline-block;width:43px;height:24px}.switch input{display:none}.slider{position:absolute;inset:0;border-radius:20px;background:var(--line);transition:.2s}.slider:before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#fff;transition:.2s}.switch input:checked+.slider{background:var(--grad)}.switch input:checked+.slider:before{transform:translateX(19px)}
+.setting-card{border:1px solid var(--line);border-radius:15px;padding:14px;margin-bottom:10px;background:var(--panel2)}.setting-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:9px}.setting-head b{font-size:14px}.setting-head small{color:var(--muted)}
+.popup-img{width:100%;max-height:250px;object-fit:cover;border-radius:14px;margin:8px 0 14px}.popup-detail{white-space:pre-wrap;color:var(--text);line-height:1.8}.hidden{display:none!important}
+.builder-page{width:100%;display:flex;flex-direction:column;gap:16px}.content-block{width:100%;overflow:hidden}.content-block.text-block{white-space:pre-wrap;line-height:1.9}.content-block.image-block img{display:block;width:100%;height:auto;max-height:650px;object-fit:contain;border-radius:16px}.content-block.image-block .caption{color:var(--muted);font-size:12px;margin-top:7px;text-align:center}
+.builder-list{display:flex;flex-direction:column;gap:9px}.builder-item{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel2)}.builder-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.builder-preview{margin-top:9px;padding:10px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);max-height:150px;overflow:hidden}.builder-preview img{max-width:100%;max-height:120px;object-fit:contain;border-radius:8px}
+.builder-toolbar{display:flex;gap:6px;flex-wrap:wrap}.builder-toolbar button{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:6px 9px;border-radius:9px;font-size:11px}
+.code-page{width:100%;min-height:70vh}.code-frame{display:block;width:100%;min-height:calc(100vh - 200px);height:70vh;border:0;background:#fff;border-radius:var(--radius)}
+.link-page{text-align:center;padding:70px 15px}
+.icon-palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.icon-palette button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--panel);font-size:16px;display:flex;align-items:center;justify-content:center}.icon-palette button:hover{border-color:var(--accent)}
+.icon-row{display:flex;align-items:center;gap:10px}.icon-row input{flex:1}.icon-preview{width:42px;height:42px;flex:0 0 auto;border-radius:12px;background:var(--panel2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:20px}
+.color-row{display:flex;gap:10px;align-items:center}.color-row input[type=color]{width:44px;height:38px;padding:2px;border-radius:10px;border:1px solid var(--line);background:var(--panel2)}
+
+.chat-fab{position:fixed;right:16px;bottom:86px;z-index:998;width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;font-size:23px;border:0;box-shadow:0 10px 24px rgba(124,92,255,.4);display:flex;align-items:center;justify-content:center}
+.chat-modal{max-width:420px;display:flex;flex-direction:column;height:70vh;padding:0;overflow:hidden}
+.chat-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--line)}
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;background:var(--bg)}
+.chat-bubble{max-width:80%;padding:9px 13px;border-radius:16px;font-size:13.5px;line-height:1.6}
+.chat-bubble.me{align-self:flex-end;background:var(--grad);color:#fff;border-bottom-right-radius:4px}
+.chat-bubble.admin{align-self:flex-start;background:var(--panel2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.chat-bubble.ai{align-self:flex-start;background:var(--accent-soft);border:1px solid var(--accent2);border-bottom-left-radius:4px}
+.chat-meta{font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600}
+.chat-bubble.me .chat-meta{color:rgba(255,255,255,.85)}
+.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--panel)}
+.chat-input-row input{flex:1;padding:10px 13px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);color:var(--text);outline:none}
+.chat-list{display:flex;gap:14px;align-items:flex-start}
+.chat-list-col{flex:0 0 220px;max-height:60vh;overflow-y:auto}
+.chat-conv-col{flex:1;min-width:0;display:flex;flex-direction:column;height:60vh}
+.chat-conv-messages{flex:1;overflow-y:auto;padding:10px;background:var(--bg);border-radius:14px;display:flex;flex-direction:column;gap:8px}
+@media(max-width:750px){.chat-list{flex-direction:column}.chat-list-col{flex:0 0 auto;max-height:180px;width:100%}}
+@media(max-width:650px){header{padding:10px 12px}.auth-box .user-name{display:none}main{padding:15px 10px 40px}.page-card{padding:20px}.grid2{grid-template-columns:1fr}.maintenance .code{font-size:65px}.admin-row{align-items:flex-start;flex-direction:column}.admin-actions{width:100%;justify-content:flex-start}.chat-fab{right:12px;bottom:82px;width:50px;height:50px;font-size:20px}}
 </style>
 </head>
 <body>
-<header><div class="brand-wrap"><img id="siteLogo" class="logo hidden" alt="logo"><div class="brand" id="siteName">กำลังโหลด...</div></div><div class="auth-box" id="authBox"><span>กำลังโหลด...</span></div></header>
+<header>
+  <div class="brand-wrap"><img id="siteLogo" class="logo hidden" alt="logo"><div class="brand" id="siteName">กำลังโหลด...</div></div>
+  <div class="auth-box" id="authBox"><span>กำลังโหลด...</span></div>
+</header>
 <div class="announcement" id="announcementBar"><div class="announcement-label">📢 ประกาศ</div><div class="ticker"><span id="announcementText"></span></div></div>
-<main><div class="page-card" id="pageContent"></div></main><nav class="menu-bar" id="menuBar"></nav>
+<main><div class="page-card" id="pageContent"></div></main>
+<nav class="menu-bar" id="menuBar"></nav>
+<button class="chat-fab" id="chatFab" onclick="openChat()" title="แชทกับแอดมิน / AI">💬</button>
 
 <div class="overlay" id="authModal"><div class="modal"><div class="tabs"><button id="tabLogin" class="active" onclick="setAuthTab('login')">เข้าสู่ระบบ</button><button id="tabRegister" onclick="setAuthTab('register')">สมัครสมาชิก</button></div>
 <div id="registerFields" class="hidden"><div class="grid2"><div class="field"><label>ชื่อจริง</label><input id="authFirstName"></div><div class="field"><label>นามสกุล</label><input id="authLastName"></div></div><div class="field"><label>ชื่อแอคเค้า</label><input id="authUsername" placeholder="เช่น np_flame"></div></div>
@@ -42,16 +100,37 @@ nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;ga
 <div class="modal-actions"><button class="pill" onclick="closeOverlay('authModal')">ยกเลิก</button><button class="pill solid" id="authSubmitBtn" onclick="submitAuth()">เข้าสู่ระบบ</button></div></div></div>
 
 <div class="overlay" id="adminModal"><div class="modal wide"><h3>⚙️ แผงควบคุมระบบ <span class="badge on">ADMIN</span></h3>
-<div class="tabs" id="adminTabs"><button class="active" onclick="showAdminTab('system',this)">ระบบ</button><button onclick="showAdminTab('pages',this)">หน้าเมนู</button><button onclick="showAdminTab('links',this)">ลิงก์</button><button onclick="showAdminTab('popup',this)">ป๊อปอัป</button></div>
-<section id="adminSystem"></section><section id="adminPages" class="hidden"></section><section id="adminLinks" class="hidden"></section><section id="adminPopup" class="hidden"></section>
+<div class="tabs" id="adminTabs">
+  <button class="active" onclick="showAdminTab('system',this)">ระบบ</button>
+  <button onclick="showAdminTab('pages',this)">หน้าเมนู</button>
+  <button onclick="showAdminTab('links',this)">ลิงก์</button>
+  <button onclick="showAdminTab('popup',this)">ป๊อปอัป</button>
+  <button onclick="showAdminTab('users',this)">บัญชีผู้ใช้</button>
+  <button onclick="showAdminTab('chat',this)">แชท</button>
+</div>
+<section id="adminSystem"></section>
+<section id="adminPages" class="hidden"></section>
+<section id="adminLinks" class="hidden"></section>
+<section id="adminPopup" class="hidden"></section>
+<section id="adminUsers" class="hidden"></section>
+<section id="adminChat" class="hidden"></section>
 <div class="modal-actions"><button class="pill" onclick="confirmLogoutAdmin()">ออกจาก Admin / ปิด</button></div></div></div>
 
-<div class="overlay" id="pageModal"><div class="modal"><h3 id="pageModalTitle">เพิ่มหน้าใหม่</h3><div class="field"><label>ชื่อหัวข้อเมนู</label><input id="pageNameInput"></div><div class="field"><label>หมวดหมู่</label><input id="pageCategoryInput"></div>
-<div class="field"><label>ประเภทหน้า</label><select id="pageTypeInput" onchange="togglePageType()"><option value="builder">สร้างหน้าแบบลากจัดเรียง (ข้อความ/ภาพ)</option><option value="code">โค้ด HTML / เนื้อหา</option><option value="link">ลิงก์ภายนอก</option></select></div><div class="setting-card" style="margin-bottom:13px"><div class="setting-head"><div><b>🔐 บังคับเข้าสู่ระบบ</b><small>ถ้าเปิด ผู้ใช้ต้องเข้าสู่ระบบก่อนใช้งานเมนูนี้</small></div><label class="switch"><input id="pageRequireLoginInput" type="checkbox"><span class="slider"></span></label></div></div>
-<div class="field hidden" id="pageBuilderField"><label>เนื้อหาหน้า</label><div id="builderList" class="builder-list"></div><div class="builder-toolbar" style="margin-top:9px"><button onclick="addBuilderBlock('text')">＋ ข้อความ</button><button onclick="addBuilderBlock('image')">🖼️ ภาพ</button></div></div><div class="field hidden" id="pageCodeField"><label>โค้ด HTML</label><textarea id="pageCodeInput"></textarea></div><div class="field hidden" id="pageLinkField"><label>URL</label><input id="pageLinkInput" type="url"></div>
+<div class="overlay" id="pageModal"><div class="modal"><h3 id="pageModalTitle">เพิ่มหน้าใหม่</h3>
+<div class="field"><label>ชื่อหัวข้อเมนู</label><input id="pageNameInput"></div>
+<div class="field"><label>ไอคอนเมนู (อิโมจิ)</label><div class="icon-row"><div class="icon-preview" id="pageIconPreview">📄</div><input id="pageIconInput" placeholder="พิมพ์อิโมจิเอง หรือเลือกด้านล่าง" oninput="$('pageIconPreview').innerText=this.value||'📄'"></div><div class="icon-palette" id="pageIconPalette"></div></div>
+<div class="field"><label>หมวดหมู่</label><input id="pageCategoryInput"></div>
+<div class="field"><label>ประเภทหน้า</label><select id="pageTypeInput" onchange="togglePageType()"><option value="builder">สร้างหน้าแบบลากจัดเรียง (ข้อความ/ภาพ)</option><option value="code">โค้ด HTML / เนื้อหา</option><option value="link">ลิงก์ภายนอก</option></select></div>
+<div class="setting-card" style="margin-bottom:13px"><div class="setting-head"><div><b>🔐 บังคับเข้าสู่ระบบ</b><small>ถ้าเปิด ผู้ใช้ต้องเข้าสู่ระบบก่อนใช้งานเมนูนี้</small></div><label class="switch"><input id="pageRequireLoginInput" type="checkbox"><span class="slider"></span></label></div></div>
+<div class="field hidden" id="pageBuilderField"><label>เนื้อหาหน้า</label><div id="builderList" class="builder-list"></div><div class="builder-toolbar" style="margin-top:9px"><button onclick="addBuilderBlock('text')">＋ ข้อความ</button><button onclick="addBuilderBlock('image')">🖼️ ภาพ</button></div></div>
+<div class="field hidden" id="pageCodeField"><label>โค้ด HTML (รันได้ตามปกติ เช่น ฟอร์มกรอกข้อมูล/ปุ่มกด/สคริปต์)</label><textarea id="pageCodeInput" placeholder="<h1>สวัสดี</h1><form>...</form>"></textarea></div>
+<div class="field hidden" id="pageLinkField"><label>URL</label><input id="pageLinkInput" type="url"></div>
 <div class="modal-actions"><button class="pill" onclick="closeOverlay('pageModal')">ยกเลิก</button><button class="pill solid" onclick="savePage()">บันทึก</button></div></div></div>
 
-<div class="overlay" id="linkModal"><div class="modal"><h3 id="linkModalTitle">เพิ่มลิงก์</h3><div class="field"><label>ชื่อหัวข้อ</label><input id="linkNameInput"></div><div class="field"><label>URL</label><input id="linkUrlInput" type="url"></div><div class="field"><label>หมวดหมู่</label><input id="linkCategoryInput"></div>
+<div class="overlay" id="linkModal"><div class="modal"><h3 id="linkModalTitle">เพิ่มลิงก์</h3>
+<div class="field"><label>ชื่อหัวข้อ</label><input id="linkNameInput"></div>
+<div class="field"><label>ไอคอนเมนู (อิโมจิ)</label><div class="icon-row"><div class="icon-preview" id="linkIconPreview">🔗</div><input id="linkIconInput" placeholder="พิมพ์อิโมจิเอง หรือเลือกด้านล่าง" oninput="$('linkIconPreview').innerText=this.value||'🔗'"></div><div class="icon-palette" id="linkIconPalette"></div></div>
+<div class="field"><label>URL</label><input id="linkUrlInput" type="url"></div><div class="field"><label>หมวดหมู่</label><input id="linkCategoryInput"></div>
 <div class="modal-actions"><button class="pill" onclick="closeOverlay('linkModal')">ยกเลิก</button><button class="pill solid" onclick="saveLink()">บันทึก</button></div></div></div>
 
 <div class="overlay" id="announcementPopup"><div class="modal"><h3 id="popupTitle">ประกาศ</h3><img id="popupImage" class="popup-img hidden" alt="ประกาศ"><div id="popupDetail" class="popup-detail"></div>
@@ -59,19 +138,33 @@ nav.menu-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;display:flex;ga
 <div class="overlay" id="notificationModal"><div class="modal" style="max-width:420px"><h3 id="notificationTitle">แจ้งเตือน</h3><div id="notificationText" class="popup-detail"></div><div class="modal-actions"><button class="pill solid" onclick="closeOverlay('notificationModal')">รับทราบ</button></div></div></div>
 <div class="overlay" id="confirmModal"><div class="modal" style="max-width:400px"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText" style="color:var(--muted);line-height:1.7"></p><div class="modal-actions"><button class="pill" onclick="closeOverlay('confirmModal')">ยกเลิก</button><button class="pill solid" id="confirmOk">ยืนยัน</button></div></div></div>
 
+<div class="overlay" id="chatModal"><div class="modal chat-modal">
+  <div class="chat-header"><b>💬 แชทกับแอดมิน &amp; AI</b><button class="pill" onclick="closeChatModal()">✕</button></div>
+  <div id="chatMessages" class="chat-messages"></div>
+  <div class="chat-input-row"><input id="chatInput" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter')sendChat()"><button class="pill solid" onclick="sendChat()">ส่ง</button></div>
+</div></div>
+
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 const firebaseConfig={apiKey:"AIzaSyACRixuNmOefWk2vDCgmt0K0-6Kvi1V8C0",authDomain:"np-404.firebaseapp.com",projectId:"np-404",storageBucket:"np-404.firebasestorage.app",messagingSenderId:"535227695851",appId:"1:535227695851:web:12d01c1780c1ec1b0674ae",measurementId:"G-SCP8RDBDS8"};
-const auth=getAuth(initializeApp(firebaseConfig));window.__auth=auth;window.__authFns={signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail};window.__getIdToken=async()=>window.__currentUser?await window.__currentUser.getIdToken(true):null;window.__ADMIN_EMAIL="admin@np404.com";
-onAuthStateChanged(auth,u=>{window.__currentUser=u;window.__isAdmin=!!(u?.email&&u.email.toLowerCase()===window.__ADMIN_EMAIL);renderAuth();renderMenu();renderActivePage()});
+const auth=getAuth(initializeApp(firebaseConfig));window.__auth=auth;window.__authFns={signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail};window.__getIdToken=async()=>window.__currentUser?await window.__currentUser.getIdToken(true):null;
+onAuthStateChanged(auth,async u=>{
+  window.__currentUser=u;
+  window.__isAdmin=!!(u&&u.email&&window.__ADMIN_EMAIL&&u.email.toLowerCase()===window.__ADMIN_EMAIL.toLowerCase());
+  renderAuth();renderMenu();renderActivePage();
+  if(u&&window.syncProfile)window.syncProfile();
+});
 window.doLogout=()=>signOut(auth);
 </script>
 <script>
 const API_URL="https://script.google.com/macros/s/AKfycbwNzOPeq1ySwZET-yNLabubjiGx-BsLjTpuWuV6cz0AG1MEBkggvSEh6bCnHq5lH7WB/exec",HOME_ID="home";
+const ICONS=['🏠','📄','📢','🛒','🎮','📚','🎵','🎬','💬','⚙️','🧾','📊','🗂️','🎯','⭐','❤️','🔥','🚀','🎁','📷','🗓️','✅','📌','🔔','🌐','💡','🔒','🧩','🏆','☕','🔗'];
 let pages=[],links=[],settings={},activeId=HOME_ID,authTab="login",editingPageRow=null,editingLinkRow=null,builderBlocks=[];
+let conversations=[],usersList=[],activeConvUserId=null,adminChatTimer=null,chatPollTimer=null;
 const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
 function apiGet(a){return fetch(API_URL+"?action="+encodeURIComponent(a)).then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x})}
+async function apiGetAuth(a,params){const token=window.__getIdToken?await window.__getIdToken():null;let qs="?action="+encodeURIComponent(a)+"&idToken="+encodeURIComponent(token||"");Object.keys(params||{}).forEach(k=>qs+="&"+k+"="+encodeURIComponent(params[k]));return fetch(API_URL+qs).then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x})}
 async function apiPost(d){
   const token=window.__getIdToken?await window.__getIdToken():null;
   if(!token)throw Error("กรุณาเข้าสู่ระบบก่อนทำรายการนี้");
@@ -80,15 +173,43 @@ async function apiPost(d){
 }
 function closeOverlay(id){$(id).classList.remove("show")}window.closeOverlay=closeOverlay;
 function toast(m,ok=true){$("notificationTitle").innerText=ok?"สำเร็จ":"แจ้งเตือน";$("notificationText").innerText=m||"";$("notificationModal").classList.add("show")}
-async function loadAll(){try{let a=await apiGet("getAll");pages=a.pages||[];links=a.links||[];settings=a.settings||{};applySettings();renderMenu();renderActivePage();renderAdmin();if(settings.popupEnabled==="true"&&settings.popupDetail)setTimeout(showPopup,700)}catch(e){console.error(e);$("pageContent").innerHTML='<div class="empty">โหลดระบบไม่สำเร็จ กรุณาตรวจสอบ API_URL และ Apps Script</div>'}}
-function applySettings(){$("siteName").innerText=settings.siteName||"เมนูระบบ";document.title=settings.siteName||"NP-404 System";let l=$("siteLogo");if(settings.logoUrl){l.src=settings.logoUrl;l.classList.remove("hidden")}else{l.classList.add("hidden")}$("announcementText").innerText=settings.announcement||"";$("announcementBar").classList.toggle("hidden",!settings.announcement)}
-function renderAuth(){let b=$("authBox"),u=window.__currentUser;if(!u){b.innerHTML='<span>ยังไม่ได้เข้าสู่ระบบ</span><button class="pill solid" onclick="openAuthModal()">เข้าสู่ระบบ</button>';return}let p=JSON.parse(localStorage.getItem("np404_profile")||"{}"),name=p.username||u.displayName||u.email;b.innerHTML='<span class="user-name">'+esc(name)+'</span>'+(window.__isAdmin?'<button class="pill solid" onclick="openAdminPanel()">แผงแอดมิน</button>':"")+'<button class="pill" onclick="logout()">ออกจากระบบ</button>'}
+function fmtDate(s){if(!s)return"-";try{return new Date(s).toLocaleString("th-TH")}catch(e){return s}}
+
+/* ---------------- Theme ---------------- */
+function applyTheme(mode){document.documentElement.setAttribute("data-theme",mode==="dark"?"dark":"light");localStorage.setItem("np404_theme",mode);let b=$("themeBtn");if(b)b.innerText=mode==="dark"?"☀️":"🌙"}
+function toggleTheme(){let cur=document.documentElement.getAttribute("data-theme")||"light";applyTheme(cur==="dark"?"light":"dark")}window.toggleTheme=toggleTheme;
+
+/* ---------------- Load ---------------- */
+async function loadAll(){try{let a=await apiGet("getAll");pages=a.pages||[];links=a.links||[];settings=a.settings||{};window.__ADMIN_EMAIL=settings.adminEmail||"admin@np404.com";applySettings();renderMenu();renderActivePage();renderAdmin();if(settings.popupEnabled==="true"&&settings.popupDetail)setTimeout(showPopup,700)}catch(e){console.error(e);$("pageContent").innerHTML='<div class="empty">โหลดระบบไม่สำเร็จ กรุณาตรวจสอบ API_URL และ Apps Script</div>'}}
+function applySettings(){
+  $("siteName").innerText=settings.siteName||"เมนูระบบ";document.title=settings.siteName||"NP-404 System";
+  let l=$("siteLogo");if(settings.logoUrl){l.src=settings.logoUrl;l.classList.remove("hidden")}else{l.classList.add("hidden")}
+  $("announcementText").innerText=settings.announcement||"";$("announcementBar").classList.toggle("hidden",!settings.announcement);
+  if(settings.accentColor)document.documentElement.style.setProperty("--accent",settings.accentColor);
+  const saved=localStorage.getItem("np404_theme")||settings.themeMode||"light";applyTheme(saved);
+}
+function renderAuth(){
+  let b=$("authBox"),u=window.__currentUser;
+  let themeBtn='<button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>';
+  if(!u){b.innerHTML=themeBtn+'<span>ยังไม่ได้เข้าสู่ระบบ</span><button class="pill solid" onclick="openAuthModal()">เข้าสู่ระบบ</button>';applyTheme(localStorage.getItem("np404_theme")||"light");return}
+  let p=JSON.parse(localStorage.getItem("np404_profile")||"{}"),name=p.username||u.displayName||u.email;
+  b.innerHTML=themeBtn+'<span class="user-name">'+esc(name)+'</span>'+(window.__isAdmin?'<button class="pill solid" onclick="openAdminPanel()">แผงแอดมิน</button>':"")+'<button class="pill" onclick="logout()">ออกจากระบบ</button>';
+  applyTheme(localStorage.getItem("np404_theme")||"light");
+}
 async function logout(){if(window.__isAdmin){confirmAction("ออกจาก Admin","ต้องการออกจากระบบ Admin ใช่หรือไม่?",async()=>{await window.doLogout();toast("ออกจากระบบแล้ว")})}else await window.doLogout()}window.logout=logout;
-function renderMenu(){let b=$("menuBar");b.innerHTML="";b.appendChild(menu({id:HOME_ID,name:"หน้าแรก",active:true}));pages.forEach(p=>b.appendChild(menu(p)));links.forEach(l=>b.appendChild(menu(l)))}
-function menu(x){let e=document.createElement("div"),key=x.id||x.rowIndex,on=x.active!==false;e.className="menu-item "+(key===activeId?"active ":"")+(!on?"disabled":"");e.innerHTML='<span class="status-dot"></span>'+esc(x.name)+(on?"":" 🔒");e.onclick=()=>{if(!on&&!window.__isAdmin)return toast("เมนูนี้ปิดปรับปรุงอยู่",false);if(x.url||x.type==="link"){window.open(x.url||x.content,"_blank");return}activeId=key;renderMenu();renderActivePage()};return e}
+
+/* ---------------- Menu (การ์ดไอคอน) ---------------- */
+function renderMenu(){let b=$("menuBar");b.innerHTML="";b.appendChild(menu({id:HOME_ID,name:settings.homeMenuLabel||"หน้าแรก",icon:settings.homeMenuIcon||"🏠",active:true},true));pages.forEach(p=>b.appendChild(menu(p,false,"📄")));links.forEach(l=>b.appendChild(menu(l,false,"🔗")))}
+function menu(x,isHome,fallbackIcon){
+  let e=document.createElement("div"),key=x.id||x.rowIndex,on=x.active!==false,icon=x.icon||fallbackIcon||"🏠";
+  e.className="menu-card "+(key===activeId?"active ":"")+(!on?"disabled":"");
+  e.innerHTML='<span class="menu-icon">'+esc(icon)+'</span><span class="menu-label">'+esc(x.name)+'</span>'+(on?"":'<span class="menu-lock">🔒</span>');
+  e.onclick=()=>{if(!on&&!window.__isAdmin)return toast("เมนูนี้ปิดปรับปรุงอยู่",false);if(x.url||x.type==="link"){window.open(x.url||x.content,"_blank");return}activeId=key;renderMenu();renderActivePage()};
+  return e;
+}
 function renderActivePage(){let c=$("pageContent");c.classList.remove("full-code");
 if(settings.maintenance==="true"&&!window.__isAdmin){c.innerHTML='<div class="maintenance"><div><div class="code">503</div><h1>ระบบขัดข้องชั่วคราว</h1><p>ขณะนี้ระบบอยู่ระหว่างการปรับปรุง กรุณาลองใหม่ภายหลัง</p></div></div>';return}
-if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">หน้าแรก</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
+if(activeId===HOME_ID){c.innerHTML='<div class="hello-title">'+esc(settings.homeTitle||"สวัสดี 👋")+'</div><div class="hello-sub">'+esc(settings.homeSubtitle||"")+'</div>';return}
 let p=pages.find(x=>(x.id||x.rowIndex)===activeId);
 if(p){
   if(p.active===false&&!window.__isAdmin){c.innerHTML='<div class="empty">หน้านี้ปิดปรับปรุงอยู่</div>';return}
@@ -109,11 +230,10 @@ if(p){
     return;
   }
   c.classList.add("full-code");c.innerHTML="";
-  // แยกหน้าโค้ดออกจากหน้าหลักด้วย iframe เพื่อไม่ให้ CSS/JS ของหน้าโค้ด
-  // ไปทับ nav.menu-bar และส่วนควบคุมหลักของระบบ
+  // แยกหน้าโค้ดออกด้วย iframe (allow-scripts + allow-forms) เพื่อให้ฟอร์ม/ปุ่ม/สคริปต์ในหน้านั้นทำงานได้ตามปกติ
+  // โดยไม่ไปรบกวน UI หลักของระบบ
   let frame=document.createElement("iframe");
-  frame.className="code-frame";
-  frame.title=p.name||"Code Page";
+  frame.className="code-frame";frame.title=p.name||"Code Page";
   frame.setAttribute("sandbox","allow-scripts allow-forms allow-popups allow-modals");
   frame.srcdoc=p.content||"";
   c.appendChild(frame);
@@ -121,35 +241,54 @@ if(p){
 }
 let l=links.find(x=>(x.id||x.rowIndex)===activeId);if(l){if(!l.active&&!window.__isAdmin)return;c.innerHTML='<div class="link-page"><h2>'+esc(l.name)+'</h2><p>กำลังเปิดลิงก์...</p></div>';window.open(l.url,"_blank");return}c.innerHTML='<div class="empty">ไม่พบหน้านี้</div>'}
 window.renderMenu=renderMenu;window.renderActivePage=renderActivePage;
+
+/* ---------------- Auth ---------------- */
 function openAuthModal(){$("authModal").classList.add("show");setAuthTab("login");$("authErr").innerText=""}window.openAuthModal=openAuthModal;
 function setAuthTab(t){authTab=t;$("tabLogin").classList.toggle("active",t==="login");$("tabRegister").classList.toggle("active",t==="register");$("registerFields").classList.toggle("hidden",t!=="register");$("authSubmitBtn").innerText=t==="login"?"เข้าสู่ระบบ":"สมัครสมาชิก"}window.setAuthTab=setAuthTab;
 async function submitAuth(){let err=$("authErr");err.innerText="";try{let email=$("authEmail").value.trim(),pass=$("authPassword").value;if(!email||!pass)throw Error("กรุณากรอกอีเมลและรหัสผ่าน");if(authTab==="register"){let f=$("authFirstName").value.trim(),l=$("authLastName").value.trim(),u=$("authUsername").value.trim();if(!f||!l||!u)throw Error("กรุณากรอกชื่อจริง นามสกุล และชื่อแอคเค้า");let c=await window.__authFns.createUserWithEmailAndPassword(window.__auth,email,pass);await window.__authFns.updateProfile(c.user,{displayName:f+" "+l});localStorage.setItem("np404_profile",JSON.stringify({firstName:f,lastName:l,username:u,email}))}else await window.__authFns.signInWithEmailAndPassword(window.__auth,email,pass);closeOverlay("authModal");toast(authTab==="login"?"เข้าสู่ระบบสำเร็จ":"สมัครสมาชิกสำเร็จ")}catch(e){err.innerText=({"auth/invalid-email":"อีเมลไม่ถูกต้อง","auth/user-not-found":"ไม่พบบัญชีนี้","auth/wrong-password":"รหัสผ่านไม่ถูกต้อง","auth/invalid-credential":"อีเมลหรือรหัสผ่านไม่ถูกต้อง","auth/email-already-in-use":"อีเมลนี้ถูกใช้ไปแล้ว","auth/weak-password":"รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"}[e.code]||e.message||"เกิดข้อผิดพลาด")}}window.submitAuth=submitAuth;
+window.syncProfile=async function(){try{let p=JSON.parse(localStorage.getItem("np404_profile")||"{}");await apiPost({action:"registerProfile",username:p.username,firstName:p.firstName,lastName:p.lastName})}catch(e){/* เงียบไว้ ไม่รบกวนผู้ใช้ */}}
 
+/* ---------------- Admin: system/pages/links/popup (เดิม + ปรับปรุง) ---------------- */
 function openAdminPanel(){if(!window.__isAdmin)return toast("เฉพาะ Admin เท่านั้น",false);renderAdmin();$("adminModal").classList.add("show")}window.openAdminPanel=openAdminPanel;
-function showAdminTab(t,b){["system","pages","links","popup"].forEach(x=>$("admin"+x[0].toUpperCase()+x.slice(1)).classList.toggle("hidden",x!==t));document.querySelectorAll("#adminTabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active")}window.showAdminTab=showAdminTab;
+function showAdminTab(t,b){["system","pages","links","popup","users","chat"].forEach(x=>$("admin"+x[0].toUpperCase()+x.slice(1)).classList.toggle("hidden",x!==t));document.querySelectorAll("#adminTabs button").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+  if(adminChatTimer){clearInterval(adminChatTimer);adminChatTimer=null}
+  if(t==="users")loadUsers();
+  if(t==="chat"){loadConversations();adminChatTimer=setInterval(()=>{loadConversations();if(activeConvUserId)loadConversationMessages()},6000)}
+}window.showAdminTab=showAdminTab;
 function renderAdmin(){if(!window.__isAdmin)return;renderSystem();renderPages();renderLinks();renderPopup()}
-function renderSystem(){$("adminSystem").innerHTML='<div class="setting-card"><div class="setting-head"><div><b>Maintenance Mode</b><small> เปิด/ปิดหน้า 503 สำหรับผู้ใช้ทั่วไป</small></div><label class="switch"><input type="checkbox" '+(settings.maintenance==="true"?"checked":"")+' onchange="toggleMaintenance(this.checked)"><span class="slider"></span></label></div></div><div class="setting-card"><div class="setting-head"><div><b>ชื่อเว็บไซต์ / โลโก้</b><small>เปลี่ยนชื่อและ URL รูปโลโก้</small></div></div><div class="field"><label>ชื่อเว็บไซต์</label><input id="setSiteName" value="'+esc(settings.siteName||"")+'"></div><div class="field"><label>URL โลโก้</label><input id="setLogoUrl" value="'+esc(settings.logoUrl||"")+'"></div><button class="pill solid" onclick="saveBrand()">บันทึกชื่อและโลโก้</button></div><div class="setting-card"><div class="setting-head"><div><b>หน้าแรก</b><small>แก้หัวข้อหน้าแรกได้</small></div></div><div class="field"><label>หัวข้อหน้าแรก</label><input id="setHomeTitle" value="'+esc(settings.homeTitle||"")+'"></div><div class="field"><label>รายละเอียดหน้าแรก</label><textarea id="setHomeSubtitle">'+esc(settings.homeSubtitle||"")+'</textarea></div><button class="pill solid" onclick="saveHome()">บันทึกหน้าแรก</button></div><div class="setting-card"><div class="setting-head"><div><b>ข้อความประกาศวิ่ง</b><small>แสดงบนแถบด้านบนและวิ่งอัตโนมัติ</small></div></div><div class="field"><input id="setAnnouncement" value="'+esc(settings.announcement||"")+'"></div><button class="pill solid" onclick="saveAnnouncement()">บันทึกประกาศวิ่ง</button></div>'}
+function renderSystem(){$("adminSystem").innerHTML=
+'<div class="setting-card"><div class="setting-head"><div><b>Maintenance Mode</b><small>เปิด/ปิดหน้า 503 สำหรับผู้ใช้ทั่วไป (แอดมินยังเข้าใช้งานได้ตามปกติ)</small></div><label class="switch"><input type="checkbox" '+(settings.maintenance==="true"?"checked":"")+' onchange="toggleMaintenance(this.checked)"><span class="slider"></span></label></div></div>'+
+'<div class="setting-card"><div class="setting-head"><div><b>ชื่อเว็บไซต์ / โลโก้</b><small>เปลี่ยนชื่อและ URL รูปโลโก้</small></div></div><div class="field"><label>ชื่อเว็บไซต์</label><input id="setSiteName" value="'+esc(settings.siteName||"")+'"></div><div class="field"><label>URL โลโก้</label><input id="setLogoUrl" value="'+esc(settings.logoUrl||"")+'"></div><button class="pill solid" onclick="saveBrand()">บันทึกชื่อและโลโก้</button></div>'+
+'<div class="setting-card"><div class="setting-head"><div><b>หน้าแรก</b><small>แก้หัวข้อ คำอธิบาย ชื่อปุ่ม และไอคอนของเมนูหน้าแรกได้ทั้งหมด</small></div></div><div class="field"><label>หัวข้อหน้าแรก</label><input id="setHomeTitle" value="'+esc(settings.homeTitle||"")+'"></div><div class="field"><label>รายละเอียดหน้าแรก</label><textarea id="setHomeSubtitle">'+esc(settings.homeSubtitle||"")+'</textarea></div><div class="grid2"><div class="field"><label>ชื่อปุ่มเมนูหน้าแรก</label><input id="setHomeMenuLabel" value="'+esc(settings.homeMenuLabel||"หน้าแรก")+'"></div><div class="field"><label>ไอคอนปุ่มเมนูหน้าแรก</label><input id="setHomeMenuIcon" value="'+esc(settings.homeMenuIcon||"🏠")+'"></div></div><button class="pill solid" onclick="saveHome()">บันทึกหน้าแรก</button></div>'+
+'<div class="setting-card"><div class="setting-head"><div><b>ข้อความประกาศวิ่ง</b><small>แสดงบนแถบด้านบนและวิ่งอัตโนมัติ</small></div></div><div class="field"><input id="setAnnouncement" value="'+esc(settings.announcement||"")+'"></div><button class="pill solid" onclick="saveAnnouncement()">บันทึกประกาศวิ่ง</button></div>'+
+'<div class="setting-card"><div class="setting-head"><div><b>ธีมสี</b><small>เลือกโหมดเริ่มต้นและสีหลักของระบบ (ไม่ใช้สีดำล้วนแล้ว)</small></div></div><div class="grid2"><div class="field"><label>โหมดเริ่มต้น</label><select id="setThemeMode"><option value="light" '+(settings.themeMode!=="dark"?"selected":"")+'>สว่าง (Light)</option><option value="dark" '+(settings.themeMode==="dark"?"selected":"")+'>มืด (Dark)</option></select></div><div class="field"><label>สีหลักของระบบ</label><div class="color-row"><input type="color" id="setAccentColor" value="'+esc(settings.accentColor||"#7c5cff")+'"></div></div></div><button class="pill solid" onclick="saveTheme()">บันทึกธีมสี</button></div>'+
+'<div class="setting-card"><div class="setting-head"><div><b>🤖 ผู้ช่วย AI ในแชท</b><small>ให้ AI ตอบคำถามผู้ใช้อัตโนมัติในเมนูแชท (แอดมินยังตอบเองเพิ่มเติมได้เสมอ)</small></div><label class="switch"><input id="aiEnabledInput" type="checkbox" '+(settings.aiEnabled==="true"?"checked":"")+'><span class="slider"></span></label></div><div class="grid2"><div class="field"><label>ผู้ให้บริการ AI</label><select id="aiProviderInput"><option value="openai" '+(settings.aiProvider!=="gemini"?"selected":"")+'>OpenAI</option><option value="gemini" '+(settings.aiProvider==="gemini"?"selected":"")+'>Google Gemini</option></select></div><div class="field"><label>โมเดล</label><input id="aiModelInput" value="'+esc(settings.aiModel||"gpt-4o-mini")+'"></div></div><div class="field"><label>API Key</label><input id="aiApiKeyInput" type="password" value="'+esc(settings.aiApiKey||"")+'" placeholder="วาง API Key ของผู้ให้บริการ AI"></div><div class="field"><label>System Prompt (บุคลิก/ขอบเขตการตอบของ AI)</label><textarea id="aiSystemPromptInput">'+esc(settings.aiSystemPrompt||"")+'</textarea></div><button class="pill solid" onclick="saveAI()">บันทึกการตั้งค่า AI</button></div>';
+}
 async function saveSettings(o){await apiPost({action:"saveSettings",settings:o});Object.assign(settings,o);applySettings();renderMenu();renderActivePage();renderAdmin()}
 async function toggleMaintenance(v){try{await saveSettings({maintenance:v?"true":"false"});toast(v?"เปิด Maintenance Mode แล้ว":"ปิด Maintenance Mode แล้ว")}catch(e){toast(e.message,false)}}window.toggleMaintenance=toggleMaintenance;
 async function saveBrand(){try{await saveSettings({siteName:$("setSiteName").value.trim(),logoUrl:$("setLogoUrl").value.trim()});toast("บันทึกชื่อและโลโก้แล้ว")}catch(e){toast(e.message,false)}}window.saveBrand=saveBrand;
-async function saveHome(){try{await saveSettings({homeTitle:$("setHomeTitle").value.trim(),homeSubtitle:$("setHomeSubtitle").value});toast("บันทึกหน้าแรกแล้ว")}catch(e){toast(e.message,false)}}window.saveHome=saveHome;
+async function saveHome(){try{await saveSettings({homeTitle:$("setHomeTitle").value.trim(),homeSubtitle:$("setHomeSubtitle").value,homeMenuLabel:$("setHomeMenuLabel").value.trim()||"หน้าแรก",homeMenuIcon:$("setHomeMenuIcon").value.trim()||"🏠"});toast("บันทึกหน้าแรกแล้ว")}catch(e){toast(e.message,false)}}window.saveHome=saveHome;
 async function saveAnnouncement(){try{await saveSettings({announcement:$("setAnnouncement").value});toast("บันทึกข้อความประกาศแล้ว")}catch(e){toast(e.message,false)}}window.saveAnnouncement=saveAnnouncement;
+async function saveTheme(){try{await saveSettings({themeMode:$("setThemeMode").value,accentColor:$("setAccentColor").value});localStorage.setItem("np404_theme",$("setThemeMode").value);toast("บันทึกธีมสีแล้ว")}catch(e){toast(e.message,false)}}window.saveTheme=saveTheme;
+async function saveAI(){try{await saveSettings({aiEnabled:$("aiEnabledInput").checked?"true":"false",aiProvider:$("aiProviderInput").value,aiModel:$("aiModelInput").value.trim(),aiApiKey:$("aiApiKeyInput").value.trim(),aiSystemPrompt:$("aiSystemPromptInput").value});toast("บันทึกการตั้งค่า AI แล้ว")}catch(e){toast(e.message,false)}}window.saveAI=saveAI;
 
-function renderPages(){let b=$("adminPages");b.innerHTML='<button class="pill solid" style="width:100%;margin-bottom:12px" onclick="openPageEditor()">+ เพิ่มหน้าเมนู</button>';if(!pages.length){b.innerHTML+='<div class="empty">ยังไม่มีหน้าเมนู</div>';return}pages.forEach(p=>b.innerHTML+='<div class="admin-row"><div class="admin-info"><b>'+esc(p.name)+' '+(p.requireLogin?'🔐':'')+'</b><small>'+esc(p.category||"ไม่ระบุหมวดหมู่")+' · '+(p.type==="link"?"ลิงก์ภายนอก":p.type==="builder"?"ตัวสร้างหน้า":"โค้ด HTML")+(p.requireLogin?" · ต้องเข้าสู่ระบบ":"")+'</small></div><div class="admin-actions"><span class="badge '+(p.active?"on":"off")+'">'+(p.active?"เปิดใช้งาน":"ปิดปรับปรุง")+'</span><label class="switch"><input type="checkbox" '+(p.active?"checked":"")+' onchange="setPageStatus('+p.rowIndex+',this.checked)"><span class="slider"></span></label><button onclick="openPageEditor('+p.rowIndex+')">แก้ไข</button><button class="danger" onclick="deletePageConfirm('+p.rowIndex+')">ลบ</button></div></div>')}
-function openPageEditor(r){editingPageRow=r||null;let p=r?pages.find(x=>x.rowIndex===r):null;$("pageModalTitle").innerText=p?"แก้ไขเมนู":"เพิ่มหน้าใหม่";$("pageNameInput").value=p?.name||"";$("pageCategoryInput").value=p?.category||"";$("pageTypeInput").value=p?.type||"builder";$("pageRequireLoginInput").checked=!!p?.requireLogin;$("pageCodeInput").value=p?.type==="code"?p.content:"";$("pageLinkInput").value=p?.type==="link"?p.content:"";builderBlocks=[];if(p?.type==="builder"){try{builderBlocks=JSON.parse(p.blocks||p.content||"[]")}catch(e){builderBlocks=[]}}renderBuilder();togglePageType();$("pageModal").classList.add("show")}window.openPageEditor=openPageEditor;
+function iconPalette(targetInputId,previewId){return ICONS.map(ic=>'<button type="button" onclick="$(\''+targetInputId+'\').value=\''+ic+'\';$(\''+previewId+'\').innerText=\''+ic+'\'">'+ic+'</button>').join("")}
+
+function renderPages(){let b=$("adminPages");b.innerHTML='<button class="pill solid" style="width:100%;margin-bottom:12px" onclick="openPageEditor()">+ เพิ่มหน้าเมนู</button>';if(!pages.length){b.innerHTML+='<div class="empty">ยังไม่มีหน้าเมนู</div>';return}pages.forEach(p=>b.innerHTML+='<div class="admin-row"><div class="admin-info"><b>'+esc(p.icon||"📄")+' '+esc(p.name)+' '+(p.requireLogin?'🔐':'')+'</b><small>'+esc(p.category||"ไม่ระบุหมวดหมู่")+' · '+(p.type==="link"?"ลิงก์ภายนอก":p.type==="builder"?"ตัวสร้างหน้า":"โค้ด HTML")+(p.requireLogin?" · ต้องเข้าสู่ระบบ":"")+'</small></div><div class="admin-actions"><span class="badge '+(p.active?"on":"off")+'">'+(p.active?"เปิดใช้งาน":"ปิดปรับปรุง")+'</span><label class="switch"><input type="checkbox" '+(p.active?"checked":"")+' onchange="setPageStatus('+p.rowIndex+',this.checked)"><span class="slider"></span></label><button onclick="openPageEditor('+p.rowIndex+')">แก้ไข</button><button class="danger" onclick="deletePageConfirm('+p.rowIndex+')">ลบ</button></div></div>')}
+function openPageEditor(r){editingPageRow=r||null;let p=r?pages.find(x=>x.rowIndex===r):null;$("pageModalTitle").innerText=p?"แก้ไขเมนู":"เพิ่มหน้าใหม่";$("pageNameInput").value=p?.name||"";$("pageCategoryInput").value=p?.category||"";$("pageTypeInput").value=p?.type||"builder";$("pageRequireLoginInput").checked=!!p?.requireLogin;$("pageCodeInput").value=p?.type==="code"?p.content:"";$("pageLinkInput").value=p?.type==="link"?p.content:"";$("pageIconInput").value=p?.icon||"";$("pageIconPreview").innerText=p?.icon||"📄";$("pageIconPalette").innerHTML=iconPalette("pageIconInput","pageIconPreview");builderBlocks=[];if(p?.type==="builder"){try{builderBlocks=JSON.parse(p.blocks||p.content||"[]")}catch(e){builderBlocks=[]}}renderBuilder();togglePageType();$("pageModal").classList.add("show")}window.openPageEditor=openPageEditor;
 function togglePageType(){let t=$("pageTypeInput").value;$("pageBuilderField").classList.toggle("hidden",t!=="builder");$("pageCodeField").classList.toggle("hidden",t!=="code");$("pageLinkField").classList.toggle("hidden",t!=="link")}window.togglePageType=togglePageType;
-function renderBuilder(){let box=$("builderList");box.innerHTML="";if(!builderBlocks.length){box.innerHTML='<div class="empty" style="padding:20px 0">ยังไม่มีเนื้อหา กด “＋ ข้อความ” หรือ “🖼️ ภาพ” เพื่อเพิ่ม</div>';return}builderBlocks.forEach((b,i)=>{let d=document.createElement("div");d.className="builder-item";d.innerHTML='<div class="builder-item-head"><b>'+(b.type==="image"?"🖼️ ภาพ":"📝 ข้อความ")+' #'+(i+1)+'</b><div class="builder-toolbar"><button onclick="moveBuilder('+i+',-1)">↑</button><button onclick="moveBuilder('+i+',1)">↓</button><button onclick="editBuilder('+i+')">แก้ไข</button><button onclick="removeBuilder('+i+')">ลบ</button></div></div><div class="builder-preview"></div>';let pv=d.querySelector(".builder-preview");if(b.type==="image"){let img=document.createElement("img");img.src=b.url||"";pv.appendChild(img);if(b.caption)pv.appendChild(document.createTextNode(b.caption))}else pv.innerText=b.text||"ข้อความว่าง";box.appendChild(d)})}window.renderBuilder=renderBuilder;
+function renderBuilder(){let box=$("builderList");box.innerHTML="";if(!builderBlocks.length){box.innerHTML='<div class="empty" style="padding:20px 0">ยังไม่มีเนื้อหา กด "＋ ข้อความ" หรือ "🖼️ ภาพ" เพื่อเพิ่ม</div>';return}builderBlocks.forEach((b,i)=>{let d=document.createElement("div");d.className="builder-item";d.innerHTML='<div class="builder-item-head"><b>'+(b.type==="image"?"🖼️ ภาพ":"📝 ข้อความ")+' #'+(i+1)+'</b><div class="builder-toolbar"><button onclick="moveBuilder('+i+',-1)">↑</button><button onclick="moveBuilder('+i+',1)">↓</button><button onclick="editBuilder('+i+')">แก้ไข</button><button onclick="removeBuilder('+i+')">ลบ</button></div></div><div class="builder-preview"></div>';let pv=d.querySelector(".builder-preview");if(b.type==="image"){let img=document.createElement("img");img.src=b.url||"";pv.appendChild(img);if(b.caption)pv.appendChild(document.createTextNode(b.caption))}else pv.innerText=b.text||"ข้อความว่าง";box.appendChild(d)})}window.renderBuilder=renderBuilder;
 function addBuilderBlock(type){if(type==="text"){let text=prompt("พิมพ์ข้อความที่ต้องการแสดงในหน้า:","");if(text===null)return;builderBlocks.push({type:"text",text})}else{let url=prompt("ใส่ URL รูปภาพ:","");if(!url)return;let caption=prompt("คำอธิบายภาพ (ถ้ามี):","")||"";builderBlocks.push({type:"image",url,caption})}renderBuilder()}window.addBuilderBlock=addBuilderBlock;
 function editBuilder(i){let b=builderBlocks[i];if(!b)return;if(b.type==="text"){let v=prompt("แก้ไขข้อความ:",b.text||"");if(v!==null)b.text=v}else{let u=prompt("แก้ไข URL รูปภาพ:",b.url||"");if(u!==null&&u.trim()){b.url=u.trim();let c=prompt("แก้ไขคำอธิบายภาพ:",b.caption||"");if(c!==null)b.caption=c}}renderBuilder()}window.editBuilder=editBuilder;
 function removeBuilder(i){confirmAction("ยืนยันการลบ","ต้องการลบเนื้อหาชิ้นนี้ใช่หรือไม่?",async()=>{builderBlocks.splice(i,1);renderBuilder()})}window.removeBuilder=removeBuilder;
 function moveBuilder(i,dir){let j=i+dir;if(j<0||j>=builderBlocks.length)return;[builderBlocks[i],builderBlocks[j]]=[builderBlocks[j],builderBlocks[i]];renderBuilder()}window.moveBuilder=moveBuilder;
-async function savePage(){try{let n=$("pageNameInput").value.trim(),cat=$("pageCategoryInput").value.trim(),type=$("pageTypeInput").value,content="",blocks="";if(!n)throw Error("กรุณากรอกชื่อเมนู");if(type==="builder"){if(!builderBlocks.length)throw Error("กรุณาเพิ่มข้อความหรือภาพอย่างน้อย 1 รายการ");blocks=JSON.stringify(builderBlocks);content=blocks}else if(type==="code"){content=$("pageCodeInput").value;if(!content)throw Error("กรุณากรอกโค้ด HTML")}else{content=$("pageLinkInput").value.trim();if(!content)throw Error("กรุณากรอก URL")}let d={action:editingPageRow?"updatePage":"addPage",name:n,category:cat,type,content,blocks,requireLogin:$("pageRequireLoginInput").checked,active:true};if(editingPageRow)d.rowIndex=editingPageRow;await apiPost(d);closeOverlay("pageModal");await loadAll();toast("บันทึกเมนูแล้ว")}catch(e){toast(e.message,false)}}window.savePage=savePage;
+async function savePage(){try{let n=$("pageNameInput").value.trim(),cat=$("pageCategoryInput").value.trim(),type=$("pageTypeInput").value,content="",blocks="",icon=$("pageIconInput").value.trim();if(!n)throw Error("กรุณากรอกชื่อเมนู");if(type==="builder"){if(!builderBlocks.length)throw Error("กรุณาเพิ่มข้อความหรือภาพอย่างน้อย 1 รายการ");blocks=JSON.stringify(builderBlocks);content=blocks}else if(type==="code"){content=$("pageCodeInput").value;if(!content)throw Error("กรุณากรอกโค้ด HTML")}else{content=$("pageLinkInput").value.trim();if(!content)throw Error("กรุณากรอก URL")}let d={action:editingPageRow?"updatePage":"addPage",name:n,category:cat,type,content,icon,requireLogin:$("pageRequireLoginInput").checked,active:true};if(editingPageRow)d.rowIndex=editingPageRow;await apiPost(d);closeOverlay("pageModal");await loadAll();toast("บันทึกเมนูแล้ว")}catch(e){toast(e.message,false)}}window.savePage=savePage;
 async function setPageStatus(r,v){try{await apiPost({action:"setPageActive",rowIndex:r,active:v});let p=pages.find(x=>x.rowIndex===r);if(p)p.active=v;renderMenu();renderPages();toast(v?"เปิดหน้าแล้ว":"ปิดปรับปรุงแล้ว")}catch(e){toast(e.message,false)}}window.setPageStatus=setPageStatus;
 function deletePageConfirm(r){let p=pages.find(x=>x.rowIndex===r);confirmAction("ยืนยันการลบ","ต้องการลบเมนู "+(p?.name||"นี้")+" ใช่หรือไม่?",async()=>{await apiPost({action:"deletePage",rowIndex:r});activeId=HOME_ID;await loadAll();toast("ลบเมนูแล้ว")})}window.deletePageConfirm=deletePageConfirm;
 
-function renderLinks(){let b=$("adminLinks");b.innerHTML='<button class="pill solid" style="width:100%;margin-bottom:12px" onclick="openLinkEditor()">+ เพิ่มลิงก์</button>';if(!links.length){b.innerHTML+='<div class="empty">ยังไม่มีลิงก์</div>';return}links.forEach(l=>b.innerHTML+='<div class="admin-row"><div class="admin-info"><b>'+esc(l.name)+'</b><small>'+esc(l.category||"ไม่ระบุหมวดหมู่")+' · '+esc(l.url)+'</small></div><div class="admin-actions"><span class="badge '+(l.active?"on":"off")+'">'+(l.active?"เปิดใช้งาน":"ปิดปรับปรุง")+'</span><label class="switch"><input type="checkbox" '+(l.active?"checked":"")+' onchange="setLinkStatus('+l.rowIndex+',this.checked)"><span class="slider"></span></label><button onclick="openLinkEditor('+l.rowIndex+')">แก้ไข</button><button class="danger" onclick="deleteLinkConfirm('+l.rowIndex+')">ลบ</button></div></div>')}
-function openLinkEditor(r){editingLinkRow=r||null;let l=r?links.find(x=>x.rowIndex===r):null;$("linkModalTitle").innerText=l?"แก้ไขลิงก์":"เพิ่มลิงก์";$("linkNameInput").value=l?.name||"";$("linkUrlInput").value=l?.url||"";$("linkCategoryInput").value=l?.category||"";$("linkModal").classList.add("show")}window.openLinkEditor=openLinkEditor;
-async function saveLink(){try{let n=$("linkNameInput").value.trim(),u=$("linkUrlInput").value.trim(),c=$("linkCategoryInput").value.trim();if(!n||!u)throw Error("กรุณากรอกชื่อและ URL");let d={action:editingLinkRow?"updateLink":"addLink",name:n,url:u,category:c,active:true};if(editingLinkRow)d.rowIndex=editingLinkRow;await apiPost(d);closeOverlay("linkModal");await loadAll();toast("บันทึกลิงก์แล้ว")}catch(e){toast(e.message,false)}}window.saveLink=saveLink;
+function renderLinks(){let b=$("adminLinks");b.innerHTML='<button class="pill solid" style="width:100%;margin-bottom:12px" onclick="openLinkEditor()">+ เพิ่มลิงก์</button>';if(!links.length){b.innerHTML+='<div class="empty">ยังไม่มีลิงก์</div>';return}links.forEach(l=>b.innerHTML+='<div class="admin-row"><div class="admin-info"><b>'+esc(l.icon||"🔗")+' '+esc(l.name)+'</b><small>'+esc(l.category||"ไม่ระบุหมวดหมู่")+' · '+esc(l.url)+'</small></div><div class="admin-actions"><span class="badge '+(l.active?"on":"off")+'">'+(l.active?"เปิดใช้งาน":"ปิดปรับปรุง")+'</span><label class="switch"><input type="checkbox" '+(l.active?"checked":"")+' onchange="setLinkStatus('+l.rowIndex+',this.checked)"><span class="slider"></span></label><button onclick="openLinkEditor('+l.rowIndex+')">แก้ไข</button><button class="danger" onclick="deleteLinkConfirm('+l.rowIndex+')">ลบ</button></div></div>')}
+function openLinkEditor(r){editingLinkRow=r||null;let l=r?links.find(x=>x.rowIndex===r):null;$("linkModalTitle").innerText=l?"แก้ไขลิงก์":"เพิ่มลิงก์";$("linkNameInput").value=l?.name||"";$("linkUrlInput").value=l?.url||"";$("linkCategoryInput").value=l?.category||"";$("linkIconInput").value=l?.icon||"";$("linkIconPreview").innerText=l?.icon||"🔗";$("linkIconPalette").innerHTML=iconPalette("linkIconInput","linkIconPreview");$("linkModal").classList.add("show")}window.openLinkEditor=openLinkEditor;
+async function saveLink(){try{let n=$("linkNameInput").value.trim(),u=$("linkUrlInput").value.trim(),c=$("linkCategoryInput").value.trim(),icon=$("linkIconInput").value.trim();if(!n||!u)throw Error("กรุณากรอกชื่อและ URL");let d={action:editingLinkRow?"updateLink":"addLink",name:n,url:u,category:c,icon,active:true};if(editingLinkRow)d.rowIndex=editingLinkRow;await apiPost(d);closeOverlay("linkModal");await loadAll();toast("บันทึกลิงก์แล้ว")}catch(e){toast(e.message,false)}}window.saveLink=saveLink;
 async function setLinkStatus(r,v){try{await apiPost({action:"setLinkActive",rowIndex:r,active:v});let l=links.find(x=>x.rowIndex===r);if(l)l.active=v;renderMenu();renderLinks();toast(v?"เปิดลิงก์แล้ว":"ปิดปรับปรุงแล้ว")}catch(e){toast(e.message,false)}}window.setLinkStatus=setLinkStatus;
 function deleteLinkConfirm(r){let l=links.find(x=>x.rowIndex===r);confirmAction("ยืนยันการลบ","ต้องการลบลิงก์ "+(l?.name||"นี้")+" ใช่หรือไม่?",async()=>{await apiPost({action:"deleteLink",rowIndex:r});activeId=HOME_ID;await loadAll();toast("ลบลิงก์แล้ว")})}window.deleteLinkConfirm=deleteLinkConfirm;
 
@@ -157,6 +296,38 @@ function renderPopup(){$("adminPopup").innerHTML='<div class="setting-card"><div
 async function savePopup(){try{let o={popupEnabled:$("popupEnabled").checked?"true":"false",popupTitle:$("popupTitleInput").value.trim(),popupDetail:$("popupDetailInput").value,popupImageUrl:$("popupImageUrlInput").value.trim()};await saveSettings(o);toast("บันทึกป๊อปอัปแล้ว")}catch(e){toast(e.message,false)}}window.savePopup=savePopup;
 function showPopup(){if(Number(localStorage.getItem("np404_popup_snooze")||0)>Date.now())return;$("popupTitle").innerText=settings.popupTitle||"ประกาศ";$("popupDetail").innerText=settings.popupDetail||"";let i=$("popupImage");if(settings.popupImageUrl){i.src=settings.popupImageUrl;i.classList.remove("hidden")}else i.classList.add("hidden");$("announcementPopup").classList.add("show")}
 function snoozePopup(){localStorage.setItem("np404_popup_snooze",String(Date.now()+3600000));closeOverlay("announcementPopup")}window.snoozePopup=snoozePopup;
+
+/* ---------------- Admin: บัญชีผู้ใช้ ---------------- */
+async function loadUsers(){try{usersList=await apiGetAuth("getUsers");renderUsers()}catch(e){$("adminUsers").innerHTML='<div class="empty">'+esc(e.message)+'</div>'}}
+function renderUsers(){let b=$("adminUsers");if(!usersList.length){b.innerHTML='<div class="empty">ยังไม่มีผู้ใช้ลงทะเบียนในระบบ</div>';return}
+  b.innerHTML='<div style="margin-bottom:10px;color:var(--muted);font-size:12px">ทั้งหมด '+usersList.length+' บัญชี</div>'+usersList.map(u=>
+  '<div class="admin-row"><div class="admin-info"><b>'+esc(u.username||u.name||u.email||"ผู้ใช้")+' '+(u.role==="admin"?'<span class="badge on">ADMIN</span>':"")+'</b><small>'+esc(u.email)+' · สมัคร '+fmtDate(u.createdAt)+' · เข้าระบบล่าสุด '+fmtDate(u.lastSeen)+'</small></div><div class="admin-actions"><span class="badge '+(u.banned?"off":"on")+'">'+(u.banned?"ถูกระงับ":"ปกติ")+'</span>'+(u.role==="admin"?"":'<label class="switch"><input type="checkbox" '+(u.banned?"":"checked")+' onchange="toggleBan(\''+u.uid+'\',!this.checked)"><span class="slider"></span></label>')+'</div></div>'
+  ).join("")}
+async function toggleBan(uid,banned){try{await apiPost({action:"setUserBan",uid,banned});toast(banned?"ระงับผู้ใช้แล้ว":"ยกเลิกการระงับแล้ว");loadUsers()}catch(e){toast(e.message,false)}}window.toggleBan=toggleBan;
+
+/* ---------------- Admin: แชท (ตอบผู้ใช้) ---------------- */
+async function loadConversations(){try{conversations=await apiGetAuth("getConversations");renderConversationList()}catch(e){$("adminChat").innerHTML='<div class="empty">'+esc(e.message)+'</div>'}}
+function renderConversationList(){
+  if(!$("adminChat").querySelector(".chat-list")){
+    $("adminChat").innerHTML='<div class="chat-list"><div class="chat-list-col" id="adminChatList"></div><div class="chat-conv-col"><div id="adminConvMessages" class="chat-conv-messages"><div class="empty">เลือกการสนทนาทางซ้ายเพื่อเริ่มตอบกลับ</div></div><div class="chat-input-row" style="border-top:1px solid var(--line);margin-top:8px;border-radius:14px"><input id="adminChatInput" placeholder="พิมพ์ข้อความตอบกลับ..." onkeydown="if(event.key===\'Enter\')sendAdminReply()"><button class="pill solid" onclick="sendAdminReply()">ส่ง</button></div></div></div>';
+  }
+  let b=$("adminChatList");
+  if(!conversations.length){b.innerHTML='<div class="empty">ยังไม่มีการสนทนา</div>';return}
+  b.innerHTML=conversations.map(c=>'<div class="admin-row conv-row" onclick="openConversation(\''+c.userId+'\')" style="'+(c.userId===activeConvUserId?"border-color:var(--accent)":"")+'"><div class="admin-info"><b>'+esc(c.username||c.userName||c.email||"ผู้ใช้")+' '+(c.unread?'<span class="badge on">'+c.unread+' ใหม่</span>':"")+'</b><small>'+esc((c.lastMessage||"").slice(0,50))+'</small></div></div>').join("");
+}
+function openConversation(uid){activeConvUserId=uid;loadConversationMessages()}window.openConversation=openConversation;
+async function loadConversationMessages(){if(!activeConvUserId)return;try{let msgs=await apiGetAuth("getChatFor",{userId:activeConvUserId});renderAdminChatMessages(msgs)}catch(e){toast(e.message,false)}}
+function renderAdminChatMessages(msgs){let box=$("adminConvMessages");if(!box)return;box.innerHTML=msgs.map(m=>'<div class="chat-bubble '+(m.sender==="admin"?"me":m.sender==="ai"?"ai":"admin")+'"><div class="chat-meta">'+(m.sender==="admin"?"แอดมิน (คุณ)":m.sender==="ai"?"🤖 AI ผู้ช่วย":"ผู้ใช้")+'</div><div class="chat-text">'+esc(m.message)+'</div></div>').join("")||'<div class="empty">ยังไม่มีข้อความ</div>';box.scrollTop=box.scrollHeight}
+async function sendAdminReply(){let inp=$("adminChatInput");if(!inp||!activeConvUserId)return;let msg=inp.value.trim();if(!msg)return;inp.value="";try{let data=await apiPost({action:"adminReplyChat",userId:activeConvUserId,message:msg});renderAdminChatMessages(data);loadConversations()}catch(e){toast(e.message,false)}}window.sendAdminReply=sendAdminReply;
+
+/* ---------------- Chat ผู้ใช้ทั่วไป (ลอยมุมจอ) ---------------- */
+function openChat(){if(!window.__currentUser){toast("กรุณาเข้าสู่ระบบก่อนใช้งานแชท",false);openAuthModal();return}$("chatModal").classList.add("show");loadChat();if(chatPollTimer)clearInterval(chatPollTimer);chatPollTimer=setInterval(loadChat,6000)}window.openChat=openChat;
+function closeChatModal(){closeOverlay("chatModal");if(chatPollTimer){clearInterval(chatPollTimer);chatPollTimer=null}}window.closeChatModal=closeChatModal;
+async function loadChat(){try{let msgs=await apiGetAuth("getChat");renderChatMessages(msgs)}catch(e){/* เงียบไว้ระหว่าง poll */}}
+function renderChatMessages(msgs){let box=$("chatMessages");box.innerHTML=msgs.map(m=>'<div class="chat-bubble '+(m.sender==="user"?"me":m.sender==="ai"?"ai":"admin")+'"><div class="chat-meta">'+(m.sender==="user"?"คุณ":m.sender==="ai"?"🤖 AI ผู้ช่วย":"🛡️ แอดมิน")+'</div><div class="chat-text">'+esc(m.message)+'</div></div>').join("")||'<div class="empty">พิมพ์ข้อความเพื่อเริ่มแชทกับแอดมินหรือ AI ได้เลย</div>';box.scrollTop=box.scrollHeight}
+async function sendChat(){let inp=$("chatInput");let msg=inp.value.trim();if(!msg)return;inp.value="";try{let data=await apiPost({action:"sendChatMessage",message:msg});renderChatMessages(data)}catch(e){toast(e.message,false)}}window.sendChat=sendChat;
+
+/* ---------------- Confirm/Logout ---------------- */
 function confirmAction(t,m,fn){$("confirmTitle").innerText=t;$("confirmText").innerText=m;$("confirmOk").onclick=async()=>{closeOverlay("confirmModal");try{await fn()}catch(e){toast(e.message,false)}};$("confirmModal").classList.add("show")}
 function confirmLogoutAdmin(){confirmAction("ออกจาก Admin","ต้องการออกจากระบบ Admin และปิดแผงควบคุมใช่หรือไม่?",async()=>{closeOverlay("adminModal");await window.doLogout();toast("ออกจากระบบแล้ว")})}window.confirmLogoutAdmin=confirmLogoutAdmin;
 loadAll();
