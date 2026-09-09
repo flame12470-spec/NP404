@@ -20,6 +20,7 @@ main{max-width:1180px;margin:auto;padding:16px}.page-card{min-height:400px}.page
 
 @media(max-width:700px){.topbar{height:62px;padding:0 12px}.brand-logo{width:39px;height:39px}.logo-text{font-size:16px}.top-user{max-width:92px;padding:7px 10px}.hero{min-height:350px;padding:25px 20px;align-items:flex-end}.hero-title{font-size:32px}.hero-subtitle{font-size:14px}.banner-grid{grid-template-columns:1fr}.banner.big{min-height:185px}.banner-title{font-size:24px}.number-boxes{gap:5px}.number-input{height:52px;font-size:22px}.search-actions{grid-template-columns:1fr 1fr}.service-grid{grid-template-columns:repeat(5,1fr);gap:6px}.service-item{padding:9px 3px}.service-icon{width:48px;height:48px;font-size:24px}.service-name{font-size:10px}.result-grid{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.chat-list{flex-direction:column}.chat-list-col{flex:0 0 170px;width:100%;max-height:180px}.chat-conv-col{height:52vh}.modal{padding:17px}.hero-actions{margin-top:17px}.hero-btn{padding:10px 14px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;scroll-behavior:auto!important}}
+.api-diag{white-space:pre-wrap;text-align:left;max-width:760px;margin:18px auto 0;padding:12px 14px;border-radius:12px;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;background:#f4f6f8;border:1px solid #d8dee6;word-break:break-word}.api-diag.ok{border-color:#35a66a;background:#edf9f1}.api-diag.error{border-color:#d9534f;background:#fff2f1}
 </style></head><body>
 <div class="app">
 <header class="topbar">
@@ -60,19 +61,56 @@ onAuthStateChanged(auth,async u=>{
 window.doLogout=()=>signOut(auth);
 </script>
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbwNzOPeq1ySwZET-yNLabubjiGx-BsLjTpuWuV6cz0AG1MEBkggvSEh6bCnHq5lH7WB/exec",HOME_ID="home";
+const API_URL="https://script.google.com/macros/s/AKfycbzrFueX3kJV7hs3vqrJg9U9c-OfubguCz8WCJqFLb7-X594CDYdnSNr50a09Cknx6o5XQ/exec",HOME_ID="home";
 const ICONS=['🏠','📄','📢','🛒','🎮','📚','🎵','🎬','💬','⚙️','🧾','📊','🗂️','🎯','⭐','❤️','🔥','🚀','🎁','📷','🗓️','✅','📌','🔔','🌐','💡','🔒','🧩','🏆','☕','🔗'];
 let pages=[],links=[],settings={},activeId=HOME_ID,authTab="login",editingPageRow=null,editingLinkRow=null,builderBlocks=[];
 let conversations=[],usersList=[],activeConvUserId=null,adminChatTimer=null,chatPollTimer=null;
 const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-function apiGet(a){return fetch(API_URL+"?action="+encodeURIComponent(a)).then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x})}
-async function apiGetAuth(a,params){const token=window.__getIdToken?await window.__getIdToken():null;let qs="?action="+encodeURIComponent(a)+"&idToken="+encodeURIComponent(token||"");Object.keys(params||{}).forEach(k=>qs+="&"+k+"="+encodeURIComponent(params[k]));return fetch(API_URL+qs).then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x})}
+async function parseApiResponse(r){
+  const text=await r.text();
+  let x;
+  try{x=JSON.parse(text)}catch(e){
+    const preview=text.replace(/\s+/g," ").slice(0,300);
+    throw Error("API ตอบกลับไม่ใช่ JSON (HTTP "+r.status+"): "+preview);
+  }
+  if(!r.ok)throw Error("API HTTP "+r.status+(x.error?": "+x.error:""));
+  if(x&&x.success===false)throw Error(x.error||"Apps Script แจ้งข้อผิดพลาด");
+  return x&&x.data!==undefined?x.data:x;
+}
+async function apiGet(a){
+  const url=API_URL+"?action="+encodeURIComponent(a)+"&_="+Date.now();
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{const r=await fetch(url,{method:"GET",cache:"no-store",redirect:"follow",signal:controller.signal});return await parseApiResponse(r)}
+  catch(e){if(e.name==="AbortError")throw Error("เชื่อมต่อ API หมดเวลา (15 วินาที)");throw e}
+  finally{clearTimeout(timer)}
+}
+async function apiGetAuth(a,params){
+  const token=window.__getIdToken?await window.__getIdToken():null;
+  let qs="?action="+encodeURIComponent(a)+"&idToken="+encodeURIComponent(token||"");
+  Object.keys(params||{}).forEach(k=>qs+="&"+k+"="+encodeURIComponent(params[k]));
+  return parseApiResponse(await fetch(API_URL+qs+"&_="+Date.now(),{cache:"no-store",redirect:"follow"}));
+}
 async function apiPost(d){
   const token=window.__getIdToken?await window.__getIdToken():null;
   if(!token)throw Error("กรุณาเข้าสู่ระบบก่อนทำรายการนี้");
-  return fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({...d,idToken:token})})
-    .then(r=>r.json()).then(x=>{if(x.success===false)throw Error(x.error);return x.data!==undefined?x.data:x});
+  return parseApiResponse(await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({...d,idToken:token}),redirect:"follow"}));
 }
+async function testApiConnection(){
+  const out=$("apiDiagnostic");
+  if(out){out.innerHTML="กำลังทดสอบ API…";out.className="api-diag"}
+  try{
+    const data=await apiGet("getAll");
+    const ok=!!data&&(typeof data==="object");
+    const msg="เชื่อมต่อ API สำเร็จ ✓\nพบ pages: "+(Array.isArray(data.pages)?data.pages.length:0)+" | links: "+(Array.isArray(data.links)?data.links.length:0);
+    if(out){out.textContent=msg;out.className="api-diag ok"}
+    return ok;
+  }catch(e){
+    const msg="เชื่อมต่อ API ไม่สำเร็จ ✕\n"+(e.message||e);
+    if(out){out.textContent=msg;out.className="api-diag error"}
+    return false;
+  }
+}
+window.testApiConnection=testApiConnection;
 function closeOverlay(id){$(id).classList.remove("show")}window.closeOverlay=closeOverlay;
 function toast(m,ok=true){$("notificationTitle").innerText=ok?"สำเร็จ":"แจ้งเตือน";$("notificationText").innerText=m||"";$("notificationModal").classList.add("show")}
 function fmtDate(s){if(!s)return"-";try{return new Date(s).toLocaleString("th-TH")}catch(e){return s}}
@@ -82,7 +120,21 @@ function applyTheme(mode){document.documentElement.setAttribute("data-theme",mod
 function toggleTheme(){let cur=document.documentElement.getAttribute("data-theme")||"light";applyTheme(cur==="dark"?"light":"dark")}window.toggleTheme=toggleTheme;
 
 /* ---------------- Load ---------------- */
-async function loadAll(){try{let a=await apiGet("getAll");pages=a.pages||[];links=a.links||[];settings=a.settings||{};window.__ADMIN_EMAIL=settings.adminEmail||"admin@np404.com";applySettings();renderMenu();renderActivePage();renderAdmin();if(settings.popupEnabled==="true"&&settings.popupDetail)setTimeout(showPopup,700)}catch(e){console.error(e);$("pageContent").innerHTML='<div class="empty">โหลดระบบไม่สำเร็จ กรุณาตรวจสอบ API_URL และ Apps Script</div>'}}
+async function loadAll(){
+  try{
+    let a=await apiGet("getAll");
+    if(!a||typeof a!=="object")throw Error("รูปแบบข้อมูลจาก Apps Script ไม่ถูกต้อง");
+    pages=Array.isArray(a.pages)?a.pages:[];links=Array.isArray(a.links)?a.links:[];settings=a.settings||{};
+    window.__ADMIN_EMAIL=settings.adminEmail||"admin@np404.com";
+    applySettings();renderMenu();renderActivePage();renderAdmin();
+    if(settings.popupEnabled==="true"&&settings.popupDetail)setTimeout(showPopup,700);
+    const d=$("apiDiagnostic");if(d){d.textContent="เชื่อมต่อระบบสำเร็จ ✓";d.className="api-diag ok"}
+  }catch(e){
+    console.error("NP404 API ERROR",e);
+    const msg=e&&e.message?e.message:String(e);
+    $("pageContent").innerHTML='<div class="empty"><div style="font-size:48px">⚠️</div><h2>โหลดระบบไม่สำเร็จ</h2><p>'+esc(msg)+'</p><p style="font-size:13px;opacity:.75;word-break:break-all">API: '+esc(API_URL)+'</p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px"><button class="pill solid" onclick="loadAll()">ลองโหลดใหม่</button><button class="pill" onclick="testApiConnection()">ทดสอบ API</button></div><pre id="apiDiagnostic" class="api-diag error">กด “ทดสอบ API” เพื่อดูผลการเชื่อมต่อ</pre></div>';
+  }
+}
 function applySettings(){
   $("siteName").innerText=settings.siteName||"เมนูระบบ";document.title=settings.siteName||"ห้องเรียน NP-404";
   let l=$("siteLogo");if(settings.logoUrl){l.src=settings.logoUrl;l.classList.remove("hidden")}else{l.classList.add("hidden")}
@@ -368,7 +420,7 @@ function homeSearchHtml(){return '<section class="section"><div class="dashboard
 function homeBannersHtml(){return '<section class="section"><div class="banner-grid"><div class="banner big"><div><div class="banner-title">ยินดีต้อนรับ</div><div class="banner-text">เข้าสู่เว็บไซต์ห้องเรียน NP-404</div></div><button class="banner-button" onclick="openClassroomMenu(classroomMenuItems()[1])">สมาชิกห้อง</button></div><div><div class="banner gold"><div><div class="banner-title">📢 ประกาศ</div><div class="banner-text">ติดตามข่าวสารและประกาศของห้อง</div></div></div><div class="banner blue" style="margin-top:15px"><div><div class="banner-title">💬 แชต | น้อง NP</div><div class="banner-text">พูดคุยกับแอดมินและผู้ช่วยของห้อง</div></div><button class="banner-button" onclick="openClassroomMenu(classroomMenuItems()[9])">เปิดแชต</button></div></div></div><div class="banner banner-wide"><div><div class="banner-title">📚 ตารางเรียน & งาน</div><div class="banner-text">เข้าถึงตารางเรียน กิจกรรม ตารางเวร และคลังไฟล์</div></div><button class="banner-button" onclick="openClassroomMenu(classroomMenuItems()[4])">ดูตารางเรียน</button></div></section>'}
 function homeResultsHtml(){return '<section class="section result-section"><h2 class="results-title">✨ ศูนย์รวมข้อมูลห้องเรียน</h2><div class="result-grid"><div class="result-card"><div class="result-top"><div class="result-number"><small>ระบบ</small><strong>เช็กชื่อ</strong></div><div class="result-image">✅</div></div><div class="result-bottom">เช็กสถานะการเข้าเรียน</div></div><div class="result-card"><div class="result-top"><div class="result-number"><small>ระบบ</small><strong>เงินห้อง</strong></div><div class="result-image">💰</div></div><div class="result-bottom">ดูรายการเงินห้อง</div></div><div class="result-card"><div class="result-top"><div class="result-number"><small>ระบบ</small><strong>กิจกรรม</strong></div><div class="result-image">🎯</div></div><div class="result-bottom">ติดตามกิจกรรมของห้อง</div></div><div class="result-card"><div class="result-top"><div class="result-number"><small>ระบบ</small><strong>คลังไฟล์</strong></div><div class="result-image">📁</div></div><div class="result-bottom">เอกสารและไฟล์ของห้อง</div></div></div></section>'}
 function homeServicesHtml(){return classroomCardsHtml()}
-function homeInfoHtml(){return '<section class="info-red"><div class="info-title">ห้องเรียน NP-404</div><div class="info-text">ระบบเดิมยังเชื่อมต่อ Firebase และ Google Apps Script เหมือนเดิม พร้อมระบบบัญชีผู้ใช้ การบังคับเข้าสู่ระบบ และการจัดการโดย Admin</div><div class="info-box"><div class="info-box-title">เข้าสู่ระบบเพื่อใช้งาน</div><div class="info-row" onclick="openAuthModal()"><div class="info-row-icon">🔐</div><div class="info-row-text"><strong>เข้าสู่ระบบ</strong><span>ใช้บัญชีเดิมของระบบ NP-404</span></div></div><div class="info-row" onclick="openAuthModal();setTimeout(()=>setAuthTab('register'),100)"><div class="info-row-icon">📝</div><div class="info-row-text"><strong>สมัครสมาชิก</strong><span>สร้างบัญชีสำหรับใช้งานระบบ</span></div></div></div></section>'}
+function homeInfoHtml(){return '<section class="info-red"><div class="info-title">ห้องเรียน NP-404</div><div class="info-text">ระบบเดิมยังเชื่อมต่อ Firebase และ Google Apps Script เหมือนเดิม พร้อมระบบบัญชีผู้ใช้ การบังคับเข้าสู่ระบบ และการจัดการโดย Admin</div><div class="info-box"><div class="info-box-title">เข้าสู่ระบบเพื่อใช้งาน</div><div class="info-row" onclick="openAuthModal()"><div class="info-row-icon">🔐</div><div class="info-row-text"><strong>เข้าสู่ระบบ</strong><span>ใช้บัญชีเดิมของระบบ NP-404</span></div></div><div class="info-row" onclick="openAuthModal();setTimeout(()=>setAuthTab(\'register\'),100)"><div class="info-row-icon">📝</div><div class="info-row-text"><strong>สมัครสมาชิก</strong><span>สร้างบัญชีสำหรับใช้งานระบบ</span></div></div></div></section>'}
 function renderActivePage(){const c=$('pageContent');if(settings.maintenance==='true'&&!window.__isAdmin){c.className='page-card';c.innerHTML='<div class="empty"><b style="font-size:70px;color:#0873ec">503</b><h2>ระบบกำลังปรับปรุง</h2><p>กรุณาลองใหม่ภายหลัง</p></div>';return}if(activeId===HOME_ID){renderHome();return}let p=pages.find(x=>(x.id||x.rowIndex)===activeId);if(p){if(p.active===false&&!window.__isAdmin){c.innerHTML='<div class="empty">หน้านี้ปิดปรับปรุงอยู่</div>';return}if(!window.__currentUser&&!window.__isAdmin){c.innerHTML='<div class="empty"><div style="font-size:40px">🔒</div><h2>เมนูนี้ต้องเข้าสู่ระบบ</h2><p>กรุณาเข้าสู่ระบบก่อนใช้งานเมนูนี้</p><button class="pill solid" onclick="openAuthModal()">เข้าสู่ระบบ</button></div>';return}if(p.type==='builder'){let blocks=[];try{blocks=JSON.parse(p.blocks||p.content||'[]')}catch(e){}c.className='page-card';c.innerHTML='<section class="section"><h2 class="section-title">'+esc(p.name)+'</h2>'+blocks.map(b=>b.type==='image'?'<div class="content-block image-block"><img src="'+esc(b.url||'')+'">'+(b.caption?'<div class="caption">'+esc(b.caption)+'</div>':'')+'</div>':'<div class="content-block">'+esc(b.text||'')+'</div>').join('')+'</section>';return}if(p.type==='link'){window.open(p.content,'_blank');return}c.className='page-card';c.innerHTML='<iframe class="code-frame" sandbox="allow-scripts allow-forms allow-popups allow-modals" title="'+esc(p.name||'Page')+'"></iframe>';c.querySelector('iframe').srcdoc=p.content||'';return}let l=links.find(x=>(x.id||x.rowIndex)===activeId);if(l){window.open(l.url,'_blank');return}c.innerHTML='<div class="empty">ไม่พบหน้านี้</div>'}
 window.renderMenu=renderMenu;window.renderActivePage=renderActivePage;
 function showPopup(){if(Number(localStorage.getItem('np404_popup_snooze')||0)>Date.now())return;$('popupTitle').innerText=settings.popupTitle||'ประกาศ';$('popupDetail').innerText=settings.popupDetail||'';let imgs=[];try{imgs=JSON.parse(settings.popupImages||'[]')}catch(e){}if(!imgs.length&&settings.popupImageUrl)imgs=[settings.popupImageUrl];$('popupGallery').innerHTML=imgs.map(u=>'<img src="'+esc(u)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;margin-bottom:10px">').join('');$('announcementPopup').classList.add('show')}
