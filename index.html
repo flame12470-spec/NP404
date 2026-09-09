@@ -1,740 +1,48 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>NP-404 System</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* =========================================================
-   NP-404 — reskinned to match the "minaPM" reference layout:
-   white sticky navbar, pink accent, horizontal top tabs,
-   hero banner on home, boxed white cards for content.
-   ========================================================= */
-:root{
-  --bg:#f6f7f9; --surface:#ffffff; --surface-2:#fafafa;
-  --line:#eef0f2; --ink:#333333; --muted:#888888;
-  --accent:#e91e63; --accent-ink:#ffffff; --accent-soft:#fce4ec; --accent-dark:#c2185b;
-  --ok:#28a745; --danger:#dc3545;
-  --radius:14px; --radius-sm:10px;
-  --shadow:0 2px 10px rgba(0,0,0,.05);
-  --shadow-lg:0 10px 30px rgba(0,0,0,.12);
-}
-[data-theme="dark"]{
-  --bg:#15161a; --surface:#1e2025; --surface-2:#25272d;
-  --line:#2e3038; --ink:#f1f1f1; --muted:#9a9a9a;
-  --accent:#ff5c8a; --accent-ink:#1a1a1a; --accent-soft:rgba(255,92,138,.15); --accent-dark:#ff85a8;
-  --ok:#3fcf9f; --danger:#ff7a7a;
-  --shadow:0 2px 10px rgba(0,0,0,.3); --shadow-lg:0 10px 30px rgba(0,0,0,.5);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{width:100%;overflow-x:hidden}
-body{min-height:100vh;display:flex;flex-direction:column;background:var(--bg);color:var(--ink);
-  font-family:Kanit,sans-serif;padding-bottom:30px;transition:background .2s,color .2s}
-button,input,textarea,select{font:inherit;color:inherit}
-button{cursor:pointer}
-img,video,iframe{max-width:100%;height:auto}
-.hidden{display:none!important}
-
-/* ---------- Header / navbar ---------- */
-header{position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:14px;
-  padding:10px 16px;background:var(--surface);box-shadow:var(--shadow)}
-.brand-wrap{display:flex;align-items:center;gap:10px;min-width:0}
-.logo{width:38px;height:38px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:linear-gradient(135deg,#ff80ab,#e91e63)}
-.brand{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand span{color:var(--accent)}
-.auth-box{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;flex-shrink:0}
-.user-name{max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink);font-weight:500;
-  background:var(--accent-soft);color:var(--accent-dark);padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600}
-.theme-btn{width:32px;height:32px;flex:0 0 32px;border-radius:50%;border:1px solid var(--line);background:var(--surface-2);
-  color:var(--ink);font-size:14px;display:flex;align-items:center;justify-content:center}
-
-/* ---------- Announcement ---------- */
-.announcement{background:var(--accent);color:#fff;text-align:center;padding:8px 12px;font-size:13px;font-weight:500;
-  display:flex;align-items:center;gap:12px;overflow:hidden;justify-content:center}
-.announcement-label{font-weight:700;font-size:12px;white-space:nowrap}
-.ticker{overflow:hidden;white-space:nowrap;flex:1;max-width:600px}
-.ticker span{display:inline-block;padding-left:100%;animation:ticker 18s linear infinite;font-size:13px}
-@keyframes ticker{to{transform:translateX(-100%)}}
-
-/* ---------- Top tab bar (was bottom floating dock) ---------- */
-nav.menu-bar{position:sticky;top:0;z-index:900;display:flex;align-items:center;gap:2px;width:100%;
-  background:var(--surface);border-bottom:1px solid var(--line);overflow-x:auto;white-space:nowrap;
-  padding:0 8px;scrollbar-width:none}
-nav.menu-bar::-webkit-scrollbar{display:none}
-.menu-card{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:7px;
-  padding:12px 16px;border-bottom:2px solid transparent;color:var(--muted);font-size:13px;font-weight:500;
-  white-space:nowrap;position:relative;transition:color .2s,border-color .2s}
-.menu-card:hover{color:var(--accent)}
-.menu-card.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
-.menu-card.disabled{opacity:.45}
-.menu-icon{display:flex;align-items:center;justify-content:center;width:16px;font-size:14px}
-.menu-lock{font-size:10px;margin-left:2px}
-
-/* ---------- Main content ---------- */
-main{flex:1;width:100%;max-width:900px;margin:0 auto;padding:15px}
-.page-card{width:100%;min-height:calc(100vh - 260px);background:transparent;border:0;padding:0;box-shadow:none}
-.page-card.full-code{padding:0;overflow:hidden}
-.hello-title{font-size:24px;font-weight:600;margin-bottom:6px}
-.hello-sub{color:var(--muted);line-height:1.8;white-space:pre-wrap;font-size:14px}
-.empty{text-align:center;color:var(--muted);padding:55px 0;font-size:14px}
-
-/* Hero banner treatment for the home page content */
-.page-card.home{background:linear-gradient(135deg,#ff80ab 0%,#d81b60 100%);border-radius:16px;
-  padding:25px 20px;color:#fff;text-align:center;box-shadow:var(--shadow-lg);min-height:auto}
-.page-card.home .hello-title,.page-card.home .hello-sub{color:#fff}
-.page-card.home .hello-sub{opacity:.9}
-
-/* ---------- Maintenance ---------- */
-.maintenance{min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center}
-.maintenance .code{font-size:72px;font-weight:700;color:var(--accent)}
-.maintenance h1{font-size:22px;margin:6px 0}
-.maintenance p{color:var(--muted)}
-.spinner{width:64px;height:64px;margin:1em auto 1.6em;border-radius:50%;border:4px solid var(--line);
-  border-top-color:var(--accent);animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ---------- Chat FAB ---------- */
-.chat-fab{position:fixed;right:18px;bottom:18px;z-index:998;width:54px;height:54px;border-radius:50%;
-  background:var(--accent);color:var(--accent-ink);font-size:22px;border:0;box-shadow:var(--shadow-lg);
-  display:flex;align-items:center;justify-content:center}
-
-/* ---------- Buttons / pills ---------- */
-.pill{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 16px;
-  border-radius:20px;font-size:12.5px;font-weight:500}
-.pill:hover{border-color:var(--accent);color:var(--accent)}
-.pill.solid{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
-.pill.solid:hover{background:var(--accent-dark);color:var(--accent-ink)}
-.text-btn{border:0;background:transparent;color:var(--accent);font-size:12px}
-.text-btn:hover{text-decoration:underline}
-
-/* ---------- Overlays / modals ---------- */
-.overlay{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;
-  padding:16px;background:rgba(0,0,0,.45)}
-.overlay.show{display:flex}
-.modal{width:100%;max-width:480px;max-height:90vh;overflow:auto;padding:22px;background:var(--surface);
-  border-radius:18px;box-shadow:var(--shadow-lg)}
-.modal.wide{max-width:900px}
-.modal h3{font-size:16px;margin-bottom:16px;font-weight:600}
-.modal-actions{display:flex;gap:8px;margin-top:14px}
-.modal-actions .pill{flex:1;text-align:center}
-
-/* ---------- Forms ---------- */
-.field{margin-bottom:13px}
-.field label{display:block;margin-bottom:6px;color:var(--muted);font-size:12px}
-.field input,.field textarea,.field select{width:100%;padding:10px 13px;border:1px solid var(--line);
-  border-radius:10px;background:var(--surface-2);color:var(--ink);outline:none}
-.field textarea{min-height:100px;resize:vertical}
-.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.tabs{display:flex;gap:4px;padding:4px;background:var(--surface-2);border-radius:12px;margin-bottom:16px;flex-wrap:wrap}
-.tabs button{flex:1 1 auto;border:0;background:transparent;color:var(--muted);padding:8px 10px;border-radius:9px;font-size:12px;font-weight:500}
-.tabs button.active{background:var(--accent);color:var(--accent-ink)}
-.err{min-height:18px;color:var(--danger);font-size:12px;margin-bottom:8px}
-
-/* ---------- Toggle switch ---------- */
-.switch{position:relative;display:inline-block;width:42px;height:24px;flex:0 0 42px}
-.switch input{position:absolute;opacity:0;width:1px;height:1px}
-.slider{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .2s;cursor:pointer}
-.slider::before{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;
-  background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .2s}
-.switch input:checked+.slider{background:var(--accent)}
-.switch input:checked+.slider::before{left:21px}
-.switch input:disabled+.slider{opacity:.5;cursor:not-allowed}
-
-/* ---------- Cards (card-box style, matches reference) ---------- */
-.setting-card{border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;
-  background:var(--surface);box-shadow:var(--shadow)}
-.setting-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
-.setting-head b{font-size:14px}
-.setting-head small{display:block;color:var(--muted);margin-top:2px}
-.color-row{display:flex;gap:10px;align-items:center}
-.color-row input[type=color]{width:44px;height:38px;padding:2px;border-radius:10px;border:1px solid var(--line);background:var(--surface)}
-
-.admin-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;
-  margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-.admin-info{min-width:0}
-.admin-info b{display:block;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.admin-info small{display:block;color:var(--muted);margin-top:3px;font-size:11.5px}
-.admin-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
-.admin-actions button{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 10px;border-radius:9px;font-size:11px}
-.admin-actions .danger{color:var(--danger);border-color:var(--danger)}
-.conv-row{cursor:pointer}
-.conv-row:hover{border-color:var(--accent)}
-.badge{font-size:10px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
-.badge.on{border-color:var(--ok);color:var(--ok)}
-.badge.off{border-color:var(--danger);color:var(--danger)}
-
-/* ---------- Page builder blocks (product-grid style card) ---------- */
-.builder-page{width:100%;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
-.content-block{width:100%;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:12px;
-  padding:12px;box-shadow:var(--shadow)}
-.content-block.text-block{white-space:pre-wrap;line-height:1.9;font-size:14px;grid-column:1/-1}
-.content-block.image-block img{display:block;width:100%;height:120px;object-fit:cover;border-radius:10px}
-.content-block.image-block .caption{color:var(--muted);font-size:12px;margin-top:7px;text-align:center}
-.builder-list{display:flex;flex-direction:column;gap:9px}
-.builder-item{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--surface-2)}
-.builder-item-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px}
-.builder-preview{margin-top:9px;padding:10px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);max-height:140px;overflow:hidden;font-size:12.5px}
-.builder-preview img{max-width:100%;max-height:110px;object-fit:contain;border-radius:8px}
-.builder-toolbar{display:flex;gap:6px;flex-wrap:wrap}
-.builder-toolbar button{border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 9px;border-radius:9px;font-size:11px}
-
-/* ---------- Code / link pages ---------- */
-.code-page{width:100%;min-height:70vh}
-.code-frame{display:block;width:100%;min-height:calc(100vh - 260px);height:70vh;border:0;background:#fff;border-radius:14px}
-.link-page{text-align:center;padding:70px 15px;color:var(--muted)}
-
-/* ---------- Icon picker ---------- */
-.icon-palette{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.icon-palette button{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:16px;display:flex;align-items:center;justify-content:center}
-.icon-palette button:hover{border-color:var(--accent)}
-.icon-row{display:flex;align-items:center;gap:10px}
-.icon-row input{flex:1}
-.icon-preview{width:42px;height:42px;flex:0 0 auto;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:20px}
-
-/* ---------- Chat ---------- */
-.chat-modal{max-width:400px;display:flex;flex-direction:column;height:70vh;padding:0;overflow:hidden}
-.chat-header{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--line);font-size:14px}
-.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-.chat-bubble{max-width:80%;padding:9px 13px;border-radius:16px;font-size:13.5px;line-height:1.6}
-.chat-bubble.me{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
-.chat-bubble.admin{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px}
-.chat-bubble.ai{align-self:flex-start;background:var(--accent-soft);border:1px solid var(--line);border-bottom-left-radius:4px}
-.chat-meta{font-size:10px;color:var(--muted);margin-bottom:3px;font-weight:600}
-.chat-bubble.me .chat-meta{color:rgba(255,255,255,.85)}
-.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:var(--surface)}
-.chat-input-row input{flex:1;padding:10px 13px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);color:var(--ink);outline:none}
-.chat-list{display:flex;gap:14px;align-items:flex-start}
-.chat-list-col{flex:0 0 220px;max-height:60vh;overflow-y:auto}
-.chat-conv-col{flex:1;min-width:0;display:flex;flex-direction:column;height:60vh}
-.chat-conv-messages{flex:1;overflow-y:auto;padding:10px;border-radius:14px;display:flex;flex-direction:column;gap:8px}
-
-/* ---------- Responsive ---------- */
-.page-card pre,.page-card code{max-width:100%;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
-.page-card table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse}
-.page-card button{max-width:100%;white-space:normal;overflow-wrap:anywhere}
-@media(max-width:750px){.chat-list{flex-direction:column}.chat-list-col{flex:0 0 auto;max-height:180px;width:100%}}
-@media(max-width:650px){
-  header{padding:9px 12px}.auth-box .user-name{display:none}
-  main{padding:12px}
-  .grid2{grid-template-columns:1fr}.maintenance .code{font-size:56px}
-  .admin-row{align-items:flex-start;flex-direction:column}.admin-actions{width:100%;justify-content:flex-start}
-  .chat-fab{right:14px;bottom:14px;width:48px;height:48px;font-size:19px}
-  .hello-title{font-size:20px}
-}
-</style>
-
-<style id="np404-polished-ui">
-/* =========================================================
-   NP-404 POLISHED UI
-   ปรับการจัดวาง / Hover / Responsive / Typography
-   โดยไม่แตะระบบ Firebase, API และฟังก์ชันเดิม
-   ========================================================= */
-:root{
-  --radius:18px;
-  --radius-sm:12px;
-  --shadow:0 4px 18px rgba(25,25,35,.055);
-  --shadow-lg:0 18px 50px rgba(25,25,35,.14);
-  --ease:cubic-bezier(.2,.75,.25,1);
-}
-
-html{scroll-behavior:smooth}
-body{
-  background:
-    radial-gradient(circle at 8% 0%, rgba(233,30,99,.055), transparent 30%),
-    radial-gradient(circle at 92% 10%, rgba(233,30,99,.035), transparent 26%),
-    var(--bg);
-  letter-spacing:.05px;
-}
-
-/* Header */
-header{
-  min-height:64px;
-  padding:10px clamp(14px,3vw,28px);
-  backdrop-filter:blur(14px);
-  background:color-mix(in srgb,var(--surface) 91%,transparent);
-  border-bottom:1px solid color-mix(in srgb,var(--line) 80%,transparent);
-  box-shadow:0 4px 18px rgba(0,0,0,.045);
-}
-.brand-wrap{gap:12px}
-.logo{
-  width:44px;height:44px;border-radius:13px;
-  box-shadow:0 5px 14px rgba(233,30,99,.16);
-  transition:transform .25s var(--ease),box-shadow .25s var(--ease);
-}
-.logo:hover{transform:translateY(-2px) rotate(-1deg);box-shadow:0 8px 20px rgba(233,30,99,.22)}
-.brand{font-size:18px;letter-spacing:.15px}
-.auth-box{gap:7px}
-.auth-box>span:not(.user-name){font-size:12px}
-.user-name{
-  padding:7px 12px;
-  box-shadow:inset 0 0 0 1px rgba(233,30,99,.04);
-}
-.theme-btn{transition:all .2s var(--ease)}
-.theme-btn:hover{transform:translateY(-2px);border-color:var(--accent);color:var(--accent)}
-
-/* Announcement */
-.announcement{
-  min-height:36px;
-  padding:7px 14px;
-  box-shadow:0 2px 12px rgba(0,0,0,.06);
-}
-.announcement-label{
-  display:inline-flex;align-items:center;gap:6px;
-}
-.announcement-label::before{content:"📢";font-size:11px}
-.ticker span{font-size:12.5px}
-
-/* Navigation */
-nav.menu-bar{
-  position:sticky;
-  top:64px;
-  z-index:900;
-  min-height:56px;
-  padding:5px clamp(8px,2vw,18px);
-  gap:5px;
-  box-shadow:0 3px 14px rgba(0,0,0,.035);
-  backdrop-filter:blur(12px);
-}
-.menu-card{
-  min-height:44px;
-  padding:9px 15px;
-  border:1px solid transparent;
-  border-bottom:0;
-  border-radius:13px;
-  gap:8px;
-  transition:all .22s var(--ease);
-}
-.menu-card:hover{
-  background:var(--accent-soft);
-  transform:translateY(-1px);
-}
-.menu-card.active{
-  background:var(--accent-soft);
-  border-color:color-mix(in srgb,var(--accent) 18%,var(--line));
-  color:var(--accent);
-  border-bottom:0;
-  box-shadow:0 3px 10px rgba(233,30,99,.08);
-}
-.menu-icon{width:19px;font-size:15px}
-.menu-label{line-height:1.2}
-
-/* Main layout */
-main{
-  max-width:1080px;
-  padding:24px clamp(13px,3vw,28px) 42px;
-}
-.page-card{
-  min-height:calc(100vh - 255px);
-}
-.page-card.home{
-  position:relative;
-  overflow:hidden;
-  min-height:240px;
-  padding:clamp(34px,6vw,64px) clamp(20px,6vw,70px);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  border-radius:24px;
-  background:
-    radial-gradient(circle at 10% 10%,rgba(255,255,255,.28),transparent 25%),
-    radial-gradient(circle at 90% 90%,rgba(80,0,40,.18),transparent 32%),
-    linear-gradient(135deg,#ff86ad 0%,#ec3f78 48%,#c9185b 100%);
-}
-.page-card.home::before,
-.page-card.home::after{
-  content:"";
-  position:absolute;
-  border-radius:50%;
-  background:rgba(255,255,255,.10);
-  pointer-events:none;
-}
-.page-card.home::before{width:180px;height:180px;left:-70px;top:-70px}
-.page-card.home::after{width:230px;height:230px;right:-100px;bottom:-110px}
-.page-card.home .hello-title{
-  position:relative;
-  z-index:1;
-  font-size:clamp(27px,4vw,42px);
-  line-height:1.2;
-  margin-bottom:13px;
-  text-shadow:0 3px 14px rgba(80,0,35,.16);
-}
-.page-card.home .hello-sub{
-  position:relative;
-  z-index:1;
-  max-width:720px;
-  font-size:clamp(14px,2vw,17px);
-  line-height:1.9;
-}
-
-/* Content cards */
-.builder-page{
-  grid-template-columns:repeat(12,minmax(0,1fr));
-  gap:18px;
-  align-items:start;
-}
-.content-block{
-  grid-column:span 6;
-  min-width:0;
-  padding:18px;
-  border-radius:17px;
-  box-shadow:var(--shadow);
-  transition:transform .22s var(--ease),box-shadow .22s var(--ease),border-color .22s var(--ease);
-}
-.content-block:hover{
-  transform:translateY(-3px);
-  box-shadow:0 10px 28px rgba(20,20,30,.09);
-  border-color:color-mix(in srgb,var(--accent) 22%,var(--line));
-}
-.content-block.text-block{
-  grid-column:1/-1;
-  font-size:15px;
-  line-height:2;
-}
-.content-block.image-block img{
-  height:clamp(170px,25vw,280px);
-  border-radius:13px;
-}
-.content-block.image-block .caption{
-  margin-top:10px;
-  line-height:1.6;
-}
-
-/* Cards / admin */
-.setting-card{
-  padding:19px;
-  margin-bottom:16px;
-  border-radius:17px;
-  box-shadow:var(--shadow);
-  transition:box-shadow .2s var(--ease),transform .2s var(--ease);
-}
-.setting-card:hover{box-shadow:0 9px 25px rgba(20,20,30,.075)}
-.setting-head{min-height:38px;align-items:center;margin-bottom:13px}
-.setting-head b{font-size:14.5px}
-.setting-head small{font-size:11.5px;line-height:1.55}
-.admin-row{
-  padding:13px 15px;
-  margin-bottom:9px;
-  border-radius:14px;
-  transition:all .2s var(--ease);
-}
-.admin-row:hover{
-  transform:translateY(-1px);
-  box-shadow:0 6px 18px rgba(20,20,30,.06);
-  border-color:color-mix(in srgb,var(--accent) 22%,var(--line));
-}
-.admin-info b{line-height:1.45}
-.admin-info small{line-height:1.55}
-.admin-actions button{
-  min-height:32px;
-  transition:all .18s var(--ease);
-}
-.admin-actions button:hover{
-  transform:translateY(-1px);
-  border-color:var(--accent);
-  color:var(--accent);
-}
-.admin-actions .danger:hover{
-  border-color:var(--danger);
-  color:var(--danger);
-  background:color-mix(in srgb,var(--danger) 7%,var(--surface));
-}
-
-/* Buttons */
-.pill{
-  min-height:36px;
-  padding:8px 16px;
-  transition:all .2s var(--ease);
-}
-.pill:hover{
-  transform:translateY(-1px);
-  box-shadow:0 5px 14px rgba(20,20,30,.07);
-}
-.pill.solid:hover{
-  transform:translateY(-2px);
-  box-shadow:0 7px 18px rgba(233,30,99,.22);
-}
-.text-btn{transition:opacity .2s}
-.text-btn:hover{text-decoration:none;opacity:.75}
-
-/* Form fields */
-.field{margin-bottom:15px}
-.field label{
-  font-size:12px;
-  font-weight:500;
-  line-height:1.5;
-}
-.field input,.field textarea,.field select{
-  min-height:42px;
-  padding:10px 13px;
-  border-radius:12px;
-  transition:border-color .2s,box-shadow .2s,background .2s;
-}
-.field textarea{min-height:115px;line-height:1.7}
-.field input:focus,.field textarea:focus,.field select:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 12%,transparent);
-}
-
-/* Modal */
-.overlay{
-  padding:clamp(10px,3vw,24px);
-  background:rgba(10,10,18,.52);
-  backdrop-filter:blur(5px);
-}
-.modal{
-  max-width:520px;
-  padding:24px;
-  border-radius:22px;
-  border:1px solid color-mix(in srgb,var(--line) 80%,transparent);
-  box-shadow:var(--shadow-lg);
-  animation:npModalIn .25s var(--ease);
-}
-.modal.wide{max-width:1000px}
-.modal h3{font-size:18px;line-height:1.45}
-.modal-actions{gap:10px}
-@keyframes npModalIn{
-  from{opacity:0;transform:translateY(12px) scale(.985)}
-  to{opacity:1;transform:translateY(0) scale(1)}
-}
-
-/* Auth */
-#authModal .modal{
-  max-width:460px;
-}
-#authModal .tabs{
-  margin-bottom:20px;
-}
-#authModal .tabs button{
-  min-height:40px;
-}
-
-/* Builder */
-.builder-list{gap:11px}
-.builder-item{
-  padding:14px;
-  border-radius:13px;
-  transition:border-color .2s,box-shadow .2s;
-}
-.builder-item:hover{
-  border-color:color-mix(in srgb,var(--accent) 25%,var(--line));
-  box-shadow:0 5px 16px rgba(20,20,30,.05);
-}
-.builder-item-head{
-  line-height:1.4;
-}
-.builder-toolbar button{
-  transition:all .18s var(--ease);
-}
-.builder-toolbar button:hover{
-  border-color:var(--accent);
-  color:var(--accent);
-  transform:translateY(-1px);
-}
-
-/* Chat */
-.chat-fab{
-  right:22px;
-  bottom:22px;
-  width:58px;height:58px;
-  box-shadow:0 10px 28px rgba(233,30,99,.28);
-  transition:transform .2s var(--ease),box-shadow .2s var(--ease);
-}
-.chat-fab:hover{
-  transform:translateY(-4px) scale(1.04);
-  box-shadow:0 14px 34px rgba(233,30,99,.34);
-}
-.chat-modal{
-  max-width:460px;
-  height:min(720px,82vh);
-  border-radius:22px;
-}
-.chat-header{padding:17px 18px}
-.chat-messages{padding:16px}
-.chat-bubble{
-  max-width:min(82%,520px);
-  padding:10px 14px;
-  line-height:1.65;
-  box-shadow:0 2px 7px rgba(20,20,30,.035);
-}
-.chat-input-row{padding:13px 15px}
-.chat-input-row input{min-height:42px}
-
-/* Maintenance / empty */
-.empty{line-height:1.8}
-.maintenance .code{text-shadow:0 5px 18px rgba(233,30,99,.14)}
-
-/* Better iframe/code page */
-.code-frame{
-  min-height:calc(100vh - 275px);
-  height:72vh;
-  border:1px solid var(--line);
-  border-radius:18px;
-  box-shadow:var(--shadow);
-}
-
-/* Dark mode */
-[data-theme="dark"] body{
-  background:
-    radial-gradient(circle at 10% 0%,rgba(255,92,138,.07),transparent 30%),
-    var(--bg);
-}
-[data-theme="dark"] header,
-[data-theme="dark"] nav.menu-bar{
-  background:color-mix(in srgb,var(--surface) 92%,transparent);
-}
-[data-theme="dark"] .page-card.home{
-  background:
-    radial-gradient(circle at 10% 10%,rgba(255,255,255,.12),transparent 25%),
-    linear-gradient(135deg,#d84c78 0%,#ad194f 100%);
-}
-
-/* Tablet */
-@media (max-width:900px){
-  main{max-width:100%;padding-top:20px}
-  nav.menu-bar{top:64px}
-  .builder-page{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .content-block{grid-column:span 1}
-  .content-block.text-block{grid-column:1/-1}
-}
-
-/* Mobile */
-@media (max-width:650px){
-  header{
-    min-height:58px;
-    padding:8px 11px;
-  }
-  .logo{width:40px;height:40px;border-radius:12px}
-  .brand{font-size:16px}
-  .auth-box{gap:5px}
-  .auth-box>span:not(.user-name){display:none}
-  nav.menu-bar{
-    top:58px;
-    min-height:52px;
-    padding:4px 7px;
-    gap:4px;
-  }
-  .menu-card{
-    min-height:42px;
-    padding:8px 12px;
-    font-size:12px;
-    border-radius:12px;
-  }
-  main{padding:14px 11px 32px}
-  .page-card.home{
-    min-height:220px;
-    padding:32px 18px;
-    border-radius:20px;
-  }
-  .page-card.home .hello-title{font-size:25px}
-  .page-card.home .hello-sub{font-size:13px;line-height:1.8}
-  .builder-page{display:flex;flex-direction:column;gap:13px}
-  .content-block,
-  .content-block.text-block{
-    width:100%;
-    padding:15px;
-  }
-  .content-block.image-block img{height:190px}
-  .modal{
-    padding:18px;
-    border-radius:19px;
-    max-height:92vh;
-  }
-  .modal.wide{max-width:100%}
-  .modal-actions{flex-direction:column}
-  .modal-actions .pill{width:100%}
-  .setting-card{padding:15px}
-  .setting-head{align-items:flex-start}
-  .grid2{gap:10px}
-  .chat-fab{right:14px;bottom:14px;width:52px;height:52px}
-  .chat-modal{height:82vh}
-}
-
-/* Very small phones */
-@media (max-width:390px){
-  .menu-card{padding:8px 10px;font-size:11.5px}
-  .menu-icon{width:16px}
-  .brand{max-width:145px}
-  .pill{padding:8px 12px}
-  .page-card.home .hello-title{font-size:23px}
-}
-
-/* Accessibility */
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{
-    animation-duration:.01ms!important;
-    animation-iteration-count:1!important;
-    scroll-behavior:auto!important;
-    transition-duration:.01ms!important;
-  }
-}
-</style>
-
-</head>
-<body>
-<header>
-  <div class="brand-wrap"><img id="siteLogo" class="logo hidden" alt="logo"><div class="brand" id="siteName">กำลังโหลด...</div></div>
-  <div class="auth-box" id="authBox"><span>กำลังโหลด...</span></div>
+<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0"><title>NP-404 System</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><style>
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap');
+:root{--blue:#0868df;--blue2:#0d4fc2;--blue3:#18a5ff;--sky:#eaf6ff;--ink:#17233a;--muted:#718096;--white:#fff;--line:#dbeafe;--gold:#ffc928;--orange:#ff9f1c;--danger:#ef4444;--shadow:0 12px 35px rgba(13,79,194,.14);--radius:24px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}html{scroll-behavior:smooth}body{font-family:Prompt,sans-serif;background:linear-gradient(#f4fbff,#eef7ff);color:var(--ink);overflow-x:hidden}button,input,textarea,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}img{max-width:100%;display:block}
+.app{min-height:100vh;padding-bottom:82px}.topbar{height:70px;background:linear-gradient(100deg,#0868df,#0b50c8);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;position:sticky;top:0;z-index:1000;box-shadow:0 5px 22px rgba(0,72,170,.2)}.logo-area{display:flex;align-items:center;gap:10px;min-width:0}.brand-logo{width:45px;height:45px;border-radius:14px;background:#fff;color:#0868df;display:grid;place-items:center;font-weight:800;font-size:18px;box-shadow:0 4px 12px rgba(0,0,0,.12);overflow:hidden}.brand-logo img{width:100%;height:100%;object-fit:cover}.logo-text{font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.top-actions{display:flex;gap:8px;align-items:center}.top-icon{border:0;background:rgba(255,255,255,.13);color:#fff;width:40px;height:40px;border-radius:13px;font-size:20px}.top-user{background:#fff;color:#0868df;border:0;border-radius:999px;padding:8px 13px;font-size:12px;font-weight:700;max-width:135px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.announcement{background:#0755c8;color:#fff;padding:8px 12px;display:flex;align-items:center;gap:10px;overflow:hidden}.announcement-label{font-weight:800;font-size:12px;white-space:nowrap}.ticker{flex:1;overflow:hidden;white-space:nowrap}.ticker span{display:inline-block;padding-left:100%;animation:ticker 18s linear infinite;font-size:12px}@keyframes ticker{to{transform:translateX(-100%)}}
+main{max-width:1180px;margin:auto;padding:16px}.page-card{min-height:400px}.page-card.home{background:transparent;box-shadow:none;padding:0}
+.hero{position:relative;min-height:330px;border-radius:30px;overflow:hidden;background:linear-gradient(135deg,#0b70ec,#63c8ff);box-shadow:var(--shadow);color:#fff;display:flex;align-items:center;padding:34px}.hero-bg{position:absolute;inset:0;background-position:center;background-size:cover;transition:opacity .35s}.hero-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,67,165,.85),rgba(7,125,235,.38),rgba(255,255,255,0))}.hero-content{position:relative;z-index:2;max-width:650px}.hero-kicker{font-size:14px;font-weight:700;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);display:inline-block;padding:7px 13px;border-radius:999px}.hero-title{font-size:45px;font-weight:800;line-height:1.1;margin:14px 0 8px;text-shadow:0 4px 15px rgba(0,0,0,.16)}.hero-subtitle{font-size:17px;line-height:1.7;opacity:.96}.hero-actions{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap}.hero-btn{border:0;border-radius:14px;padding:12px 19px;font-weight:700}.hero-btn.primary{background:#fff;color:#0755c8}.hero-btn.ghost{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff}.hero-dots{position:absolute;z-index:3;right:20px;bottom:18px;display:flex;gap:6px}.hero-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.55)}.hero-dot.active{width:22px;border-radius:9px;background:#fff}
+.section{margin:24px 0}.section-title{font-size:24px;font-weight:800;margin-bottom:14px}.section-sub{color:var(--muted);font-size:13px;margin-top:-8px;margin-bottom:14px}.search-wrap{margin-top:18px}.search-card{background:#fff;border:1px solid #d8edff;border-radius:25px;padding:22px;box-shadow:var(--shadow);border-top:4px solid var(--blue3)}.search-title{font-size:20px;font-weight:800;margin-bottom:15px}.type-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}.type-tab{height:47px;border:2px solid #b8dcff;color:#0966d7;background:#fff;border-radius:13px;font-weight:700}.type-tab.active{background:linear-gradient(135deg,#0873ec,#0955c7);border-color:#0873ec;color:#fff}.number-boxes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.number-input{height:60px;border:1px solid #cfe5f8;border-radius:13px;text-align:center;font-size:27px;font-weight:800;color:#0b4fae;outline:none;background:#f8fcff}.number-input:focus{border:2px solid var(--blue);box-shadow:0 0 0 4px rgba(8,104,223,.08)}.search-actions{display:grid;grid-template-columns:1fr 2fr;gap:9px;margin-top:15px}.random-btn,.search-btn{height:53px;border:0;border-radius:13px;color:#fff;font-weight:700}.random-btn{background:#17324f}.search-btn{background:linear-gradient(135deg,#0873ec,#0955c7)}
+.banner-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.banner{min-height:150px;border-radius:25px;padding:23px;color:#fff;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}.banner.big{min-height:215px;background:linear-gradient(135deg,#0755c8,#19a9ff)}.banner.gold{background:linear-gradient(135deg,#0871e8,#43c7ff)}.banner.blue{background:linear-gradient(135deg,#093a96,#166fe1)}.banner-wide{margin-top:16px;background:linear-gradient(135deg,#0755c8,#13a5f4);min-height:135px}.banner-title{font-size:30px;font-weight:800}.banner-text{font-size:14px;margin-top:4px;opacity:.94}.banner-button{background:#fff;border:0;color:#0755c8;padding:11px 17px;border-radius:11px;font-weight:700;white-space:nowrap}
+.result-section{background:linear-gradient(135deg,#0755c8,#0b8feb);border-radius:30px;padding:28px 18px;color:#fff}.results-title{font-size:28px;text-align:center;margin-bottom:20px}.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:950px;margin:auto}.result-card{background:#fff;color:#17233a;border-radius:18px;overflow:hidden;box-shadow:0 7px 18px rgba(0,0,0,.13)}.result-top{display:flex;min-height:145px}.result-number{width:86px;background:#11243e;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}.result-number small{font-size:11px}.result-number strong{font-size:22px}.result-image{flex:1;background:linear-gradient(135deg,#fff,#e8f5ff);display:flex;align-items:center;justify-content:center;font-size:48px}.result-bottom{background:#f6fbff;padding:11px;text-align:center;color:#0755c8;font-size:13px;font-weight:700}.all-results{display:block;max-width:800px;width:100%;margin:20px auto 0;height:52px;border:0;border-radius:13px;background:#072e70;color:#fff;font-weight:700}
+.service-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.service-item{text-align:center;cursor:pointer;background:#fff;border:1px solid #d8edff;border-radius:19px;padding:13px 7px;box-shadow:0 5px 15px rgba(13,79,194,.07);transition:.18s}.service-item:active{transform:scale(.96)}.service-icon{width:58px;height:58px;margin:auto;border-radius:17px;background:linear-gradient(135deg,#e8f5ff,#cceaff);display:grid;place-items:center;font-size:29px}.service-name{margin-top:7px;font-size:12px;font-weight:700;color:#24517e}
+.info-red{background:linear-gradient(135deg,#0755c8,#0b9ff2);color:#fff;padding:35px 20px;border-radius:30px;margin-top:20px;text-align:center}.info-title{font-size:24px;font-weight:800}.info-text{max-width:850px;margin:10px auto 22px;line-height:1.8;opacity:.93;font-size:14px}.info-box{background:#fff;color:#17233a;max-width:560px;margin:auto;border-radius:22px;padding:20px;text-align:left}.info-box-title{color:#0755c8;text-align:center;font-size:18px;font-weight:800;margin-bottom:14px}.info-row{padding:14px 0;border-top:1px dashed #cfe5f8;display:flex;align-items:center;gap:14px;cursor:pointer}.info-row-icon{font-size:25px}.info-row-text strong{display:block}.info-row-text span{color:#718096;font-size:12px}
+.footer{background:#063f9d;color:#fff;text-align:center;padding:30px 20px 100px;margin-top:20px}.socials{display:flex;justify-content:center;gap:10px;margin:16px 0}.social{width:40px;height:40px;border-radius:50%;background:#fff;color:#0755c8;display:grid;place-items:center;font-weight:800;cursor:pointer}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:78px;background:rgba(255,255,255,.97);backdrop-filter:blur(14px);border-top:1px solid #d7ebfb;display:grid;grid-template-columns:repeat(5,1fr);z-index:2000;box-shadow:0 -5px 20px rgba(13,79,194,.12)}.nav-item{border:0;background:transparent;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#6d7e93;gap:3px;font-size:11px;font-weight:600}.nav-icon{font-size:23px}.nav-item.active{color:#0755c8}.nav-item.active:before{content:"";position:absolute;top:0;width:58px;height:3px;background:#0873ec;border-radius:0 0 8px 8px}
+.side-overlay,.overlay{position:fixed;inset:0;background:rgba(0,38,88,.48);z-index:3000;display:none;align-items:center;justify-content:center;padding:15px}.side-overlay.show,.overlay.show{display:flex}.side-menu{position:absolute;right:0;top:0;width:min(390px,90%);height:100%;background:#fff;overflow:auto;box-shadow:-10px 0 35px rgba(0,0,0,.15)}.side-head{background:linear-gradient(135deg,#0755c8,#13a5f4);color:#fff;padding:25px 20px}.close-menu{float:right;border:0;background:rgba(255,255,255,.15);color:#fff;width:38px;height:38px;border-radius:12px;font-size:25px}.profile{display:flex;align-items:center;gap:12px;clear:both;padding-top:15px}.profile-icon{width:55px;height:55px;border-radius:18px;background:#fff;color:#0755c8;display:grid;place-items:center;font-size:25px}.menu-list{padding:8px}.menu-item{width:100%;border:0;border-bottom:1px solid #edf5fc;background:#fff;text-align:left;padding:16px 15px;display:flex;gap:13px;align-items:center;font-size:14px;color:#21364e;border-radius:12px}.menu-item:hover{background:#f0f8ff}.menu-item span:first-child{width:28px;font-size:21px}.menu-item.locked{opacity:.5}
+.modal{width:100%;max-width:520px;max-height:90vh;overflow:auto;background:#fff;border-radius:24px;padding:22px;box-shadow:0 20px 60px rgba(0,35,90,.25)}.modal.wide{max-width:940px}.modal h3{font-size:20px;margin-bottom:16px}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.modal-close{border:0;background:#edf6ff;color:#0755c8;width:35px;height:35px;border-radius:50%;font-size:20px}.modal-actions{display:flex;gap:8px;margin-top:16px}.modal-actions .pill{flex:1}.pill{border:1px solid #cfe5f8;background:#fff;color:#17456f;padding:9px 15px;border-radius:13px;font-size:13px;font-weight:600}.pill.solid{background:linear-gradient(135deg,#0873ec,#0955c7);border-color:#0873ec;color:#fff}.field{margin-bottom:13px}.field label{display:block;margin-bottom:6px;color:#6c7d92;font-size:12px}.field input,.field textarea,.field select{width:100%;padding:11px 13px;border:1px solid #d5e9f8;border-radius:12px;background:#f8fcff;outline:none}.field input:focus,.field textarea:focus,.field select:focus{border-color:#0873ec}.field textarea{min-height:100px;resize:vertical}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tabs{display:flex;gap:5px;padding:4px;background:#edf7ff;border-radius:13px;margin-bottom:16px;flex-wrap:wrap}.tabs button{flex:1;border:0;background:transparent;color:#66809b;padding:9px;border-radius:10px;font-size:12px}.tabs button.active{background:#0873ec;color:#fff}.err{min-height:18px;color:#ef4444;font-size:12px}.setting-card{border:1px solid #d9ecfb;background:#fbfdff;border-radius:17px;padding:15px;margin-bottom:12px}.setting-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.setting-head small{display:block;color:#718096;font-size:11px;margin-top:3px}.switch{position:relative;display:inline-block;width:42px;height:24px;flex:0 0 42px}.switch input{opacity:0;width:1px;height:1px}.slider{position:absolute;inset:0;border-radius:999px;background:#cbd8e6}.slider:before{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.switch input:checked+.slider{background:#0873ec}.switch input:checked+.slider:before{left:21px}.badge{display:inline-block;padding:4px 8px;border-radius:999px;font-size:10px}.badge.on{background:#dff7ea;color:#16834c}.badge.off{background:#ffe5e5;color:#c23838}.admin-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid #e0eef8;border-radius:14px;margin-bottom:8px}.admin-info{min-width:0}.admin-info b{display:block;font-size:13px}.admin-info small{display:block;color:#718096;font-size:10px;margin-top:3px;word-break:break-word}.admin-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.admin-actions button{border:1px solid #cfe5f8;background:#fff;border-radius:9px;padding:6px 9px;font-size:11px}.admin-actions button.danger{color:#c23838}.icon-row{display:flex;gap:8px;align-items:center}.icon-preview{width:48px;height:42px;border:1px solid #d5e9f8;border-radius:11px;display:grid;place-items:center;font-size:23px;background:#f8fcff}.icon-row input{flex:1}.icon-palette{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}.icon-palette button{border:1px solid #d7eafb;background:#fff;border-radius:8px;padding:5px 7px}.builder-item{border:1px solid #d7eafb;border-radius:14px;padding:12px;margin-bottom:8px}.builder-item-head{display:flex;justify-content:space-between;gap:8px}.builder-preview{margin-top:8px;background:#f8fcff;border-radius:10px;padding:10px;min-height:30px}.builder-preview img{max-height:180px;margin:auto;border-radius:10px}.content-block{background:#fff;border:1px solid #dbeeff;border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 7px 18px rgba(13,79,194,.06)}.image-block img{width:100%;border-radius:15px}.caption{text-align:center;color:#718096;font-size:12px;margin-top:8px}.code-frame{width:100%;min-height:70vh;border:0;background:#fff}.chat-modal{max-width:470px;display:flex;flex-direction:column;height:78vh;padding:0;overflow:hidden}.chat-header{padding:16px;border-bottom:1px solid #e0eef8;display:flex;justify-content:space-between;align-items:center}.chat-messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:8px;background:#f7fbff}.chat-bubble{max-width:82%;padding:10px 13px;border-radius:17px;font-size:13px;line-height:1.55}.chat-bubble.me{align-self:flex-end;background:#0873ec;color:#fff;border-bottom-right-radius:5px}.chat-bubble.admin{align-self:flex-start;background:#fff;border:1px solid #d9ecfb;border-bottom-left-radius:5px}.chat-bubble.ai{align-self:flex-start;background:#e9f5ff;border:1px solid #cde8ff;border-bottom-left-radius:5px}.chat-meta{font-size:10px;margin-bottom:3px;font-weight:700;opacity:.75}.chat-input-row{display:flex;gap:8px;padding:12px;border-top:1px solid #dbeeff;background:#fff}.chat-input-row input{flex:1;padding:10px 13px;border:1px solid #d5e9f8;border-radius:999px;background:#f8fcff;outline:none}.chat-list{display:flex;gap:14px}.chat-list-col{flex:0 0 240px;max-height:60vh;overflow:auto}.chat-conv-col{flex:1;min-width:0;display:flex;flex-direction:column;height:60vh}.chat-conv-messages{flex:1;overflow-y:auto;padding:10px;border-radius:14px;display:flex;flex-direction:column;gap:8px;background:#f7fbff}.empty{text-align:center;color:#7b8da1;padding:45px 10px;font-size:13px}.toast{position:fixed;left:50%;bottom:95px;transform:translate(-50%,20px);background:#12304f;color:#fff;padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:5000}.toast.show{opacity:1;transform:translate(-50%,0)}.back-top{position:fixed;right:16px;bottom:92px;width:48px;height:48px;border:0;border-radius:14px;background:#0873ec;color:#fff;font-size:22px;z-index:1500;display:none}.back-top.show{display:block}
+@media(max-width:700px){.topbar{height:62px;padding:0 12px}.brand-logo{width:39px;height:39px}.logo-text{font-size:16px}.top-user{max-width:92px;padding:7px 10px}.hero{min-height:350px;padding:25px 20px;align-items:flex-end}.hero-title{font-size:32px}.hero-subtitle{font-size:14px}.banner-grid{grid-template-columns:1fr}.banner.big{min-height:185px}.banner-title{font-size:24px}.number-boxes{gap:5px}.number-input{height:52px;font-size:22px}.search-actions{grid-template-columns:1fr 1fr}.service-grid{grid-template-columns:repeat(5,1fr);gap:6px}.service-item{padding:9px 3px}.service-icon{width:48px;height:48px;font-size:24px}.service-name{font-size:10px}.result-grid{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.chat-list{flex-direction:column}.chat-list-col{flex:0 0 170px;width:100%;max-height:180px}.chat-conv-col{height:52vh}.modal{padding:17px}.hero-actions{margin-top:17px}.hero-btn{padding:10px 14px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;scroll-behavior:auto!important}}
+</style></head><body>
+<div class="app">
+<header class="topbar">
+  <div class="logo-area"><div class="brand-logo" id="brandLogo">NP</div><div class="logo-text" id="siteName">NP-404 System</div></div>
+  <div class="top-actions"><button class="top-user" id="topUser" onclick="openAuthModal()">เข้าสู่ระบบ</button><button class="top-icon" onclick="openModal('แจ้งเตือน','ขณะนี้ไม่มีการแจ้งเตือนใหม่')">🔔</button><button class="top-icon" onclick="openSideMenu()">☰</button></div>
 </header>
-<div class="announcement" id="announcementBar"><div class="announcement-label">ประกาศ</div><div class="ticker"><span id="announcementText"></span></div></div>
-<nav class="menu-bar" id="menuBar"></nav>
-<main><div class="page-card" id="pageContent"></div></main>
-<button class="chat-fab" id="chatFab" onclick="openChat()" title="แชทกับแอดมิน / AI"><i class="fa-solid fa-comment-dots"></i></button>
-
-<div class="overlay" id="authModal"><div class="modal"><div class="tabs"><button id="tabLogin" class="active" onclick="setAuthTab('login')">เข้าสู่ระบบ</button><button id="tabRegister" onclick="setAuthTab('register')">สมัครสมาชิก</button></div>
-<div id="registerFields" class="hidden"><div class="grid2"><div class="field"><label>ชื่อจริง</label><input id="authFirstName"></div><div class="field"><label>นามสกุล</label><input id="authLastName"></div></div><div class="field"><label>ชื่อแอคเค้า</label><input id="authUsername" placeholder="เช่น np_flame"></div></div>
-<div class="field"><label>อีเมล</label><input type="email" id="authEmail" placeholder="you@example.com"></div><div class="field"><label>รหัสผ่าน</label><input type="password" id="authPassword" placeholder="อย่างน้อย 6 ตัวอักษร"></div>
-<div style="text-align:right;margin-top:-4px;margin-bottom:10px"><button class="text-btn" onclick="openForgotPasswordModal()">ลืมรหัสผ่าน?</button></div><div class="err" id="authErr"></div>
-<div class="modal-actions"><button class="pill" onclick="closeOverlay('authModal')">ยกเลิก</button><button class="pill solid" id="authSubmitBtn" onclick="submitAuth()">เข้าสู่ระบบ</button></div></div></div>
-
-<div class="overlay" id="adminModal"><div class="modal wide"><h3>แผงควบคุมระบบ <span class="badge on">ADMIN</span></h3>
-<div class="tabs" id="adminTabs">
-  <button class="active" onclick="showAdminTab('system',this)">ระบบ</button>
-  <button onclick="showAdminTab('pages',this)">หน้าเมนู</button>
-  <button onclick="showAdminTab('links',this)">ลิงก์</button>
-  <button onclick="showAdminTab('popup',this)">ป๊อปอัป</button>
-  <button onclick="showAdminTab('users',this)">บัญชีผู้ใช้</button>
-  <button onclick="showAdminTab('chat',this)">แชท</button>
+<div class="announcement" id="announcementBar"><div class="announcement-label">📣 ประกาศ</div><div class="ticker"><span id="announcementText"></span></div></div>
+<main><div class="page-card home" id="pageContent"></div></main>
+<footer class="footer"><h2>ติดตามเรา</h2><div class="socials"><div class="social" onclick="toast('Facebook')">f</div><div class="social" onclick="toast('TikTok')">♪</div><div class="social" onclick="toast('X')">X</div><div class="social" onclick="toast('LINE')">L</div><div class="social" onclick="toast('YouTube')">▶</div></div><p>© 2026 NP-404 System</p></footer>
 </div>
-<section id="adminSystem"></section>
-<section id="adminPages" class="hidden"></section>
-<section id="adminLinks" class="hidden"></section>
-<section id="adminPopup" class="hidden"></section>
-<section id="adminUsers" class="hidden"></section>
-<section id="adminChat" class="hidden"></section>
-<div class="modal-actions"><button class="pill" onclick="confirmLogoutAdmin()">ออกจาก Admin / ปิด</button></div></div></div>
+<nav class="bottom-nav" id="bottomNav"></nav>
+<div class="side-overlay" id="sideOverlay" onclick="if(event.target.id==='sideOverlay')closeSideMenu()"><aside class="side-menu"><div class="side-head"><button class="close-menu" onclick="closeSideMenu()">×</button><div class="profile"><div class="profile-icon">👤</div><div><strong id="sideWelcome">ยินดีต้อนรับ</strong><br><small id="sideAccount">เข้าสู่ระบบ / สมาชิก</small></div></div></div><div class="menu-list" id="sideMenuList"></div></aside></div>
+<div id="menuBar" class="hidden"></div>
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<div class="toast" id="toastBox"></div>
 
-<div class="overlay" id="pageModal"><div class="modal"><h3 id="pageModalTitle">เพิ่มหน้าใหม่</h3>
-<div class="field"><label>ชื่อหัวข้อเมนู</label><input id="pageNameInput"></div>
-<div class="field"><label>ไอคอนเมนู (อิโมจิ)</label><div class="icon-row"><div class="icon-preview" id="pageIconPreview">📄</div><input id="pageIconInput" placeholder="พิมพ์อิโมจิเอง หรือเลือกด้านล่าง" oninput="$('pageIconPreview').innerText=this.value||'📄'"></div><div class="icon-palette" id="pageIconPalette"></div></div>
-<div class="field"><label>หมวดหมู่</label><input id="pageCategoryInput"></div>
-<div class="field"><label>ประเภทหน้า</label><select id="pageTypeInput" onchange="togglePageType()"><option value="builder">สร้างหน้าแบบลากจัดเรียง (ข้อความ/ภาพ)</option><option value="code">โค้ด HTML / เนื้อหา</option><option value="link">ลิงก์ภายนอก</option></select></div>
-<div class="setting-card" style="margin-bottom:13px"><div class="setting-head"><div><b>บังคับเข้าสู่ระบบ</b><small>ถ้าเปิด ผู้ใช้ต้องเข้าสู่ระบบก่อนใช้งานเมนูนี้</small></div><label class="switch"><input id="pageRequireLoginInput" type="checkbox"><span class="slider"></span></label></div></div>
-<div class="field hidden" id="pageBuilderField"><label>เนื้อหาหน้า</label><div id="builderList" class="builder-list"></div><div class="builder-toolbar" style="margin-top:9px"><button onclick="addBuilderBlock('text')">＋ ข้อความ</button><button onclick="addBuilderBlock('image')">🖼️ ภาพ</button></div></div>
-<div class="field hidden" id="pageCodeField"><label>โค้ด HTML (รันได้ตามปกติ เช่น ฟอร์มกรอกข้อมูล/ปุ่มกด/สคริปต์)</label><textarea id="pageCodeInput" placeholder="<h1>สวัสดี</h1><form>...</form>"></textarea></div>
-<div class="field hidden" id="pageLinkField"><label>URL</label><input id="pageLinkInput" type="url"></div>
-<div class="modal-actions"><button class="pill" onclick="closeOverlay('pageModal')">ยกเลิก</button><button class="pill solid" onclick="savePage()">บันทึก</button></div></div></div>
-
-<div class="overlay" id="linkModal"><div class="modal"><h3 id="linkModalTitle">เพิ่มลิงก์</h3>
-<div class="field"><label>ชื่อหัวข้อ</label><input id="linkNameInput"></div>
-<div class="field"><label>ไอคอนเมนู (อิโมจิ)</label><div class="icon-row"><div class="icon-preview" id="linkIconPreview">🔗</div><input id="linkIconInput" placeholder="พิมพ์อิโมจิเอง หรือเลือกด้านล่าง" oninput="$('linkIconPreview').innerText=this.value||'🔗'"></div><div class="icon-palette" id="linkIconPalette"></div></div>
-<div class="field"><label>URL</label><input id="linkUrlInput" type="url"></div><div class="field"><label>หมวดหมู่</label><input id="linkCategoryInput"></div>
-<div class="modal-actions"><button class="pill" onclick="closeOverlay('linkModal')">ยกเลิก</button><button class="pill solid" onclick="saveLink()">บันทึก</button></div></div></div>
-
-<div class="overlay" id="announcementPopup"><div class="modal"><h3 id="popupTitle">ประกาศ</h3><img id="popupImage" class="popup-img hidden" alt="ประกาศ"><div id="popupDetail" class="popup-detail"></div>
-<div class="modal-actions"><button class="pill" onclick="snoozePopup()">ไม่ต้องแสดงอีก 60 นาที</button><button class="pill solid" onclick="closeOverlay('announcementPopup')">รับทราบ</button></div></div></div>
-<div class="overlay" id="notificationModal"><div class="modal" style="max-width:420px"><h3 id="notificationTitle">แจ้งเตือน</h3><div id="notificationText" class="popup-detail"></div><div class="modal-actions"><button class="pill solid" onclick="closeOverlay('notificationModal')">รับทราบ</button></div></div></div>
-<div class="overlay" id="confirmModal"><div class="modal" style="max-width:400px"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText" style="color:var(--muted);line-height:1.7"></p><div class="modal-actions"><button class="pill" onclick="closeOverlay('confirmModal')">ยกเลิก</button><button class="pill solid" id="confirmOk">ยืนยัน</button></div></div></div>
-
-<div class="overlay" id="chatModal"><div class="modal chat-modal">
-  <div class="chat-header"><b>แชทกับแอดมิน &amp; AI</b><button class="pill" onclick="closeChatModal()">✕</button></div>
-  <div id="chatMessages" class="chat-messages"></div>
-  <div class="chat-input-row"><input id="chatInput" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter')sendChat()"><button class="pill solid" onclick="sendChat()">ส่ง</button></div>
-</div></div>
-
+<!-- auth/admin/page/link/popup/notification/confirm/chat are kept for the original system -->
+<div class="overlay" id="authModal"><div class="modal"><div class="tabs"><button id="tabLogin" class="active" onclick="setAuthTab('login')">เข้าสู่ระบบ</button><button id="tabRegister" onclick="setAuthTab('register')">สมัครสมาชิก</button></div><div id="registerFields" class="hidden"><div class="grid2"><div class="field"><label>ชื่อจริง</label><input id="authFirstName"></div><div class="field"><label>นามสกุล</label><input id="authLastName"></div></div><div class="field"><label>ชื่อแอคเค้า</label><input id="authUsername"></div></div><div class="field"><label>อีเมล</label><input type="email" id="authEmail"></div><div class="field"><label>รหัสผ่าน</label><input type="password" id="authPassword"></div><div style="text-align:right;margin-bottom:10px"><button class="text-btn" onclick="openForgotPasswordModal()">ลืมรหัสผ่าน?</button></div><div class="err" id="authErr"></div><div class="modal-actions"><button class="pill" onclick="closeOverlay('authModal')">ยกเลิก</button><button class="pill solid" id="authSubmitBtn" onclick="submitAuth()">เข้าสู่ระบบ</button></div></div></div>
+<div class="overlay" id="adminModal"><div class="modal wide"><h3>แผงควบคุมระบบ <span class="badge on">ADMIN</span></h3><div class="tabs" id="adminTabs"><button class="active" onclick="showAdminTab('system',this)">ระบบ</button><button onclick="showAdminTab('pages',this)">หน้าเมนู</button><button onclick="showAdminTab('links',this)">ลิงก์</button><button onclick="showAdminTab('popup',this)">ป๊อปอัป</button><button onclick="showAdminTab('users',this)">บัญชีผู้ใช้</button><button onclick="showAdminTab('chat',this)">แชท</button></div><section id="adminSystem"></section><section id="adminPages" class="hidden"></section><section id="adminLinks" class="hidden"></section><section id="adminPopup" class="hidden"></section><section id="adminUsers" class="hidden"></section><section id="adminChat" class="hidden"></section><div class="modal-actions"><button class="pill" onclick="confirmLogoutAdmin()">ออกจาก Admin / ปิด</button></div></div></div>
+<div class="overlay" id="pageModal"><div class="modal"><h3 id="pageModalTitle">เพิ่มหน้าใหม่</h3><div class="field"><label>ชื่อหัวข้อเมนู</label><input id="pageNameInput"></div><div class="field"><label>ไอคอนเมนู</label><div class="icon-row"><div class="icon-preview" id="pageIconPreview">📄</div><input id="pageIconInput" oninput="$('pageIconPreview').innerText=this.value||'📄'"></div><div class="icon-palette" id="pageIconPalette"></div></div><div class="field"><label>หมวดหมู่</label><input id="pageCategoryInput"></div><div class="field"><label>ประเภทหน้า</label><select id="pageTypeInput" onchange="togglePageType()"><option value="builder">สร้างหน้าแบบข้อความ/ภาพ</option><option value="code">โค้ด HTML</option><option value="link">ลิงก์ภายนอก</option></select></div><div class="setting-card"><div class="setting-head"><div><b>บังคับเข้าสู่ระบบ</b><small>ผู้ใช้ต้องเข้าสู่ระบบก่อนใช้เมนูนี้</small></div><label class="switch"><input id="pageRequireLoginInput" type="checkbox"><span class="slider"></span></label></div></div><div class="field hidden" id="pageBuilderField"><label>เนื้อหา</label><div id="builderList" class="builder-list"></div><div class="builder-toolbar"><button class="pill" onclick="addBuilderBlock('text')">＋ ข้อความ</button><button class="pill" onclick="addBuilderBlock('image')">🖼️ ภาพ</button></div></div><div class="field hidden" id="pageCodeField"><textarea id="pageCodeInput"></textarea></div><div class="field hidden" id="pageLinkField"><input id="pageLinkInput" type="url"></div><div class="modal-actions"><button class="pill" onclick="closeOverlay('pageModal')">ยกเลิก</button><button class="pill solid" onclick="savePage()">บันทึก</button></div></div></div>
+<div class="overlay" id="linkModal"><div class="modal"><h3 id="linkModalTitle">เพิ่มลิงก์</h3><div class="field"><label>ชื่อหัวข้อ</label><input id="linkNameInput"></div><div class="field"><label>ไอคอน</label><div class="icon-row"><div class="icon-preview" id="linkIconPreview">🔗</div><input id="linkIconInput" oninput="$('linkIconPreview').innerText=this.value||'🔗'"></div><div class="icon-palette" id="linkIconPalette"></div></div><div class="field"><label>URL</label><input id="linkUrlInput" type="url"></div><div class="field"><label>หมวดหมู่</label><input id="linkCategoryInput"></div><div class="modal-actions"><button class="pill" onclick="closeOverlay('linkModal')">ยกเลิก</button><button class="pill solid" onclick="saveLink()">บันทึก</button></div></div></div>
+<div class="overlay" id="announcementPopup"><div class="modal"><div class="modal-head"><h3 id="popupTitle">ประกาศ</h3><button class="modal-close" onclick="closeOverlay('announcementPopup')">×</button></div><div id="popupGallery"></div><div id="popupDetail" style="white-space:pre-wrap;line-height:1.8;color:#53677e"></div><div class="modal-actions"><button class="pill" onclick="snoozePopup()">ไม่ต้องแสดงอีก 60 นาที</button><button class="pill solid" onclick="closeOverlay('announcementPopup')">รับทราบ</button></div></div></div>
+<div class="overlay" id="notificationModal"><div class="modal"><h3 id="notificationTitle">แจ้งเตือน</h3><div id="notificationText" style="color:#53677e;line-height:1.7"></div><div class="modal-actions"><button class="pill solid" onclick="closeOverlay('notificationModal')">รับทราบ</button></div></div></div>
+<div class="overlay" id="confirmModal"><div class="modal"><h3 id="confirmTitle">ยืนยัน</h3><p id="confirmText" style="color:#718096;line-height:1.7"></p><div class="modal-actions"><button class="pill" onclick="closeOverlay('confirmModal')">ยกเลิก</button><button class="pill solid" id="confirmOk">ยืนยัน</button></div></div></div>
+<div class="overlay" id="chatModal"><div class="modal chat-modal"><div class="chat-header"><b>💬 แชทกับแอดมิน & AI</b><button class="pill" onclick="closeChatModal()">✕</button></div><div id="chatMessages" class="chat-messages"></div><div class="chat-input-row"><input id="chatInput" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter')sendChat()"><button class="pill solid" onclick="sendChat()">ส่ง</button></div></div></div>
+<div class="overlay" id="forgotPasswordModal"><div class="modal"><div class="modal-head"><h3>ลืมรหัสผ่าน</h3><button class="modal-close" onclick="closeOverlay('forgotPasswordModal')">×</button></div><div class="field"><label>อีเมลบัญชี</label><input id="forgotEmailInput" type="email"></div><button class="pill solid" style="width:100%" onclick="sendResetEmail()">ส่งลิงก์รีเซ็ตรหัสผ่าน</button></div></div>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import{getAuth,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,signOut,updateProfile,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
@@ -986,4 +294,75 @@ window.sendResetEmail=sendResetEmail;
   </div>
 </div>
 
+
+<script>
+/* ===== NEW BLUE UI BRIDGE — keeps the original API/Firebase system ===== */
+let homeSlides=[],homeSlideIndex=0,homeSlideTimer=null,lastChatSig="",lastAdminSig="";
+function openSideMenu(){document.getElementById('sideOverlay').classList.add('show')}window.openSideMenu=openSideMenu;
+function closeSideMenu(){document.getElementById('sideOverlay').classList.remove('show')}window.closeSideMenu=closeSideMenu;
+function toast(message,ok=true){const b=document.getElementById('toastBox');if(!b)return;b.textContent=message||'';b.classList.add('show');clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>b.classList.remove('show'),1800)}window.toast=toast;
+function openModal(title,content){$('notificationTitle').innerText=title||'แจ้งเตือน';$('notificationText').innerHTML=content||'';$('notificationModal').classList.add('show')}window.openModal=openModal;
+function applySettings(){
+  $('siteName').innerText=settings.siteName||'NP-404 System';document.title=settings.siteName||'NP-404 System';
+  const logo=settings.logoUrl||'';const bl=$('brandLogo');if(logo){bl.innerHTML='<img src="'+esc(logo)+'" alt="logo">'}else bl.textContent='NP';
+  $('announcementText').innerText=settings.announcement||'';$('announcementBar').classList.toggle('hidden',!settings.announcement);
+  if(settings.accentColor)document.documentElement.style.setProperty('--blue',settings.accentColor);
+  const saved=localStorage.getItem('np404_theme')||settings.themeMode||'light';applyTheme(saved);
+  try{homeSlides=JSON.parse(settings.homeSlides||'[]');if(!Array.isArray(homeSlides))homeSlides=[]}catch(e){homeSlides=[]}
+}
+function renderAuth(){
+  const u=window.__currentUser, b=$('topUser'), side=$('sideAccount');
+  if(!u){b.textContent='เข้าสู่ระบบ';b.onclick=openAuthModal;side.textContent='เข้าสู่ระบบ / สมาชิก';$('sideWelcome').textContent='ยินดีต้อนรับ';return}
+  let p={};try{p=JSON.parse(localStorage.getItem('np404_profile')||'{}')}catch(e){};const name=p.username||u.displayName||u.email;
+  b.textContent=name;b.onclick=openSideMenu;side.textContent=name;$('sideWelcome').textContent='สวัสดี 👋';
+}
+function iconFor(icon){const s=String(icon||'');const map=[['🏠','⌂'],['📄','▤'],['📢','📣'],['🛒','🛒'],['🎮','🎮'],['📚','📚'],['🎵','♫'],['🎬','▶'],['💬','💬'],['⚙️','⚙'],['🧾','▤'],['📊','▥'],['🗂️','🗂'],['🎯','◎'],['⭐','★'],['❤️','♥'],['🔥','🔥'],['🚀','🚀'],['🎁','🎁'],['📷','📷'],['🗓️','▣'],['✅','✓'],['📌','📌'],['🔔','🔔'],['🌐','◎'],['💡','💡'],['🔒','🔒'],['🏆','🏆'],['🔗','↗']];return (map.find(x=>s.includes(x[0]))||['','•'])[1]}
+function navigateItem(x,isHome){if(x.requireLogin&&!window.__currentUser&&!window.__isAdmin){openAuthModal();return}if(x.url||x.type==='link'){window.open(x.url||x.content,'_blank');return}activeId=x.id||x.rowIndex||HOME_ID;renderMenu();renderActivePage();closeSideMenu();window.scrollTo({top:0,behavior:'smooth'})}
+function renderMenu(){
+  const items=[{id:HOME_ID,name:settings.homeMenuLabel||'หน้าหลัก',icon:settings.homeMenuIcon||'🏠',active:true},...pages,...links];
+  const side=$('sideMenuList'),bottom=$('bottomNav'),hidden=$('menuBar');side.innerHTML='';bottom.innerHTML='';hidden.innerHTML='';
+  items.forEach((x,i)=>{
+    const on=x.active!==false, key=x.id||x.rowIndex, label=x.name||'เมนู';
+    const m=document.createElement('button');m.className='menu-item'+(!on?' locked':'');m.innerHTML='<span>'+esc(x.icon||'📄')+'</span><span style="flex:1">'+esc(label)+'</span>'+(x.requireLogin?'🔒':'');m.onclick=()=>{if(!on&&!window.__isAdmin)return toast('เมนูนี้ปิดปรับปรุงอยู่',false);navigateItem(x,i===0)};side.appendChild(m);
+    if(i<5){const n=document.createElement('button');n.className='nav-item '+(key===activeId?'active':'');n.innerHTML='<span class="nav-icon">'+iconFor(x.icon)+'</span><span>'+esc(label)+'</span>';n.onclick=()=>{if(!on&&!window.__isAdmin)return toast('เมนูนี้ปิดปรับปรุงอยู่',false);navigateItem(x,i===0)};bottom.appendChild(n)}
+  });
+}
+function renderHome(){
+  const c=$('pageContent');c.className='page-card home';
+  const fallback=[{image:settings.homeImageUrl||settings.logoUrl||'',title:settings.homeTitle||'ยินดีต้อนรับสู่เว็บไซต์',subtitle:settings.homeSubtitle||'ระบบ NP-404 พร้อมใช้งาน',button:'เริ่มใช้งาน'}];
+  const slides=homeSlides.length?homeSlides:fallback;homeSlideIndex=Math.min(homeSlideIndex,slides.length-1);const s=slides[homeSlideIndex]||fallback[0];
+  const bg=s.image||'';
+  c.innerHTML='<section class="hero"><div class="hero-bg" style="background-image:url(\''+esc(bg).replace(/'/g,'%27')+'\')"></div><div class="hero-content"><div class="hero-kicker">✨ NP-404 • FLAME SHOP</div><div class="hero-title">'+esc(s.title||'ยินดีต้อนรับ')+'</div><div class="hero-subtitle">'+esc(s.subtitle||'')+'</div><div class="hero-actions"><button class="hero-btn primary" onclick="scrollToSearch()">ดูบริการ</button><button class="hero-btn ghost" onclick="openChat()">💬 แชท</button></div></div><div class="hero-dots">'+slides.map((_,i)=>'<span class="hero-dot '+(i===homeSlideIndex?'active':'')+'"></span>').join('')+'</div></section>'+homeSearchHtml()+homeBannersHtml()+homeResultsHtml()+homeServicesHtml()+homeInfoHtml();
+  if(homeSlideTimer)clearInterval(homeSlideTimer);if(slides.length>1)homeSlideTimer=setInterval(()=>{homeSlideIndex=(homeSlideIndex+1)%slides.length;renderHome()},3000);
+}
+function homeSearchHtml(){return '<section class="search-wrap section"><div class="search-card"><div class="search-title">🔎 ค้นหา / ตรวจข้อมูล</div><div class="type-tabs"><button class="type-tab active" onclick="changeType(this)">ทั้งหมด</button><button class="type-tab" onclick="changeType(this)">เลขเดี่ยว</button><button class="type-tab" onclick="changeType(this)">เลขชุด</button></div><div class="number-boxes">'+[1,2,3,4,5,6].map(()=>'<input class="number-input" maxlength="1" inputmode="numeric">').join('')+'</div><div class="search-actions"><button class="random-btn" onclick="randomNumber()">✨ สุ่ม</button><button class="search-btn" onclick="searchResult()">ค้นหา</button></div></div></section>'}
+function homeBannersHtml(){return '<section class="section"><div class="banner-grid"><div class="banner big"><div><div class="banner-title">ระบบของคุณ</div><div class="banner-text">จัดการทุกเมนูและข้อมูลได้จาก Admin</div></div><button class="banner-button" onclick="openSideMenu()">ดูเมนู</button></div><div><div class="banner gold"><div><div class="banner-title">ประกาศ</div><div class="banner-text">ข่าวสารและอัปเดตล่าสุด</div></div></div><div class="banner blue" style="margin-top:15px"><div><div class="banner-title">แชท</div><div class="banner-text">คุยกับแอดมิน / AI แบบเร็ว</div></div><button class="banner-button" onclick="openChat()">แชทเลย</button></div></div></div><div class="banner banner-wide"><div><div class="banner-title">สร้างหน้าใหม่</div><div class="banner-text">Admin เพิ่มข้อความ ภาพ โค้ด หรือลิงก์ได้</div></div><button class="banner-button" onclick="openAdminPanel()">จัดการ</button></div></section>'}
+function homeResultsHtml(){return '<section class="section result-section"><h2 class="results-title">✨ ไฮไลต์</h2><div class="result-grid">'+['257740','156664','621913','032718'].map(n=>'<div class="result-card"><div class="result-top"><div class="result-number"><small>ตัวอย่าง</small><strong>'+n+'</strong></div><div class="result-image">⭐</div></div><div class="result-bottom">📌 บันทึกไว้ดูภายหลัง</div></div>').join('')+'</div><button class="all-results" onclick="openModal(\'ข้อมูลทั้งหมด\',\'หน้านี้สามารถเชื่อมต่อกับข้อมูลจริงของระบบเดิมได้\')">ดูทั้งหมด</button></section>'}
+function homeServicesHtml(){return '<section class="section"><h2 class="section-title">บริการทั้งหมด</h2><div class="service-grid" id="serviceGrid">'+[{i:'🎟️',n:'ตรวจผล'},{i:'🏆',n:'อันดับ'},{i:'🔎',n:'ตรวจข้อมูล'},{i:'👥',n:'สมาชิก'},{i:'📣',n:'ข่าวสาร'},{i:'🪙',n:'กระเป๋า'},{i:'📋',n:'ฝากตรวจ'},{i:'📖',n:'วิธีใช้งาน'},{i:'🎁',n:'ของขวัญ'},{i:'🎧',n:'ช่วยเหลือ'}].map(x=>'<div class="service-item" onclick="openModal(\''+x.n+'\',\'เมนู '+x.n+' เชื่อมต่อกับระบบเดิมของคุณได้\')"><div class="service-icon">'+x.i+'</div><div class="service-name">'+x.n+'</div></div>').join('')+'</div></section>'}
+function homeInfoHtml(){return '<section class="info-red"><div class="info-title">NP-404 • ระบบออนไลน์</div><div class="info-text">UI ใหม่โทนฟ้า แต่ระบบเดิมยังทำงานผ่าน Firebase + Google Apps Script เหมือนเดิม</div><div class="info-box"><div class="info-box-title">บริการเสริม</div><div class="info-row" onclick="openModal(\'จัดส่ง\',\'หน้าตัวอย่างบริการ\')"><div class="info-row-icon">🚚</div><div class="info-row-text"><strong>จัดส่ง</strong><span>หน้าตัวอย่าง UI</span></div></div><div class="info-row" onclick="openModal(\'ตรวจข้อมูล\',\'หน้าตัวอย่างการตรวจข้อมูล\')"><div class="info-row-icon">📰</div><div class="info-row-text"><strong>ตรวจข้อมูล</strong><span>ตรวจสอบข้อมูลตัวอย่าง</span></div></div></div></section>'}
+function renderActivePage(){const c=$('pageContent');if(settings.maintenance==='true'&&!window.__isAdmin){c.className='page-card';c.innerHTML='<div class="empty"><b style="font-size:70px;color:#0873ec">503</b><h2>ระบบกำลังปรับปรุง</h2><p>กรุณาลองใหม่ภายหลัง</p></div>';return}if(activeId===HOME_ID){renderHome();return}let p=pages.find(x=>(x.id||x.rowIndex)===activeId);if(p){if(p.active===false&&!window.__isAdmin){c.innerHTML='<div class="empty">หน้านี้ปิดปรับปรุงอยู่</div>';return}if(p.requireLogin&&!window.__currentUser&&!window.__isAdmin){c.innerHTML='<div class="empty"><div style="font-size:40px">🔒</div><h2>เมนูนี้ต้องเข้าสู่ระบบ</h2><button class="pill solid" onclick="openAuthModal()">เข้าสู่ระบบ</button></div>';return}if(p.type==='builder'){let blocks=[];try{blocks=JSON.parse(p.blocks||p.content||'[]')}catch(e){}c.className='page-card';c.innerHTML='<section class="section"><h2 class="section-title">'+esc(p.name)+'</h2>'+blocks.map(b=>b.type==='image'?'<div class="content-block image-block"><img src="'+esc(b.url||'')+'">'+(b.caption?'<div class="caption">'+esc(b.caption)+'</div>':'')+'</div>':'<div class="content-block">'+esc(b.text||'')+'</div>').join('')+'</section>';return}if(p.type==='link'){window.open(p.content,'_blank');return}c.className='page-card';c.innerHTML='<iframe class="code-frame" sandbox="allow-scripts allow-forms allow-popups allow-modals" title="'+esc(p.name||'Page')+'"></iframe>';c.querySelector('iframe').srcdoc=p.content||'';return}let l=links.find(x=>(x.id||x.rowIndex)===activeId);if(l){window.open(l.url,'_blank');return}c.innerHTML='<div class="empty">ไม่พบหน้านี้</div>'}
+window.renderMenu=renderMenu;window.renderActivePage=renderActivePage;
+function showPopup(){if(Number(localStorage.getItem('np404_popup_snooze')||0)>Date.now())return;$('popupTitle').innerText=settings.popupTitle||'ประกาศ';$('popupDetail').innerText=settings.popupDetail||'';let imgs=[];try{imgs=JSON.parse(settings.popupImages||'[]')}catch(e){}if(!imgs.length&&settings.popupImageUrl)imgs=[settings.popupImageUrl];$('popupGallery').innerHTML=imgs.map(u=>'<img src="'+esc(u)+'" style="width:100%;max-height:260px;object-fit:cover;border-radius:16px;margin-bottom:10px">').join('');$('announcementPopup').classList.add('show')}
+/* Chat faster: 1.5s polling + no DOM repaint when unchanged. */
+function chatSig(msgs){return JSON.stringify((msgs||[]).map(m=>[m.id,m.createdAt,m.sender,m.message]))}
+async function loadChat(){try{const msgs=await apiGetAuth('getChat');const sig=chatSig(msgs);if(sig!==lastChatSig){lastChatSig=sig;renderChatMessages(msgs)}}catch(e){}}
+function openChat(){if(!window.__currentUser){toast('กรุณาเข้าสู่ระบบก่อนใช้งานแชท',false);openAuthModal();return}$('chatModal').classList.add('show');loadChat();if(chatPollTimer)clearInterval(chatPollTimer);chatPollTimer=setInterval(loadChat,1500)}window.openChat=openChat;
+async function loadConversationMessages(){if(!activeConvUserId)return;try{let msgs=await apiGetAuth('getChatFor',{userId:activeConvUserId});let sig=chatSig(msgs);if(sig!==lastAdminSig){lastAdminSig=sig;renderAdminChatMessages(msgs)}}catch(e){}}
+function showAdminTab(t,b){['system','pages','links','popup','users','chat'].forEach(x=>$('admin'+x[0].toUpperCase()+x.slice(1)).classList.toggle('hidden',x!==t));document.querySelectorAll('#adminTabs button').forEach(x=>x.classList.remove('active'));b.classList.add('active');if(adminChatTimer){clearInterval(adminChatTimer);adminChatTimer=null}if(t==='users')loadUsers();if(t==='chat'){loadConversations();adminChatTimer=setInterval(()=>{loadConversations();if(activeConvUserId)loadConversationMessages()},2000)}}window.showAdminTab=showAdminTab;
+/* Extended popup/home settings editor; keeps old settings keys compatible. */
+function renderSystem(){
+  $('adminSystem').innerHTML='<div class="setting-card"><div class="setting-head"><div><b>Maintenance Mode</b><small>เปิด/ปิดหน้า 503</small></div><label class="switch"><input type="checkbox" '+(settings.maintenance==='true'?'checked':'')+' onchange="toggleMaintenance(this.checked)"><span class="slider"></span></label></div></div>'+
+  '<div class="setting-card"><b>ชื่อเว็บไซต์ / โลโก้</b><div class="field"><label>ชื่อเว็บไซต์</label><input id="setSiteName" value="'+esc(settings.siteName||'')+'"></div><div class="field"><label>URL โลโก้</label><input id="setLogoUrl" value="'+esc(settings.logoUrl||'')+'"></div><button class="pill solid" onclick="saveBrand()">บันทึก</button></div>'+
+  '<div class="setting-card"><b>หน้าแรก</b><div class="field"><label>หัวข้อ</label><input id="setHomeTitle" value="'+esc(settings.homeTitle||'')+'"></div><div class="field"><label>รายละเอียด</label><textarea id="setHomeSubtitle">'+esc(settings.homeSubtitle||'')+'</textarea></div><div class="field"><label>ภาพหน้าแรกเริ่มต้น</label><input id="setHomeImageUrl" value="'+esc(settings.homeImageUrl||'')+'"></div><div class="field"><label>ภาพสไลด์หน้าแรก (1 URL ต่อ 1 บรรทัด)</label><textarea id="setHomeSlides">'+esc((homeSlides||[]).map(x=>[x.image||'',x.title||'',x.subtitle||''].join(' | ')).join('\n'))+'</textarea><small style="color:#718096">รูปแบบ: URL | หัวข้อ | รายละเอียด — เปลี่ยนทุก 3 วินาที</small></div><button class="pill solid" onclick="saveHomePlus()">บันทึกหน้าแรก</button></div>'+
+  '<div class="setting-card"><b>ประกาศวิ่ง</b><div class="field"><input id="setAnnouncement" value="'+esc(settings.announcement||'')+'"></div><button class="pill solid" onclick="saveAnnouncement()">บันทึก</button></div>'+
+  '<div class="setting-card"><b>ธีม</b><div class="grid2"><div class="field"><label>โหมด</label><select id="setThemeMode"><option value="light">สว่าง</option><option value="dark">มืด</option></select></div><div class="field"><label>สีหลัก</label><input type="color" id="setAccentColor" value="'+esc(settings.accentColor||'#0868df')+'"></div></div><button class="pill solid" onclick="saveTheme()">บันทึก</button></div>'+
+  '<div class="setting-card"><b>ผู้ช่วย AI ในแชท</b><div class="setting-head"><small>เปิดให้ AI ตอบอัตโนมัติ</small><label class="switch"><input id="aiEnabledInput" type="checkbox" '+(settings.aiEnabled==='true'?'checked':'')+'><span class="slider"></span></label></div><div class="grid2"><div class="field"><label>ผู้ให้บริการ</label><select id="aiProviderInput"><option value="openai">OpenAI</option><option value="gemini">Google Gemini</option></select></div><div class="field"><label>โมเดล</label><input id="aiModelInput" value="'+esc(settings.aiModel||'gpt-4o-mini')+'"></div></div><div class="field"><label>API Key</label><input id="aiApiKeyInput" type="password" value="'+esc(settings.aiApiKey||'')+'"></div><div class="field"><label>System Prompt</label><textarea id="aiSystemPromptInput">'+esc(settings.aiSystemPrompt||'')+'</textarea></div><button class="pill solid" onclick="saveAI()">บันทึก AI</button></div>'
+}
+async function saveHomePlus(){try{let lines=$('setHomeSlides').value.split(/\n+/).map(s=>s.trim()).filter(Boolean);let slides=lines.map(line=>{let [image,title,subtitle]=line.split('|').map(v=>v.trim());return{image,title,subtitle}}).filter(x=>x.image||x.title||x.subtitle);await saveSettings({homeTitle:$('setHomeTitle').value.trim(),homeSubtitle:$('setHomeSubtitle').value,homeImageUrl:$('setHomeImageUrl').value.trim(),homeSlides:JSON.stringify(slides)});homeSlides=slides;homeSlideIndex=0;toast('บันทึกหน้าแรกแล้ว')}catch(e){toast(e.message,false)}}window.saveHomePlus=saveHomePlus;
+function renderPopup(){let imgs=[];try{imgs=JSON.parse(settings.popupImages||'[]')}catch(e){}if(!imgs.length&&settings.popupImageUrl)imgs=[settings.popupImageUrl];$('adminPopup').innerHTML='<div class="setting-card"><div class="setting-head"><div><b>ป๊อปอัปประกาศ</b><small>เพิ่มรูปได้หลายรูป และผู้ใช้จะเห็นเป็นแกลเลอรี</small></div><label class="switch"><input id="popupEnabled" type="checkbox" '+(settings.popupEnabled==='true'?'checked':'')+'><span class="slider"></span></label></div><div class="field"><label>หัวข้อ</label><input id="popupTitleInput" value="'+esc(settings.popupTitle||'')+'"></div><div class="field"><label>รายละเอียด</label><textarea id="popupDetailInput">'+esc(settings.popupDetail||'')+'</textarea></div><div class="field"><label>URL รูปภาพ (1 URL ต่อ 1 บรรทัด)</label><textarea id="popupImagesInput">'+esc(imgs.join('\n'))+'</textarea></div><button class="pill solid" onclick="savePopupPlus()">บันทึกป๊อปอัป</button></div>'}
+async function savePopupPlus(){try{let imgs=$('popupImagesInput').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);await saveSettings({popupEnabled:$('popupEnabled').checked?'true':'false',popupTitle:$('popupTitleInput').value.trim(),popupDetail:$('popupDetailInput').value,popupImages:JSON.stringify(imgs),popupImageUrl:imgs[0]||''});toast('บันทึกป๊อปอัปแล้ว')}catch(e){toast(e.message,false)}}window.savePopupPlus=savePopupPlus;
+window.renderSystem=renderSystem; function renderAdmin(){if(!window.__isAdmin)return;renderSystem();renderPages();renderLinks();renderPopup()} window.renderAdmin=renderAdmin; window.addEventListener('scroll',()=>{$('backTop').classList.toggle('show',scrollY>400)});
+/* initial home after original loadAll finishes */
+setTimeout(()=>{renderAuth();renderMenu();renderActivePage()},350);
+</script>
 </body></html>
