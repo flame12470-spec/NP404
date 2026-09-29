@@ -425,8 +425,8 @@ const DEFAULT = {
   popupTitleWeight: '700',
   popupTextWeight: '400',
   menus: [
-    { id: 'menu0', title: 'ข่าวสาร', icon: '📢', category: 'ทั่วไป', type: 'builder', content: '<h2>ข่าวสารและประกาศ</h2><p>พื้นที่สำหรับแสดงข่าวสารของเว็บไซต์</p>', url: '', requiresLogin: false, visible: true },
-    { id: 'menu1', title: 'กิจกรรม', icon: '📅', category: 'ทั่วไป', type: 'builder', content: '<h2>กิจกรรม</h2><p>เพิ่มเนื้อหาหรือรูปภาพจากแผงควบคุม</p>', url: '', requiresLogin: false, visible: true }
+    { id: 'menu0', title: 'ข่าวสาร', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>ข่าวสารและประกาศ</h2><p>พื้นที่สำหรับแสดงข่าวสารของเว็บไซต์</p>', url: '', requiresLogin: false, visible: true },
+    { id: 'menu1', title: 'กิจกรรม', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>กิจกรรม</h2><p>เพิ่มเนื้อหาหรือรูปภาพจากแผงควบคุม</p>', url: '', requiresLogin: false, visible: true }
   ]
 };
 
@@ -441,59 +441,65 @@ let admin = false, tab = null, adminMenuOpen = false, popupTimer = null, sideOpe
 
 const $ = id => document.getElementById(id);
 const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-function parseMaterialIcon(value, fallbackName = '') {
+// Only pasted Material Symbols code is used. No preset icon or placeholder.
+function parseMaterialIcon(value) {
   const raw = String(value || '').trim();
-  // Only parse code as text. Never inject pasted <link> or <style> into the page.
+  if (!raw) return null;
   const link = raw.match(/<link\b[^>]*href\s*=\s*["'](https:\/\/fonts\.googleapis\.com\/css2\?[^"']+)["'][^>]*\/?>/i);
+  const span = raw.match(/<span\b[^>]*class\s*=\s*["'][^"']*material-symbols-(outlined|rounded|sharp)[^"']*["'][^>]*>\s*([a-z][a-z0-9_]*)\s*<\/span>/i);
   const style = raw.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i);
-  const plain = /^[a-z][a-z0-9_]*$/.test(raw) ? raw : '';
-  let names = [];
-  if (link) {
+  const directUrl = /^https:\/\/fonts\.googleapis\.com\/css2\?\S+$/i.test(raw) ? raw : null;
+  let variant = span?.[1]?.toLowerCase() || 'outlined';
+  let icon = span?.[2] || '';
+  const url = link?.[1] || directUrl;
+  if (url) {
     try {
-      const u = new URL(link[1].replace(/&amp;/g, '&'));
-      if (u.hostname !== 'fonts.googleapis.com' || u.pathname !== '/css2' ||
-          !/Material\+Symbols\+(Outlined|Rounded|Sharp)|Material Symbols (Outlined|Rounded|Sharp)/i.test(u.searchParams.get('family') || '')) return null;
-      names = (u.searchParams.get('icon_names') || '').split(',').filter(x => /^[a-z][a-z0-9_]*$/.test(x));
+      const u = new URL(url.replace(/&amp;/g, '&'));
+      if (u.hostname !== 'fonts.googleapis.com' || u.pathname !== '/css2') return null;
+      const family = u.searchParams.get('family') || '';
+      const match = family.match(/Material[+ ]Symbols[+ ](Outlined|Rounded|Sharp)/i);
+      if (!match) return null;
+      variant = match[1].toLowerCase();
+      const names = (u.searchParams.get('icon_names') || '').split(',');
+      if (!icon) icon = names.find(n => /^[a-z][a-z0-9_]*$/.test(n)) || '';
     } catch { return null; }
   }
-  if (!link && !style && !plain) return null;
-  if (style && !/\.material-symbols-(outlined|rounded|sharp)\s*\{/i.test(style[1])) return null;
-  const icon = names[0] || plain || String(fallbackName || '').trim();
-  if (!/^[a-z][a-z0-9_]*$/.test(icon)) return null;
-  const family = /Material\+Symbols\+(Rounded|Sharp)|Material Symbols (Rounded|Sharp)/i.exec(link?.[1] || '');
-  const variant = family ? (family[1] || family[2]).toLowerCase() : 'outlined';
-  const settings = {FILL: 0, wght: 400, GRAD: 0, opsz: 24};
+  // CSS alone changes appearance but does not identify a glyph.
+  if (!icon || !/^[a-z][a-z0-9_]*$/.test(icon)) return null;
+  if (!url && !span) return null;
+  const settings = {FILL:0,wght:400,GRAD:0,opsz:24};
   if (style) {
     const block = style[1].match(/\.material-symbols-(?:outlined|rounded|sharp)\s*\{([^}]*)\}/i)?.[1] || '';
     for (const m of block.matchAll(/['"](FILL|wght|GRAD|opsz)['"]\s*(-?\d+)/gi)) {
-      const key = Object.keys(settings).find(k => k.toLowerCase() === m[1].toLowerCase());
-      if (key) settings[key] = Number(m[2]);
+      const k = Object.keys(settings).find(k => k.toLowerCase() === m[1].toLowerCase());
+      if (k) settings[k] = Number(m[2]);
     }
   }
-  settings.FILL = Math.max(0, Math.min(1, settings.FILL));
-  settings.wght = Math.max(100, Math.min(700, settings.wght));
-  settings.GRAD = Math.max(-50, Math.min(200, settings.GRAD));
-  settings.opsz = Math.max(20, Math.min(48, settings.opsz));
-  return {icon, variant, settings};
+  settings.FILL=Math.max(0,Math.min(1,settings.FILL));
+  settings.wght=Math.max(100,Math.min(700,settings.wght));
+  settings.GRAD=Math.max(-50,Math.min(200,settings.GRAD));
+  settings.opsz=Math.max(20,Math.min(48,settings.opsz));
+  return {icon,variant,settings};
 }
-function extractMaterialIcon(value, fallbackName = '') { return parseMaterialIcon(value, fallbackName)?.icon || null; }
 function menuIconMarkup(value) {
   const parsed = parseMaterialIcon(value);
-  if (!parsed) return `<span class="material-symbols-outlined" aria-hidden="true">help</span>`;
-  const {icon, variant, settings} = parsed;
-  const fontSettings = `'FILL' ${settings.FILL}, 'wght' ${settings.wght}, 'GRAD' ${settings.GRAD}, 'opsz' ${settings.opsz}`;
-  return `<span class="material-symbols-${variant}" style="font-variation-settings:${fontSettings}" aria-hidden="true">${esc(icon)}</span>`;
+  if (!parsed) return '';
+  const {icon,variant,settings}=parsed;
+  // Use a fixed, trusted font URL; never inject pasted HTML into the page.
+  const fontId='np404-symbols-'+variant;
+  if (!document.getElementById(fontId)) {
+    const sheet=document.createElement('link');
+    sheet.id=fontId; sheet.rel='stylesheet';
+    sheet.href='https://fonts.googleapis.com/css2?family=Material+Symbols+'+variant[0].toUpperCase()+variant.slice(1)+':opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200';
+    document.head.appendChild(sheet);
+  }
+  return `<span class="material-symbols-${variant}" style="font-variation-settings:'FILL' ${settings.FILL},'wght' ${settings.wght},'GRAD' ${settings.GRAD},'opsz' ${settings.opsz}" aria-hidden="true">${esc(icon)}</span>`;
 }
 function updateMenuIconPreview() {
-  const input = $('mIcon'); if (!input) return;
-  const fallback = $('mIconName')?.value.trim() || '';
-  const parsed = parseMaterialIcon(input.value, fallback);
-  const styleOnly = /<style\b/i.test(input.value) && !/<link\b/i.test(input.value);
-  $('mIconNameField')?.classList.toggle('hidden', !styleOnly);
-  const previewValue = parsed && styleOnly ? input.value + '\n' + `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&icon_names=${parsed.icon}">` : input.value;
-  $('menuIconPreview').innerHTML = parsed ? (styleOnly ? `<span class="material-symbols-${parsed.variant}" style="font-variation-settings:'FILL' ${parsed.settings.FILL},'wght' ${parsed.settings.wght},'GRAD' ${parsed.settings.GRAD},'opsz' ${parsed.settings.opsz}">${esc(parsed.icon)}</span>` : menuIconMarkup(previewValue)) : '<span class="material-symbols-outlined">help</span>';
-  const message = $('iconValidation');
-  if (message) message.textContent = parsed ? `ตัวอย่าง: ${parsed.icon}` : 'วางโค้ด <link> หรือ <style> และระบุชื่อไอคอนหากใช้ <style> อย่างเดียว';
+  const raw=$('mIcon')?.value || '';
+  const parsed=parseMaterialIcon(raw);
+  $('menuIconPreview').innerHTML=parsed ? menuIconMarkup(raw) : '';
+  $('iconValidation').textContent=!raw.trim() ? 'ยังไม่ได้วางโค้ด (เมนูจะแสดงเฉพาะชื่อ)' : parsed ? 'แสดงไอคอนจากโค้ดที่วาง' : 'ต้องวางลิงก์ที่มี icon_names หรือโค้ด <span> พร้อมชื่อไอคอน; <style> อย่างเดียวไม่ระบุรูปไอคอน';
 }
 
 let saveQueue = Promise.resolve();
@@ -615,7 +621,7 @@ function refresh() {
     
   $('homeCards').innerHTML = s.menus.filter(m => m.visible).map(m => `
     <div class="card">
-      <div class="icon">${menuIconMarkup(m.icon)}</div>
+      ${menuIconMarkup(m.icon) ? `<div class="icon">${menuIconMarkup(m.icon)}</div>` : ''}
       <h2>${esc(m.title)}</h2>
       <p><small style="color:var(--muted);">${esc(m.category)}</small></p>
       <button class="btn ghost" onclick="go('${esc(m.id)}')">เปิดเมนู →</button>
@@ -891,7 +897,7 @@ function renderAdmin() {
 }
 
 function addMenu() {
-  s.menus.push({ id: 'menu' + Date.now(), title: 'เมนูใหม่', icon: '▣', category: 'ทั่วไป', type: 'builder', content: '<h2>หัวข้อใหม่</h2><p>เนื้อหาตัวอย่าง</p>', url: '', requiresLogin: false, visible: true });
+  s.menus.push({ id: 'menu' + Date.now(), title: 'เมนูใหม่', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>หัวข้อใหม่</h2><p>เนื้อหาตัวอย่าง</p>', url: '', requiresLogin: false, visible: true });
   persist();
   renderAdmin();
   editMenu(s.menus.length - 1);
@@ -941,7 +947,7 @@ function editMenu(i) {
     <h2>แก้ไขเมนู: ${esc(m.title)}</h2>
     <div class="cols">
       <div class="field"><label>ชื่อเมนู (ในแถบเมนู)</label><input id="mTitle" value="${esc(m.title)}"></div>
-      <div class="field"><label>โค้ดไอคอน Google Material Symbols</label><textarea id="mIcon" rows="4" placeholder="วางโค้ด &lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;icon_names=contact_support&quot; /&gt;" oninput="updateMenuIconPreview()">${esc(m.icon)}</textarea><p class="form-help">รองรับโค้ด &lt;link&gt; และ &lt;style&gt; ของ Material Symbols โดยไม่รันโค้ดที่วาง</p><div class="field hidden" id="mIconNameField"><label>ชื่อไอคอน (เมื่อวางเฉพาะ &lt;style&gt;)</label><input id="mIconName" placeholder="เช่น contact_support" oninput="updateMenuIconPreview()"></div><div class="icon-preview"><span id="menuIconPreview"></span><span id="iconValidation">ตัวอย่างไอคอน</span></div></div>
+      <div class="field"><label>วางลิงก์หรือโค้ดไอคอน (ไม่บังคับ)</label><textarea id="mIcon" rows="5" placeholder="วาง <link ... icon_names=contact_support> หรือ <span class=&quot;material-symbols-outlined&quot;>contact_support</span> พร้อม <style>" oninput="updateMenuIconPreview()">${esc(parseMaterialIcon(m.icon) ? m.icon : '')}</textarea><p class="form-help">ไม่มีไอคอนเริ่มต้นหรือรายการให้เลือก วางโค้ดที่ต้องการเท่านั้น หากไม่ใส่จะแสดงเฉพาะชื่อเมนู โค้ด &lt;style&gt; อย่างเดียวไม่สามารถระบุได้ว่าต้องแสดงไอคอนใด</p><div class="icon-preview"><span id="menuIconPreview"></span><span id="iconValidation"></span></div></div>
       <div class="field"><label>หมวดหมู่</label><input id="mCategory" value="${esc(m.category)}"></div>
       <div class="field"><label>รูปแบบการแสดงผล</label>
         <select id="mType" onchange="menuTypeChanged()">
@@ -987,11 +993,11 @@ function saveMenu(i) {
       (image ? `<img data-part="image" src="${esc(image)}" alt="รูปประกอบ" loading="lazy" style="max-width:100%;height:auto;border-radius:16px;margin:12px 0">` : '') +
       (detail ? `<div data-part="detail" style="white-space:pre-wrap">${esc(detail)}</div>` : '') + '</article>';
   } else if (type === 'html') content = $('mContent').value;
-  const parsedIcon = parseMaterialIcon($('mIcon').value, $('mIconName')?.value || '');
-  if (!parsedIcon) return toast('กรุณาวางโค้ด Material Symbols และระบุชื่อไอคอน');
+  const rawIcon = $('mIcon').value.trim();
+  if (rawIcon && !parseMaterialIcon(rawIcon)) return toast('โค้ดไอคอนไม่สมบูรณ์: ต้องมี icon_names หรือ <span> ระบุชื่อไอคอน');
   Object.assign(m, {
     title: $('mTitle').value.trim() || 'เมนูใหม่',
-    icon: /<style\b/i.test($('mIcon').value) && !/<link\b/i.test($('mIcon').value) ? $('mIcon').value.trim() + '\n' + `<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&icon_names=${parsedIcon.icon}">` : $('mIcon').value.trim(),
+    icon: rawIcon,
     category: $('mCategory').value.trim() || 'ทั่วไป',
     type, content,
     url: type === 'external' ? $('mUrl').value.trim() : m.url
