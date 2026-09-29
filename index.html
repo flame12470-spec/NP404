@@ -440,21 +440,34 @@ let admin = false, tab = null, adminMenuOpen = false, popupTimer = null, sideOpe
 
 const $ = id => document.getElementById(id);
 const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const MATERIAL_ICON_NAMES = ['home','dashboard','campaign','event','school','groups','payments','calendar_month','assignment','folder','chat','contact_support','settings','notifications','image','photo_library','link','article','edit_note','person','verified','sports_soccer','receipt_long','account_balance','schedule','info','menu_book','public','star'];
-function menuIconMarkup(name) {
-  const value = String(name || '').trim();
-  return /^[a-z][a-z0-9_]*$/.test(value)
-    ? `<span class="material-symbols-outlined" aria-hidden="true">${esc(value)}</span>`
-    : `<span aria-hidden="true">${esc(value || '▣')}</span>`;
+function extractMaterialIcon(value) {
+  const raw = String(value || '').trim();
+  // Accept only a pasted Google Fonts Material Symbols stylesheet link.
+  const match = raw.match(/^<link\s+[^>]*href\s*=\s*["'](https:\/\/fonts\.googleapis\.com\/css2\?[^"']+)["'][^>]*\/?>$/i);
+  if (!match) return null;
+  try {
+    const url = new URL(match[1].replace(/&amp;/g, '&'));
+    if (url.hostname !== 'fonts.googleapis.com' || !url.pathname.startsWith('/css2')) return null;
+    if (!url.searchParams.has('family') || !url.searchParams.get('family').includes('Material Symbols Outlined')) return null;
+    const names = url.searchParams.get('icon_names');
+    if (!names || !/^[a-z][a-z0-9_]*(?:,[a-z][a-z0-9_]*)*$/.test(names)) return null;
+    return names.split(',')[0];
+  } catch { return null; }
 }
-function selectMenuIcon(name) {
-  $('mIcon').value = name;
-  updateMenuIconPreview();
+function menuIconMarkup(value) {
+  const icon = extractMaterialIcon(value);
+  if (!icon && /^[a-z][a-z0-9_]*$/.test(String(value || '').trim())) return `<span class="material-symbols-outlined" aria-hidden="true">${esc(value)}</span>`;
+  if (!icon && !String(value || '').includes('<')) return `<span aria-hidden="true">${esc(value || '▣')}</span>`;
+  return icon
+    ? `<span class="material-symbols-outlined" aria-hidden="true">${esc(icon)}</span>`
+    : `<span class="material-symbols-outlined" aria-hidden="true">help</span>`;
 }
 function updateMenuIconPreview() {
   const input = $('mIcon'); if (!input) return;
-  $('menuIconPreview').innerHTML = menuIconMarkup(input.value);
-  document.querySelectorAll('.icon-choice').forEach(el => el.classList.toggle('selected',el.dataset.icon === input.value));
+  const icon = extractMaterialIcon(input.value);
+  $('menuIconPreview').innerHTML = icon ? menuIconMarkup(input.value) : '<span class="material-symbols-outlined">help</span>';
+  const message = $('iconValidation');
+  if (message) message.textContent = icon ? `ไอคอนที่เลือก: ${icon}` : 'วางโค้ด <link> จาก Google Fonts ที่มี icon_names=...';
 }
 
 let saveQueue = Promise.resolve();
@@ -902,7 +915,7 @@ function editMenu(i) {
     <h2>แก้ไขเมนู: ${esc(m.title)}</h2>
     <div class="cols">
       <div class="field"><label>ชื่อเมนู (ในแถบเมนู)</label><input id="mTitle" value="${esc(m.title)}"></div>
-      <div class="field"><label>ไอคอน Material Symbols หรืออีโมจิ</label><input id="mIcon" value="${esc(m.icon)}" placeholder="เช่น contact_support" oninput="updateMenuIconPreview()"><p class="form-help">พิมพ์ชื่อไอคอน เช่น contact_support, home, campaign หรือเลือกด้านล่าง</p><div class="icon-preview"><span id="menuIconPreview"></span><span>ตัวอย่างไอคอน</span></div><div class="icon-picker">${MATERIAL_ICON_NAMES.map(name => `<button type="button" class="icon-choice" data-icon="${name}" onclick="selectMenuIcon('${name}')"><span class="material-symbols-outlined">${name}</span><span>${name}</span></button>`).join('')}</div></div>
+      <div class="field"><label>โค้ดไอคอน Google Material Symbols</label><textarea id="mIcon" rows="4" placeholder="วางโค้ด &lt;link rel=&quot;stylesheet&quot; href=&quot;https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;icon_names=contact_support&quot; /&gt;" oninput="updateMenuIconPreview()">${esc(m.icon)}</textarea><p class="form-help">วางโค้ด &lt;link&gt; จาก Google Fonts เท่านั้น ระบบจะอ่านชื่อไอคอนจาก icon_names และแสดงตัวอย่างโดยไม่รันโค้ดที่วาง</p><div class="icon-preview"><span id="menuIconPreview"></span><span id="iconValidation">ตัวอย่างไอคอน</span></div></div>
       <div class="field"><label>หมวดหมู่</label><input id="mCategory" value="${esc(m.category)}"></div>
       <div class="field"><label>รูปแบบการแสดงผล</label>
         <select id="mType" onchange="menuTypeChanged()">
@@ -948,9 +961,10 @@ function saveMenu(i) {
       (image ? `<img data-part="image" src="${esc(image)}" alt="รูปประกอบ" loading="lazy" style="max-width:100%;height:auto;border-radius:16px;margin:12px 0">` : '') +
       (detail ? `<div data-part="detail" style="white-space:pre-wrap">${esc(detail)}</div>` : '') + '</article>';
   } else if (type === 'html') content = $('mContent').value;
+  if (!extractMaterialIcon($('mIcon').value)) return toast('กรุณาวางโค้ด <link> ของ Material Symbols ที่มี icon_names');
   Object.assign(m, {
     title: $('mTitle').value.trim() || 'เมนูใหม่',
-    icon: $('mIcon').value.trim() || '▣',
+    icon: $('mIcon').value.trim(),
     category: $('mCategory').value.trim() || 'ทั่วไป',
     type, content,
     url: type === 'external' ? $('mUrl').value.trim() : m.url
