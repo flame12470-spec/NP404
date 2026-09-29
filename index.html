@@ -711,7 +711,7 @@ main{
 /* =========================================================
    BLUE GLASS THEME — based on #6593c7 reference
    ปรับเฉพาะ UI / สี / เอฟเฟกต์ / responsive
-   ไม่แตะ Firebase, Apps Script, API หรือฟังก์ชันระบบ
+   คงระบบ Firebase Authentication และหน้าตาเดิม
 ========================================================= */
 
 :root{
@@ -1164,7 +1164,7 @@ nav.menu-bar .menu-card:hover .menu-icon{transform:scale(1.15) rotate(-5deg)}
 <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 <nav class="menu-bar" id="menuBar" aria-label="เมนูหลัก"><div class="sidebar-head"><span class="sidebar-title">เมนูหลัก</span><button class="sidebar-close" onclick="closeSidebar()" aria-label="ปิดเมนู">&times;</button></div></nav>
 <main><div class="page-card" id="pageContent"></div></main>
-<button class="chat-fab" id="chatFab" onclick="openChat()" title="แชทกับแอดมิน / AI"><i class="fa-solid fa-comment-dots"></i></button>
+<button class="chat-fab hidden" id="chatFab" onclick="openChat()" title="แชทกับแอดมิน / AI"><i class="fa-solid fa-comment-dots"></i></button>
 
 <div class="overlay" id="authModal"><div class="modal"><div class="tabs"><button id="tabLogin" class="active" onclick="setAuthTab('login')">เข้าสู่ระบบ</button><button id="tabRegister" onclick="setAuthTab('register')">สมัครสมาชิก</button></div>
 <div id="registerFields" class="hidden"><div class="grid2"><div class="field"><label>ชื่อจริง</label><input id="authFirstName"></div><div class="field"><label>นามสกุล</label><input id="authLastName"></div></div><div class="field"><label>ชื่อแอคเค้า</label><input id="authUsername" placeholder="เช่น np_flame"></div></div>
@@ -1178,8 +1178,8 @@ nav.menu-bar .menu-card:hover .menu-icon{transform:scale(1.15) rotate(-5deg)}
   <button onclick="showAdminTab('pages',this)">หน้าเมนู</button>
   <button onclick="showAdminTab('links',this)">ลิงก์</button>
   <button onclick="showAdminTab('popup',this)">ป๊อปอัป</button>
-  <button onclick="showAdminTab('users',this)">บัญชีผู้ใช้</button>
-  <button onclick="showAdminTab('chat',this)">แชท</button>
+  
+  
 </div>
 <section id="adminSystem"></section>
 <section id="adminPages" class="hidden"></section>
@@ -1241,114 +1241,49 @@ onAuthStateChanged(auth,async u=>{
   window.__currentUser=u;
   window.__isAdmin=!!(u&&u.email&&window.__ADMIN_EMAIL&&u.email.toLowerCase()===window.__ADMIN_EMAIL.toLowerCase());
   renderAuth();renderMenu();renderActivePage();
-  if(u&&window.syncProfile)window.syncProfile();
+  
 });
 window.doLogout=()=>signOut(auth);
 </script>
 <script>
-const API_URL="https://script.google.com/macros/s/AKfycbwNzOPeq1ySwZET-yNLabubjiGx-BsLjTpuWuV6cz0AG1MEBkggvSEh6bCnHq5lH7WB/exec",HOME_ID="home";
+const HOME_ID="home";
 const ICONS=['🏠','📄','📢','🛒','🎮','📚','🎵','🎬','💬','⚙️','🧾','📊','🗂️','🎯','⭐','❤️','🔥','🚀','🎁','📷','🗓️','✅','📌','🔔','🌐','💡','🔒','🧩','🏆','☕','🔗'];
 let pages=[],links=[],settings={},activeId=HOME_ID,authTab="login",editingPageRow=null,editingLinkRow=null,builderBlocks=[];
 let conversations=[],usersList=[],activeConvUserId=null,adminChatTimer=null,chatPollTimer=null;
 const $=id=>document.getElementById(id),esc=s=>String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-/* =========================================================
-   NP-404 — API connection layer v3
-   เหมือน v2 (JSONP + fetch แข่งกัน ไม่ต้องรอทั้งคู่ครบ) แต่เพิ่ม:
-   1) เก็บ error จริงจากทั้ง fetch และ JSONP แยกกันไว้ใน __lastApiErrors
-      แล้วโชว์ทั้งคู่ในข้อความ error แทนคำว่า "เชื่อมต่อไม่สำเร็จ" เฉยๆ
-      เพื่อวินิจฉัยได้ตรงจุดว่าฝั่งไหนพังเพราะอะไร (CORS / permission / timeout ฯลฯ)
-   2) มี testApiConnection() ไว้กดทดสอบจากในแอปได้เลย ไม่ต้องเปิด URL แยก
-   ========================================================= */
-const API_TIMEOUT=25000; // เผื่อ Apps Script cold start / getAll ที่ไล่สร้าง-อ่านหลายชีต อาจช้ากว่า 8 วิ
-let __lastApiErrors={fetch:null,jsonp:null};
-function apiUrl(action,params){
-  const u=new URL(API_URL);
-  u.searchParams.set("action",action||"getAll");
-  u.searchParams.set("_ts",Date.now().toString());
-  Object.keys(params||{}).forEach(k=>u.searchParams.set(k,String(params[k]??"")));
-  return u.toString();
+/* NP-404 standalone mode: no remote data API.
+   Settings, pages and links are stored in this browser only. */
+const LOCAL_KEY="np404_standalone_v1";
+function readLocalData(){
+  try {const d=JSON.parse(localStorage.getItem(LOCAL_KEY)||"{}");return {
+    pages:Array.isArray(d.pages)?d.pages:[], links:Array.isArray(d.links)?d.links:[],
+    settings:d.settings&&typeof d.settings==="object"?d.settings:{siteName:"NP-404",homeTitle:"ยินดีต้อนรับ",homeSubtitle:"เว็บไซต์ห้องเรียน",homeMenuLabel:"หน้าแรก",accentColor:"#6593c7"}
+  }}catch(e){return {pages:[],links:[],settings:{siteName:"NP-404",homeTitle:"ยินดีต้อนรับ"}}}
 }
-function jsonp(url){
-  return new Promise((resolve,reject)=>{
-    const name="__np404_jsonp_"+Date.now()+"_"+Math.random().toString(36).slice(2);
-    const script=document.createElement("script");
-    let done=false,timer;
-    const cleanup=()=>{
-      done=true; clearTimeout(timer);
-      try{delete window[name]}catch(e){window[name]=undefined}
-      if(script.parentNode)script.parentNode.removeChild(script);
-    };
-    timer=setTimeout(()=>{cleanup();reject(new Error("JSONP timeout 8 วิ (มักแปลว่า Apps Script เด้งขอ login ของ Google แทนที่จะตอบ JSON — เช็คว่า deployment ตั้ง Who has access เป็น 'Anyone' จริงไหม)"))},API_TIMEOUT);
-    window[name]=(data)=>{
-      if(done)return; cleanup();
-      if(data&&data.success===false)reject(new Error(data.error||"Apps Script แจ้งข้อผิดพลาด"));
-      else resolve(data&&data.data!==undefined?data.data:data);
-    };
-    script.onerror=()=>{cleanup();reject(new Error("JSONP script โหลดไม่สำเร็จ (อาจถูก CSP บล็อก หรือ URL ผิด)"))};
-    script.src=url+(url.includes("?")?"&":"?")+"callback="+encodeURIComponent(name);
-    script.async=true;
-    document.head.appendChild(script);
-  });
+function writeLocalData(d){localStorage.setItem(LOCAL_KEY,JSON.stringify(d))}
+async function apiGet(action){
+  if(action==="getAll")return readLocalData();
+  throw Error("ฟังก์ชันนี้ยังไม่มีฐานข้อมูลออนไลน์เชื่อมต่อ");
 }
-async function fetchApiJson(url,options={},attempt=0){
-  const ctl=new AbortController();
-  const timer=setTimeout(()=>ctl.abort(),API_TIMEOUT);
-  try{
-    const r=await fetch(url,{
-      method:options.method||"GET", body:options.body,
-      headers:options.headers||{"Accept":"application/json,text/plain,*/*"},
-      credentials:"omit", redirect:"follow", cache:"no-store", mode:"cors", signal:ctl.signal
-    });
-    const text=await r.text();
-    if(!r.ok)throw new Error("HTTP "+r.status);
-    let x; try{x=JSON.parse(text)}catch(e){throw new Error("API ส่งข้อมูลที่ไม่ใช่ JSON (มักแปลว่าโดนเด้งไปหน้า login ของ Google แทน)")}
-    if(x&&x.success===false)throw new Error(x.error||"Apps Script แจ้งข้อผิดพลาด");
-    return x&&x.data!==undefined?x.data:x;
-  }catch(e){
-    if(attempt<1){await new Promise(r=>setTimeout(r,250));return fetchApiJson(url,options,attempt+1)}
-    if(e&&e.name==="AbortError")throw new Error("API ใช้เวลานานเกินไป (เกิน 8 วิ)");
-    if(e instanceof TypeError)throw new Error("Fetch ถูกบล็อกโดย CORS/เครือข่าย (ปกติสำหรับ Apps Script — JSONP จะเป็นตัวช่วยแทน)");
-    throw e;
-  }finally{clearTimeout(timer)}
-}
-/* เรียก GET แบบขนาน: มือถือมักได้ผลจาก fetch ส่วน Safari/iPad ใช้ JSONP
-   ไม่ต้องรอวิธีใดวิธีหนึ่งครบ 15 วินาทีเหมือนรุ่นก่อน */
-function apiGetFast(a,params){
-  const url=apiUrl(a,params);
-  __lastApiErrors={fetch:null,jsonp:null};
-  return new Promise((resolve,reject)=>{
-    let settled=false,errors=0;
-    const finish=(fn,v)=>{if(settled)return;settled=true;fn(v)};
-    jsonp(url).then(v=>finish(resolve,v)).catch(e=>{__lastApiErrors.jsonp=e&&e.message||String(e);if(++errors>=2)finish(reject,new Error(combinedApiError_()))});
-    fetchApiJson(url).then(v=>finish(resolve,v)).catch(e=>{__lastApiErrors.fetch=e&&e.message||String(e);if(++errors>=2)finish(reject,new Error(combinedApiError_()))});
-  });
-}
-function combinedApiError_(){
-  return "เชื่อมต่อ Apps Script ไม่สำเร็จ\nfetch: "+(__lastApiErrors.fetch||"-")+"\nJSONP: "+(__lastApiErrors.jsonp||"-");
-}
-function apiGet(a){return apiGetFast(a)}
-/* กดทดสอบการเชื่อมต่อ API จากในแอปได้เลย โดยไม่ต้องเปิด URL แยกในแท็บใหม่ */
-async function testApiConnection(){
-  toast("กำลังทดสอบการเชื่อมต่อ...");
-  try{
-    const ping=await apiGetFast("ping");
-    toast("เชื่อมต่อ Apps Script สำเร็จ ("+(ping&&ping.time||"")+")");
-  }catch(e){
-    toast(String(e&&e.message||e),false);
-  }
-}
-window.testApiConnection=testApiConnection;
-async function apiGetAuth(a,params){
-  const token=window.__getIdToken?await window.__getIdToken():null;
-  return apiGetFast(a,{...(params||{}),idToken:token||""});
-}
+async function apiGetAuth(action){return apiGet(action)}
 async function apiPost(d){
-  const token=window.__getIdToken?await window.__getIdToken():null;
-  if(!token)throw Error("กรุณาเข้าสู่ระบบก่อนทำรายการนี้");
-  return fetchApiJson(API_URL+"?action="+encodeURIComponent(d.action||"")+"&_ts="+Date.now(),{
-    method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8","Accept":"application/json,text/plain,*/*"},
-    body:JSON.stringify({...d,idToken:token})
-  });
+  const data=readLocalData();
+  if(d.action==="saveSettings")data.settings={...data.settings,...d.settings};
+  else if(d.action==="addPage"||d.action==="updatePage"){
+    const row=d.action==="updatePage"?Number(d.rowIndex):Math.max(0,...data.pages.map(p=>Number(p.rowIndex)||0))+1;
+    const item={...d,rowIndex:row};delete item.action;
+    data.pages=d.action==="updatePage"?data.pages.map(p=>Number(p.rowIndex)===row?{...p,...item}:p):[...data.pages,item];
+  }else if(d.action==="setPageActive")data.pages=data.pages.map(p=>Number(p.rowIndex)===Number(d.rowIndex)?{...p,active:d.active}:p);
+  else if(d.action==="deletePage")data.pages=data.pages.filter(p=>Number(p.rowIndex)!==Number(d.rowIndex));
+  else if(d.action==="addLink"||d.action==="updateLink"){
+    const row=d.action==="updateLink"?Number(d.rowIndex):Math.max(0,...data.links.map(l=>Number(l.rowIndex)||0))+1;
+    const item={...d,rowIndex:row};delete item.action;
+    data.links=d.action==="updateLink"?data.links.map(l=>Number(l.rowIndex)===row?{...l,...item}:l):[...data.links,item];
+  }else if(d.action==="setLinkActive")data.links=data.links.map(l=>Number(l.rowIndex)===Number(d.rowIndex)?{...l,active:d.active}:l);
+  else if(d.action==="deleteLink")data.links=data.links.filter(l=>Number(l.rowIndex)!==Number(d.rowIndex));
+  else if(d.action==="registerProfile")return {success:true};
+  else throw Error("ฟังก์ชันนี้ต้องเชื่อมต่อฐานข้อมูลออนไลน์ก่อนใช้งาน");
+  writeLocalData(data);return {success:true};
 }
 function closeOverlay(id){$(id).classList.remove("show")}window.closeOverlay=closeOverlay;
 function toast(m,ok=true){$("notificationTitle").innerText=ok?"สำเร็จ":"แจ้งเตือน";$("notificationText").innerText=m||"";$("notificationModal").classList.add("show")}
@@ -1371,11 +1306,10 @@ async function loadAll(){
     const msg=String(e&&e.message||e||"");
     $("pageContent").innerHTML='<div class="empty" style="padding:55px 20px;line-height:2">'+
       '<b style="display:block;font-size:18px;color:var(--ink);margin-bottom:6px">โหลดข้อมูลระบบไม่สำเร็จ</b>'+
-      '<span>กรุณาลองรีเฟรชอีกครั้ง หากใช้ iPad/Safari ให้ตรวจสอบว่า Apps Script ตั้งค่าเป็น <b>ทุกคน (Anyone)</b> และ URL API ยังใช้งานได้</span>'+
+      '<span>ไม่สามารถอ่านข้อมูลที่จัดเก็บในเบราว์เซอร์นี้ได้</span>'+
       '<small style="display:block;margin-top:8px;opacity:.75;word-break:break-word;white-space:pre-line">'+esc(msg)+'</small>'+
       '<div style="margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'+
       '<button class="pill solid" onclick="loadAll()">ลองโหลดใหม่</button>'+
-      '<button class="pill" onclick="testApiConnection()">ทดสอบ API</button>'+
       '</div></div>';
   }
 }
@@ -1639,7 +1573,7 @@ function renderSystem(){$("adminSystem").innerHTML=
 '<div class="setting-card"><div class="setting-head"><div><b>หน้าแรก</b><small>แก้หัวข้อ คำอธิบาย ชื่อปุ่ม และไอคอนของเมนูหน้าแรกได้ทั้งหมด</small></div></div><div class="field"><label>หัวข้อหน้าแรก</label><input id="setHomeTitle" value="'+esc(settings.homeTitle||"")+'"></div><div class="text-style-grid"><div class="field"><label>รูปแบบหัวข้อ</label><select id="setHomeTitleWeight">'+[100,200,300,400,500,600,700,800,900].map(function(w){return '<option value="'+w+'" '+(String(settings.homeTitleWeight||700)===String(w)?'selected':'')+'>'+w+'</option>'}).join('')+'</select></div><div class="field"><label>จัดหัวข้อ</label><select id="setHomeTitleAlign"><option value="left" '+(popupAlign(settings.homeTitleAlign)==="left"?"selected":"")+'>ชิดซ้าย</option><option value="center" '+(popupAlign(settings.homeTitleAlign)==="center"?"selected":"")+'>กึ่งกลาง</option><option value="right" '+(popupAlign(settings.homeTitleAlign)==="right"?"selected":"")+'>ชิดขวา</option></select></div></div><div class="field"><label>รายละเอียดหน้าแรก</label><textarea id="setHomeSubtitle">'+esc(settings.homeSubtitle||"")+'</textarea></div><div class="text-style-grid"><div class="field"><label>รูปแบบรายละเอียด</label><select id="setHomeDetailWeight">'+[100,200,300,400,500,600,700,800,900].map(function(w){return '<option value="'+w+'" '+(String(settings.homeDetailWeight||400)===String(w)?'selected':'')+'>'+w+'</option>'}).join('')+'</select></div><div class="field"><label>จัดรายละเอียด</label><select id="setHomeDetailAlign"><option value="left" '+(popupAlign(settings.homeDetailAlign)==="left"?"selected":"")+'>ชิดซ้าย</option><option value="center" '+(popupAlign(settings.homeDetailAlign)==="center"?"selected":"")+'>กึ่งกลาง</option><option value="right" '+(popupAlign(settings.homeDetailAlign)==="right"?"selected":"")+'>ชิดขวา</option></select></div></div><div class="grid2"><div class="field"><label>ชื่อปุ่มเมนูหน้าแรก</label><input id="setHomeMenuLabel" value="'+esc(settings.homeMenuLabel||"หน้าแรก")+'"></div><div class="field"><label>ไอคอนหน้าแรก — Material Symbols</label><div class="icon-row"><div class="icon-preview" id="setHomeMenuIconPreview"><span class="material-symbols-outlined">home</span></div><input id="setHomeMenuIcon" value="'+esc(settings.homeMenuIcon||"home")+'" placeholder="เช่น home, school, dashboard" oninput="previewMaterialIcon(this.id,&quot;setHomeMenuIconPreview&quot;,&quot;home&quot;)"></div></div></div><button class="pill solid" onclick="saveHome()">บันทึกหน้าแรก</button></div>'+
 '<div class="setting-card"><div class="setting-head"><div><b>ข้อความประกาศวิ่ง</b><small>แสดงบนแถบด้านบนและวิ่งอัตโนมัติ</small></div></div><div class="field"><input id="setAnnouncement" value="'+esc(settings.announcement||"")+'"></div><button class="pill solid" onclick="saveAnnouncement()">บันทึกประกาศวิ่ง</button></div>'+
 '<div class="setting-card"><div class="setting-head"><div><b>ฟอนต์และความหนาตัวอักษร</b><small>ใช้ Kanit ทั้งระบบ โดยแยกขนาดและความหนาของข้อความ เมนู และเนื้อหาออกจากกัน</small></div></div><div class="text-style-grid"><div class="field"><label>ความหนาตัวอักษรทั่วไป</label><select id="setFontWeight"><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option></select></div><div class="field"><label>ความหนาตัวอักษรเมนู</label><select id="setMenuFontWeight"><option value="100">100</option><option value="200">200</option><option value="300">300</option><option value="400">400</option><option value="500">500</option><option value="600">600</option><option value="700">700</option><option value="800">800</option><option value="900">900</option></select></div></div><div class="text-style-grid"><div class="field"><label>ขนาดตัวอักษรทั่วไป</label><select id="setFontSize"><option value="13">13 px — เล็ก</option><option value="14">14 px</option><option value="15">15 px</option><option value="16">16 px — ปกติ</option><option value="17">17 px</option><option value="18">18 px</option><option value="19">19 px</option><option value="20">20 px — ใหญ่</option></select></div><div class="field"><label>ขนาดตัวอักษรเมนู</label><select id="setMenuFontSize"><option value="11">11 px</option><option value="12">12 px</option><option value="13">13 px</option><option value="14">14 px — ปกติ</option><option value="15">15 px</option><option value="16">16 px</option><option value="17">17 px</option></select></div></div><button class="pill solid" onclick="saveTypography()">บันทึกฟอนต์</button></div><div class="setting-card"><div class="setting-head"><div><b>ธีมสี</b><small>เลือกโหมดเริ่มต้นและสีหลักของระบบ</small></div></div><div class="grid2"><div class="field"><label>โหมดเริ่มต้น</label><select id="setThemeMode"><option value="light" '+(settings.themeMode!=="dark"?"selected":"")+'>สว่าง (Light)</option><option value="dark" '+(settings.themeMode==="dark"?"selected":"")+'>มืด (Dark)</option></select></div><div class="field"><label>สีหลักของระบบ</label><div class="color-row"><input type="color" id="setAccentColor" value="'+esc(settings.accentColor||"#d6455a")+'"></div></div></div><button class="pill solid" onclick="saveTheme()">บันทึกธีมสี</button></div>'+
-'<div class="setting-card"><div class="setting-head"><div><b>ผู้ช่วย AI ในแชท</b><small>ให้ AI ตอบคำถามผู้ใช้อัตโนมัติในเมนูแชท (แอดมินยังตอบเองเพิ่มเติมได้เสมอ)</small></div><label class="switch"><input id="aiEnabledInput" type="checkbox" '+(settings.aiEnabled==="true"?"checked":"")+'><span class="slider"></span></label></div><div class="grid2"><div class="field"><label>ผู้ให้บริการ AI</label><select id="aiProviderInput"><option value="openai" '+(settings.aiProvider!=="gemini"?"selected":"")+'>OpenAI</option><option value="gemini" '+(settings.aiProvider==="gemini"?"selected":"")+'>Google Gemini</option></select></div><div class="field"><label>โมเดล</label><input id="aiModelInput" value="'+esc(settings.aiModel||"gpt-4o-mini")+'"></div></div><div class="field"><label>API Key</label><input id="aiApiKeyInput" type="password" value="'+esc(settings.aiApiKey||"")+'" placeholder="วาง API Key ของผู้ให้บริการ AI"></div><div class="field"><label>System Prompt (บุคลิก/ขอบเขตการตอบของ AI)</label><textarea id="aiSystemPromptInput">'+esc(settings.aiSystemPrompt||"")+'</textarea></div><button class="pill solid" onclick="saveAI()">บันทึกการตั้งค่า AI</button></div>';
+'<div class="setting-card hidden"><div class="setting-head"><div><b>ผู้ช่วย AI ในแชท</b><small>ให้ AI ตอบคำถามผู้ใช้อัตโนมัติในเมนูแชท (แอดมินยังตอบเองเพิ่มเติมได้เสมอ)</small></div><label class="switch"><input id="aiEnabledInput" type="checkbox" '+(settings.aiEnabled==="true"?"checked":"")+'><span class="slider"></span></label></div><div class="grid2"><div class="field"><label>ผู้ให้บริการ AI</label><select id="aiProviderInput"><option value="openai" '+(settings.aiProvider!=="gemini"?"selected":"")+'>OpenAI</option><option value="gemini" '+(settings.aiProvider==="gemini"?"selected":"")+'>Google Gemini</option></select></div><div class="field"><label>โมเดล</label><input id="aiModelInput" value="'+esc(settings.aiModel||"gpt-4o-mini")+'"></div></div><div class="field"><label>API Key</label><input id="aiApiKeyInput" type="password" value="'+esc(settings.aiApiKey||"")+'" placeholder="วาง API Key ของผู้ให้บริการ AI"></div><div class="field"><label>System Prompt (บุคลิก/ขอบเขตการตอบของ AI)</label><textarea id="aiSystemPromptInput">'+esc(settings.aiSystemPrompt||"")+'</textarea></div><button class="pill solid" onclick="saveAI()">บันทึกการตั้งค่า AI</button></div>';
   const fw=$("setFontWeight"),mw=$("setMenuFontWeight"),fs=$("setFontSize"),mfs=$("setMenuFontSize");if(fw)fw.value=String(settings.fontWeight||400);if(mw)mw.value=String(settings.menuFontWeight||500);if(fs)fs.value=String(settings.fontSize||16);if(mfs)mfs.value=String(settings.menuFontSize||14);
 }
 async function saveSettings(o){await apiPost({action:"saveSettings",settings:o});Object.assign(settings,o);applySettings();renderMenu();renderActivePage();renderAdmin()}
