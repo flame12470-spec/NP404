@@ -261,6 +261,18 @@ code { font-family: ui-monospace, monospace; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Refined dashboard form controls */
+.admin-form-card{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:clamp(18px,3vw,30px);margin-bottom:20px;box-shadow:var(--shadow-sm)}
+.admin-form-card h3{margin:0 0 6px;font-size:1.12rem}.form-help{font-size:.82rem;color:var(--muted);margin:4px 0 15px;line-height:1.6}
+.field{margin-bottom:19px}.field label{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-weight:600;color:var(--text)}
+.field input:not([type=checkbox]),.field select,.field textarea,#menuEditor input,#menuEditor textarea,#menuEditor select{width:100%;max-width:100%;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);padding:13px 15px;min-height:47px;font:inherit;box-shadow:var(--shadow-sm);transition:border-color .2s,box-shadow .2s,background .2s}
+.field textarea,#menuEditor textarea{resize:vertical;min-height:100px;line-height:1.7}
+.field input:focus,.field select:focus,.field textarea:focus,#menuEditor input:focus,#menuEditor textarea:focus,#menuEditor select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-light)}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);opacity:.8}
+.field select,#menuEditor select{cursor:pointer}.form-section-heading{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.08rem;margin:20px 0 15px}.form-section-heading .material-symbols-outlined{color:var(--primary)}
+.icon-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin:12px 0}.icon-choice{border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);padding:12px 6px;display:flex;align-items:center;flex-direction:column;gap:6px;font:inherit;font-size:.73rem;cursor:pointer;min-height:76px}.icon-choice:hover,.icon-choice.selected{border-color:var(--primary);background:var(--primary-light)}.icon-choice .material-symbols-outlined{font-size:27px}.icon-preview{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border);border-radius:13px;margin:10px 0}.icon-preview .material-symbols-outlined{font-size:32px;color:var(--primary)}
+@media(max-width:600px){.icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-form-card{padding:16px}.cols{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -428,6 +440,22 @@ let admin = false, tab = null, adminMenuOpen = false, popupTimer = null, sideOpe
 
 const $ = id => document.getElementById(id);
 const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const MATERIAL_ICON_NAMES = ['home','dashboard','campaign','event','school','groups','payments','calendar_month','assignment','folder','chat','contact_support','settings','notifications','image','photo_library','link','article','edit_note','person','verified','sports_soccer','receipt_long','account_balance','schedule','info','menu_book','public','star'];
+function menuIconMarkup(name) {
+  const value = String(name || '').trim();
+  return /^[a-z][a-z0-9_]*$/.test(value)
+    ? `<span class="material-symbols-outlined" aria-hidden="true">${esc(value)}</span>`
+    : `<span aria-hidden="true">${esc(value || '▣')}</span>`;
+}
+function selectMenuIcon(name) {
+  $('mIcon').value = name;
+  updateMenuIconPreview();
+}
+function updateMenuIconPreview() {
+  const input = $('mIcon'); if (!input) return;
+  $('menuIconPreview').innerHTML = menuIconMarkup(input.value);
+  document.querySelectorAll('.icon-choice').forEach(el => el.classList.toggle('selected',el.dataset.icon === input.value));
+}
 
 let saveQueue = Promise.resolve();
 function persist() {
@@ -544,11 +572,11 @@ function refresh() {
   $('maintenanceText').textContent = s.maintenanceText;
   
   $('publicNav').innerHTML = '<button onclick="go(\'home\')"><span class="material-symbols-outlined">home</span> หน้าแรก</button>' +
-    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')"><span>${esc(m.icon)}</span> ${esc(m.title)}</button>`).join('');
+    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}</button>`).join('');
     
   $('homeCards').innerHTML = s.menus.filter(m => m.visible).map(m => `
     <div class="card">
-      <div class="icon">${esc(m.icon)}</div>
+      <div class="icon">${menuIconMarkup(m.icon)}</div>
       <h2>${esc(m.title)}</h2>
       <p><small style="color:var(--muted);">${esc(m.category)}</small></p>
       <button class="btn ghost" onclick="go('${esc(m.id)}')">เปิดเมนู →</button>
@@ -789,7 +817,7 @@ function renderAdmin() {
       ${s.menus.map((m, i) => `
         <div class="menuitem">
           <div class="row between">
-            <b>${esc(m.icon)} ${esc(m.title)}</b>
+            <b>${menuIconMarkup(m.icon)} ${esc(m.title)}</b>
             <div class="row">
               <button class="btn ghost" onclick="moveMenu(${i},-1)">↑</button>
               <button class="btn ghost" onclick="moveMenu(${i},1)">↓</button>
@@ -870,11 +898,11 @@ function menuTypeChanged() {
 }
 function editMenu(i) {
   const m = s.menus[i], v = readBuilderContent(m.content);
-  $('menuEditor').innerHTML = `<div class="card" style="margin-top:20px;">
+  $('menuEditor').innerHTML = `<div class="admin-form-card" style="margin-top:20px;">
     <h2>แก้ไขเมนู: ${esc(m.title)}</h2>
     <div class="cols">
       <div class="field"><label>ชื่อเมนู (ในแถบเมนู)</label><input id="mTitle" value="${esc(m.title)}"></div>
-      <div class="field"><label>ไอคอน</label><input id="mIcon" value="${esc(m.icon)}"></div>
+      <div class="field"><label>ไอคอน Material Symbols หรืออีโมจิ</label><input id="mIcon" value="${esc(m.icon)}" placeholder="เช่น contact_support" oninput="updateMenuIconPreview()"><p class="form-help">พิมพ์ชื่อไอคอน เช่น contact_support, home, campaign หรือเลือกด้านล่าง</p><div class="icon-preview"><span id="menuIconPreview"></span><span>ตัวอย่างไอคอน</span></div><div class="icon-picker">${MATERIAL_ICON_NAMES.map(name => `<button type="button" class="icon-choice" data-icon="${name}" onclick="selectMenuIcon('${name}')"><span class="material-symbols-outlined">${name}</span><span>${name}</span></button>`).join('')}</div></div>
       <div class="field"><label>หมวดหมู่</label><input id="mCategory" value="${esc(m.category)}"></div>
       <div class="field"><label>รูปแบบการแสดงผล</label>
         <select id="mType" onchange="menuTypeChanged()">
@@ -884,7 +912,7 @@ function editMenu(i) {
         </select>
       </div>
     </div>
-    <div id="builderFields">
+    <div id="builderFields"><div class="form-section-heading"><span class="material-symbols-outlined">article</span>ข้อมูลหน้าเนื้อหา</div>
       <div class="notice">เลือกหน้าเนื้อหาเพื่อกรอกข้อความตามช่องด้านล่าง โดยไม่ต้องเขียน HTML</div>
       <div class="field"><label>หัวข้อเนื้อหา</label><input id="mHeading" value="${esc(v.heading)}" placeholder="เช่น ข่าวสารประจำสัปดาห์"></div>
       <div class="field"><label>คำอธิบายสั้น</label><textarea id="mDescription" rows="3" placeholder="ข้อความแนะนำใต้หัวข้อ">${esc(v.description)}</textarea></div>
@@ -893,16 +921,17 @@ function editMenu(i) {
       ${imageUploader('menuUpload','mImage','single')}
       <div class="notice">เมนูเก่าที่เขียน HTML ไว้ยังคงอยู่ หากต้องการรักษารูปแบบเดิม ให้เลือก “หน้า HTML แบบเต็ม” ก่อนบันทึก</div>
     </div>
-    <div id="htmlFields" class="hidden">
+    <div id="htmlFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">code</span>โค้ด HTML</div>
       <div class="field"><label>โค้ด HTML ของหน้านี้</label><textarea id="mContent" rows="10">${esc(m.content)}</textarea></div>
       ${imageUploader('menuHtmlUpload','mContent','html')}
     </div>
-    <div id="externalFields" class="hidden">
+    <div id="externalFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">link</span>ลิงก์ภายนอก</div>
       <div class="field"><label>ลิงก์เว็บไซต์ปลายทาง</label><input id="mUrl" type="text" value="${esc(m.url)}" placeholder="https://..."></div>
     </div>
     <div class="row"><button class="btn" onclick="saveMenu(${i})">บันทึกเมนู</button></div>
   </div>`;
   menuTypeChanged();
+  updateMenuIconPreview();
 }
 function saveMenu(i) {
   const m = s.menus[i], type = $('mType').value;
