@@ -273,6 +273,48 @@ code { font-family: ui-monospace, monospace; }
 .field select,#menuEditor select{cursor:pointer}.form-section-heading{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.08rem;margin:20px 0 15px}.form-section-heading .material-symbols-outlined{color:var(--primary)}
 .icon-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin:12px 0}.icon-choice{border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);padding:12px 6px;display:flex;align-items:center;flex-direction:column;gap:6px;font:inherit;font-size:.73rem;cursor:pointer;min-height:76px}.icon-choice:hover,.icon-choice.selected{border-color:var(--primary);background:var(--primary-light)}.icon-choice .material-symbols-outlined{font-size:27px}.icon-preview{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border);border-radius:13px;margin:10px 0}.icon-preview .material-symbols-outlined,.icon-preview .material-symbols-rounded,.icon-preview .material-symbols-sharp{font-size:32px;color:var(--primary)}
 @media(max-width:600px){.icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-form-card{padding:16px}.cols{grid-template-columns:1fr}}
+
+/* Full-width custom maintenance HTML, isolated from dashboard styling */
+.maintenance-full { padding:0 !important; margin:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; }
+.maintenance-full::before,.maintenance-full::after { display:none !important; }
+.maintenance-full #maintenanceCustom { width:100%; }
+@media(max-width:600px){ #maintenanceFrame { height:calc(100dvh - 58px) !important; min-height:0 !important; } }
+/* Compact, readable layout for small screens; keep full images uncropped. */
+@media (max-width: 600px) {
+  html { font-size: 14px; }
+  .top { height: 58px; padding: 0 12px; gap: 8px; }
+  .brand { font-size: 1rem; gap: 8px; }
+  .brand img { width: 32px; height: 32px; }
+  .hamburger { width: 36px; height: 36px; }
+  .shell { min-height: calc(100dvh - 58px); }
+  .side { top: 58px; }
+  .main { padding: 14px 12px 28px; }
+  .hero { padding: 22px 18px; margin-bottom: 16px; border-radius: 16px; }
+  .hero-badge { width: 42px; height: 42px; font-size: 1.25rem; margin-bottom: 14px; }
+  h1 { font-size: clamp(1.5rem, 6vw, 1.9rem); }
+  h2 { font-size: 1.15rem; }
+  p { font-size: .94rem; margin-bottom: 14px; }
+  .cards { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 14px; }
+  .card { min-width: 0; padding: 16px; border-radius: 15px; }
+  .btn { padding: 9px 16px; font-size: .9rem; }
+  .dialog { padding: 20px 16px; border-radius: 18px; }
+  .fullframe { height: calc(100dvh - 58px); max-width: 100vw; }
+  .admin-form-card { padding: 14px; }
+  #builderContent { overflow-wrap: anywhere; }
+  #builderContent img, #builderContent video { display:block; max-width:100%; height:auto; object-fit:contain; }
+  #builderContent table { display:block; max-width:100%; overflow-x:auto; }
+  #popup .dialog { padding: 12px; }
+  #popupImageBox img { max-height: 68dvh; width:auto; height:auto; object-fit:contain; }
+}
+
+/* Notification center and repeatable content editor */
+.notify-toggle{position:relative;display:flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);cursor:pointer}
+.notify-count{position:absolute;right:-5px;top:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:#dc2626;color:#fff;font:700 11px/18px system-ui;text-align:center}
+.notification-panel{position:fixed;right:14px;top:75px;width:min(400px,calc(100vw - 28px));max-height:min(72dvh,620px);overflow:auto;z-index:90;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow-lg)}
+.notification-list{margin-top:12px}.notification-item{padding:12px 0;border-top:1px solid var(--border);overflow-wrap:anywhere}.notification-item small{display:block;color:var(--muted);margin-top:4px}
+#toastStack{position:fixed;right:12px;bottom:12px;z-index:110;display:grid;gap:8px;max-width:min(420px,calc(100vw - 24px));pointer-events:none}.np-toast{background:var(--text);color:var(--surface);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-lg);font-size:.88rem;overflow-wrap:anywhere}
+.content-editor{padding:16px;margin:12px 0;border:1px solid var(--border);border-radius:16px;background:var(--surface-alt)}.content-editor .field{margin-bottom:12px}.content-editor .row{margin-bottom:12px}.np-content-section{padding:clamp(14px,3vw,24px) 0;border-bottom:1px solid var(--border)}.np-content-section:last-child{border-bottom:0}.np-content-section img{max-width:100%;height:auto;object-fit:contain;border-radius:12px}.np-content-section a{color:var(--primary);overflow-wrap:anywhere}
+@media(max-width:600px){.notification-panel{top:64px}.content-editor{padding:12px}.np-content-section{padding:12px 0}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&family=Material+Symbols+Sharp" rel="stylesheet">
 </head>
@@ -289,8 +331,9 @@ code { font-family: ui-monospace, monospace; }
     </a>
   </div>
   
+  <button type="button" id="notificationToggle" class="notify-toggle" onclick="toggleNotifications()" aria-label="การแจ้งเตือน"><span class="material-symbols-outlined">notifications</span><span id="notifyCount" class="notify-count hidden">0</span></button>
   <div class="ticker-wrap">
-    <div class="ticker" id="ticker">ยินดีต้อนรับสู่เว็บไซต์ NP-404 • เว็บไซต์ตัวอย่างสำหรับทดลองปรับแต่ง</div>
+    <div class="ticker" id="ticker">ยินดีต้อนรับสู่เว็บไซต์ NP-404 • เว็บไซต์สำหรับจัดการข้อมูลและข่าวสาร</div>
   </div>
 
 </header>
@@ -313,10 +356,10 @@ code { font-family: ui-monospace, monospace; }
     <!-- Home Section -->
     <section id="home">
       <div class="hero" id="homeHero">
-        <div id="homeIcon" class="hero-badge">✦</div>
+        
         <h1 id="homeTitle">ยินดีต้อนรับสู่ NP-404</h1>
         <p id="homeDescription">เว็บไซต์สำหรับจัดการข้อมูล ข่าวสาร และประกาศต่าง ๆ</p>
-        <button id="homeButton" class="btn" onclick="go('menu0')">สำรวจเว็บไซต์</button>
+        
       </div>
       <div class="cards" id="homeCards"></div>
     </section>
@@ -340,10 +383,10 @@ code { font-family: ui-monospace, monospace; }
     <section id="admin" class="hidden">
       <div class="hero">
         <h1>แผงควบคุมเว็บไซต์</h1>
-        <p>แก้ไขและทดลองการตั้งค่าทั้งหมดได้โดยไม่ต้องเชื่อมต่อฐานข้อมูล</p>
+        <p>จัดการข้อมูลและการตั้งค่าเว็บไซต์ผ่าน Supabase</p>
       </div>
       <div class="notice">
-        <b>โหมดทดลอง:</b> ข้อมูลจะบันทึกเฉพาะในเบราว์เซอร์เครื่องนี้ (localStorage) ไม่ใช่ระบบล็อกอินหรือฐานข้อมูลจริง
+        <b>ระบบข้อมูล:</b> การเปลี่ยนแปลงจะบันทึกลง Supabase เมื่อเชื่อมต่อและมีสิทธิ์แอดมิน
       </div>
       <div class="tabs" id="adminTabs"></div>
       <div id="adminBody"></div>
@@ -351,6 +394,7 @@ code { font-family: ui-monospace, monospace; }
   </main>
 </div>
 
+<aside id="notificationPanel" class="notification-panel hidden" aria-label="รายการแจ้งเตือน"><div class="row between"><h2 style="margin:0">การแจ้งเตือน</h2><button class="btn ghost" onclick="clearNotifications()">ล้างทั้งหมด</button></div><div id="notificationList" class="notification-list"><p>ยังไม่มีการแจ้งเตือน</p></div></aside>
 <!-- Announcement Popup Modal -->
 <div id="popup" class="modal hidden">
   <div class="dialog">
@@ -366,8 +410,8 @@ code { font-family: ui-monospace, monospace; }
 <!-- Admin Login Modal -->
 <div id="login" class="modal hidden">
   <div class="dialog">
-    <h2 id="loginTitle">เข้าสู่ระบบแอดมิน (ทดลอง)</h2>
-    <p id="loginHint">ใช้รหัสผ่านทดลอง: <code style="background:var(--surface-alt); padding:2px 6px; border-radius:4px;">123456</code></p>
+    <h2 id="loginTitle">เข้าสู่ระบบแอดมิน</h2>
+    <p id="loginHint">ใช้อีเมลและรหัสผ่านบัญชีแอดมิน</p>
     <div class="field hidden" id="emailField">
       <label for="email">อีเมล</label>
       <input id="email" type="text" autocomplete="username" placeholder="อีเมลแอดมิน" onkeydown="if(event.key==='Enter')login()">
@@ -388,7 +432,7 @@ code { font-family: ui-monospace, monospace; }
 <script>
 /* ===== Supabase config =====
    ใส่ anon public key (Project Settings → API) ห้ามใช้ service_role key
-   ถ้าเว้นไว้ เว็บจะทำงานโหมดทดลอง (localStorage) เหมือนเดิม */
+   ต้องมี Supabase SDK และ publishable key จึงจะทำงานกับฐานข้อมูลจริง */
 const SUPABASE_URL = 'https://iejmwihipfvtkbvjtude.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_PybXrP5brR32CHIw3nm8Lg_-SruBwlg';
 const CLOUD = !!SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('PASTE') && !!window.supabase;
@@ -406,11 +450,9 @@ const DEFAULT = {
   primary: '#2563eb',
   theme: 'light',
   fontWeight: '400',
-  ticker: 'ยินดีต้อนรับสู่เว็บไซต์ NP-404 • เว็บไซต์ตัวอย่างสำหรับทดลองปรับแต่ง',
+  ticker: 'ยินดีต้อนรับสู่เว็บไซต์ NP-404 • เว็บไซต์สำหรับจัดการข้อมูลและข่าวสาร',
   homeTitle: 'ยินดีต้อนรับสู่ NP-404',
   homeDescription: 'เว็บไซต์สำหรับจัดการข้อมูล ข่าวสาร และประกาศต่าง ๆ',
-  homeIcon: '✦',
-  homeButton: 'สำรวจเว็บไซต์',
   homeAlign: 'left',
   homeWeight: '700',
   maintenance: false,
@@ -575,13 +617,29 @@ async function cloudSave(snapshot) {
   if (c.error) throw c.error;
 }
 
-function toast(t) {
-  let n = document.createElement('div');
-  n.textContent = t;
-  n.style = 'position:fixed; bottom:24px; right:24px; background:var(--text); color:var(--surface); padding:12px 20px; border-radius:8px; z-index:99; font-size:0.88rem; font-weight:500; box-shadow:var(--shadow-lg); transition:all 0.2s;';
-  document.body.append(n);
-  setTimeout(() => n.remove(), 2400);
+const notificationHistory = [];
+function notify(message, kind='info') {
+  const item={message:String(message),kind,time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})};
+  notificationHistory.unshift(item);
+  if(notificationHistory.length>50) notificationHistory.pop();
+  renderNotifications();
+  let stack=$('toastStack');
+  if(!stack){stack=document.createElement('div');stack.id='toastStack';stack.setAttribute('role','status');document.body.appendChild(stack);}
+  const n=document.createElement('div');n.className='np-toast';n.textContent=item.message;stack.appendChild(n);
+  setTimeout(()=>n.remove(),4200);
 }
+function toast(t){notify(t,/ไม่สำเร็จ|ผิด|ไม่ได้|กรุณา|ล้มเหลว/.test(t)?'error':'success');}
+function renderNotifications(){
+  const count=$('notifyCount'),list=$('notificationList');if(!count||!list)return;
+  count.textContent=notificationHistory.length;count.classList.toggle('hidden',!notificationHistory.length);
+  list.replaceChildren();
+  if(!notificationHistory.length){const p=document.createElement('p');p.textContent='ยังไม่มีการแจ้งเตือน';list.appendChild(p);return;}
+  notificationHistory.forEach(n=>{const el=document.createElement('div');el.className='notification-item';
+    const t=document.createElement('div');t.textContent=n.message;
+    const time=document.createElement('small');time.textContent=n.time;el.append(t,time);list.appendChild(el);});
+}
+function toggleNotifications(){$('notificationPanel').classList.toggle('hidden');renderNotifications();}
+function clearNotifications(){notificationHistory.length=0;renderNotifications();}
 
 function toggleSide() {
   sideOpen = !sideOpen;
@@ -608,13 +666,12 @@ function refresh() {
   $('ticker').textContent = s.ticker;
   $('homeTitle').textContent = s.homeTitle;
   $('homeDescription').textContent = s.homeDescription;
-  $('homeIcon').textContent = s.homeIcon;
-  $('homeButton').textContent = s.homeButton;
   $('homeHero').className = 'hero ' + s.homeAlign;
   $('homeTitle').style.fontWeight = s.homeWeight;
   
   $('maintenanceTitle').textContent = s.maintenanceTitle;
   $('maintenanceText').textContent = s.maintenanceText;
+  renderMaintenance();
   
   $('publicNav').innerHTML = '<button onclick="go(\'home\')"><span class="material-symbols-outlined">home</span> หน้าแรก</button>' +
     s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}</button>`).join('');
@@ -631,6 +688,105 @@ function refresh() {
   $('logoutBtn').classList.toggle('hidden', !admin);
 }
 
+/* Compact embedded HTML on phones without changing the saved Supabase content. */
+function responsiveHtml(source) {
+  const doc = new DOMParser().parseFromString(String(source || ''), 'text/html');
+  let viewport = doc.querySelector('meta[name="viewport"]');
+  if (!viewport) {
+    viewport = doc.createElement('meta');
+    doc.head.prepend(viewport);
+  }
+  viewport.setAttribute('content', 'width=device-width, initial-scale=1');
+  const style = doc.createElement('style');
+  style.id = 'np404-mobile-fit';
+  style.textContent = `
+    *, *::before, *::after { box-sizing: border-box; }
+    html { width: 100%; max-width: 100%; -webkit-text-size-adjust: 100%; }
+    body { width: 100%; max-width: 100%; min-width: 0; margin: 0; overflow-x: hidden; }
+    img, video, svg, canvas { max-width: 100%; height: auto; }
+    table { display: block; max-width: 100%; overflow-x: auto; }
+    pre, code { max-width: 100%; overflow-wrap: anywhere; }
+    @media (max-width: 600px) {
+      html { font-size: 13px !important; }
+      body { font-size: 13px !important; line-height: 1.5 !important; }
+      h1, .hero h1, .title, .page-title { font-size: clamp(19px, 5.3vw, 24px) !important; line-height: 1.3 !important; }
+      h2 { font-size: clamp(17px, 4.5vw, 20px) !important; line-height: 1.35 !important; }
+      h3 { font-size: 16px !important; }
+      p, li, label, td, th, small, .subtitle, .description { font-size: 13px !important; overflow-wrap: anywhere; }
+      button, input, select, textarea { max-width: 100%; font-size: 14px !important; }
+      input, select, textarea { min-width: 0 !important; }
+      button { padding: 8px 12px !important; }
+      header, nav, .navbar, .topbar, .header, .nav { max-width: 100%; }
+      nav, .tabs, .nav-tabs, .tab-list, [role="tablist"] { overflow-x: auto !important; max-width: 100%; scrollbar-width: thin; }
+      nav a, .tabs button, .nav-tabs a, [role="tab"] { font-size: 13px !important; white-space: nowrap; }
+      .container, .wrapper, .content, .main, main, section, article, .card, .hero, .panel { max-width: 100% !important; min-width: 0 !important; }
+      .hero, .card, .panel { padding: 12px !important; }
+      .grid, .cards { min-width: 0; }
+      [style*="min-width: 1000px"], [style*="min-width:1000px"], [style*="width: 1200px"], [style*="width:1200px"] { min-width: 0 !important; max-width: 100% !important; }
+    }
+  `;
+  doc.head.append(style);
+  // Existing pages sometimes use desktop-only pixel widths. Scale those layouts
+  // only when they actually overflow a narrow phone viewport.
+  const script = doc.createElement('script');
+  script.textContent = `(() => {
+    function fit() {
+      if (window.innerWidth > 600) return;
+      const body = document.body;
+      if (!body) return;
+      body.style.zoom = '';
+      const width = Math.max(document.documentElement.scrollWidth, body.scrollWidth);
+      const viewport = window.innerWidth;
+      if (width > viewport + 24) {
+        const scale = Math.max(.48, Math.min(1, viewport / width));
+        body.style.zoom = String(scale);
+        body.style.width = (100 / scale) + '%';
+      }
+    }
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    document.addEventListener('DOMContentLoaded', fit);
+    if (document.readyState !== 'loading') fit();
+  })();`;
+  doc.body.append(script);
+  return '<!doctype html>\\n' + doc.documentElement.outerHTML;
+}
+
+function renderMaintenance() {
+  const code = String(s.maintenanceHtml || '').trim();
+  const custom = $('maintenanceCustom');
+  const title = $('maintenanceTitle');
+  const description = $('maintenanceText');
+  if (!code) {
+    custom.replaceChildren();
+    title.classList.remove('hidden');
+    description.classList.remove('hidden');
+    $('maintenance').querySelector('.hero-badge').classList.remove('hidden');
+    return;
+  }
+  title.classList.add('hidden');
+  description.classList.add('hidden');
+  $('maintenance').querySelector('.hero-badge').classList.add('hidden');
+  custom.innerHTML = '<iframe id="maintenanceFrame" title="หน้าปิดปรับปรุง" sandbox="allow-scripts allow-forms allow-popups" style="display:block;width:100%;height:calc(100dvh - 68px);min-height:500px;border:0;background:transparent"></iframe>';
+  $('maintenanceFrame').srcdoc = responsiveHtml(code);
+}
+function preview503() {
+  const code = $('f_maintenanceHtml')?.value.trim() || '';
+  const title = $('f_maintenanceTitle')?.value || '503 • ปิดปรับปรุงชั่วคราว';
+  const detail = $('f_maintenanceText')?.value || '';
+  const target = $('maintPreview');
+  if (!target) return;
+  target.innerHTML = '<div class="preview"><h3 style="margin-top:0">ตัวอย่างหน้า 503</h3><div id="preview503Content"></div></div>';
+  const box = $('preview503Content');
+  if (code) {
+    box.innerHTML = '<iframe title="ตัวอย่าง HTML หน้า 503" sandbox="allow-scripts allow-forms allow-popups" style="width:100%;height:min(65dvh,600px);min-height:320px;border:1px solid var(--border);border-radius:12px;background:white"></iframe>';
+    box.querySelector('iframe').srcdoc = responsiveHtml(code);
+  } else {
+    const heading = document.createElement('h2'); heading.textContent = title;
+    const paragraph = document.createElement('p'); paragraph.textContent = detail;
+    box.append(heading, paragraph);
+  }
+}
 function go(page) {
   if (page === 'admin' && !admin) {
     $('login').classList.remove('hidden');
@@ -647,6 +803,12 @@ function go(page) {
   
   if (['home', 'admin', 'maintenance'].includes(page)) {
     $(page).classList.remove('hidden');
+    if (page === 'maintenance' && String(s.maintenanceHtml || '').trim()) {
+      document.querySelector('.main').classList.add('fullpage');
+      $('maintenance').querySelector('.hero').classList.add('maintenance-full');
+    } else {
+      $('maintenance').querySelector('.hero').classList.remove('maintenance-full');
+    }
     if (page === 'admin') {
       tab = null;
       adminMenuOpen = false;
@@ -669,7 +831,8 @@ function go(page) {
     if (m.type === 'html') {
       document.querySelector('.main').classList.add('fullpage');
       $('dynamic').innerHTML = `<iframe id="customFrame" class="fullframe" title="${esc(m.title)}" sandbox="allow-scripts allow-forms allow-popups"></iframe>`;
-      $('customFrame').srcdoc = m.content;
+      $('customFrame').srcdoc = responsiveHtml(m.content);
+
     } else {
       $('dynamic').innerHTML = `<div class="card" id="builderContent"></div>`;
       if (m.type === 'builder') $('builderContent').innerHTML = m.content;
@@ -716,6 +879,7 @@ async function login() {
     $('password').value = '';
     refresh();
     go('admin');
+    notify('เข้าสู่ระบบแอดมินสำเร็จ');
   } catch (error) {
     console.error('Login error:', error);
     const message = error.message || String(error);
@@ -844,12 +1008,10 @@ function renderAdmin() {
       ${field('ข้อความต้อนรับ', 'homeTitle')}
       ${field('รายละเอียด', 'homeDescription', 'textarea')}
       <div class="cols">
-        ${field('ไอคอน สัญลักษณ์', 'homeIcon')}
-        ${field('ข้อความบนปุ่ม', 'homeButton')}
         ${field('การจัดตำแหน่ง', 'homeAlign', 'select', 'left:ซ้าย|center:กลาง|right:ขวา')}
         ${field('น้ำหนักหัวข้อ', 'homeWeight', 'select', '400:ปกติ|600:หนา|700:หนามาก')}
       </div>
-      <button class="btn" onclick="saveFields(['homeTitle','homeDescription','homeIcon','homeButton','homeAlign','homeWeight'])">บันทึกการเปลี่ยนแปลง</button>
+      <button class="btn" onclick="saveFields(['homeTitle','homeDescription','homeAlign','homeWeight'])">บันทึกการเปลี่ยนแปลง</button>
     </div>`;
   }
 
@@ -919,22 +1081,45 @@ function removeMenu(i) {
   }
 }
 
-function readBuilderContent(content) {
-  const doc = new DOMParser().parseFromString(content || '', 'text/html');
-  const root = doc.querySelector('[data-np-builder="1"]');
-  if (root) return {
-    heading: root.querySelector('[data-part="heading"]')?.textContent || '',
-    description: root.querySelector('[data-part="description"]')?.textContent || '',
-    detail: root.querySelector('[data-part="detail"]')?.textContent || '',
-    image: root.querySelector('[data-part="image"]')?.getAttribute('src') || ''
-  };
-  // Keep older menus editable without discarding their original HTML.
-  return {
-    heading: doc.querySelector('h1,h2,h3')?.textContent || '',
-    description: doc.querySelector('p')?.textContent || '',
-    detail: '', image: doc.querySelector('img')?.getAttribute('src') || ''
-  };
+function readBuilderSections(content){
+  const doc=new DOMParser().parseFromString(content||'','text/html');
+  const root=doc.querySelector('[data-np-builder="2"]');
+  if(root){const sections=[...root.querySelectorAll('[data-np-section]')].map(el=>({
+    heading:el.querySelector('[data-part="heading"]')?.textContent||'',
+    description:el.querySelector('[data-part="description"]')?.textContent||'',
+    detail:el.querySelector('[data-part="detail"]')?.textContent||'',
+    image:el.querySelector('[data-part="image"]')?.getAttribute('src')||'',
+    link:el.querySelector('[data-part="link"]')?.getAttribute('href')||'',
+    linkLabel:el.querySelector('[data-part="link"]')?.textContent||''
+  }));return sections.length?sections:[emptySection()];}
+  const old=doc.querySelector('[data-np-builder="1"]');
+  if(old)return [{heading:old.querySelector('[data-part="heading"]')?.textContent||'',description:old.querySelector('[data-part="description"]')?.textContent||'',detail:old.querySelector('[data-part="detail"]')?.textContent||'',image:old.querySelector('[data-part="image"]')?.getAttribute('src')||'',link:'',linkLabel:''}];
+  return [{heading:doc.querySelector('h1,h2,h3')?.textContent||'',description:doc.querySelector('p')?.textContent||'',detail:'',image:doc.querySelector('img')?.getAttribute('src')||'',link:'',linkLabel:''}];
 }
+function emptySection(){return {heading:'',description:'',detail:'',image:'',link:'',linkLabel:''};}
+let editorSections=[];
+function captureSections(){
+  editorSections=[...document.querySelectorAll('#sectionEditors [data-editor-section]')].map(el=>({
+    heading:el.querySelector('[data-field="heading"]').value,description:el.querySelector('[data-field="description"]').value,
+    detail:el.querySelector('[data-field="detail"]').value,image:el.querySelector('[data-field="image"]').value,
+    link:el.querySelector('[data-field="link"]').value,linkLabel:el.querySelector('[data-field="linkLabel"]').value}));
+}
+function renderSectionEditors(){
+ const host=$('sectionEditors');if(!host)return;
+ host.innerHTML=editorSections.map((v,i)=>`<div class="content-editor" data-editor-section>
+ <div class="row between"><b>เนื้อหาที่ ${i+1}</b><div class="row"><button type="button" class="btn ghost" onclick="moveSection(${i},-1)">↑</button><button type="button" class="btn ghost" onclick="moveSection(${i},1)">↓</button><button type="button" class="btn red" onclick="removeSection(${i})">ลบ</button></div></div>
+ <div class="field"><label>หัวข้อ</label><input data-field="heading" value="${esc(v.heading)}" placeholder="หัวข้อเนื้อหา"></div>
+ <div class="field"><label>คำอธิบายสั้น</label><textarea data-field="description" rows="2">${esc(v.description)}</textarea></div>
+ <div class="field"><label>รายละเอียด</label><textarea data-field="detail" rows="5">${esc(v.detail)}</textarea></div>
+ <div class="field"><label>ลิงก์รูปภาพ</label><input id="sectionImage${i}" data-field="image" value="${esc(v.image)}" placeholder="https://..."></div>
+ ${imageUploader('sectionUpload'+i,'sectionImage'+i,'single')}
+ <div class="field"><label>ลิงก์เว็บไซต์ (ไม่บังคับ)</label><input data-field="link" value="${esc(v.link)}" placeholder="https://..."></div>
+ <div class="field"><label>ข้อความปุ่มลิงก์</label><input data-field="linkLabel" value="${esc(v.linkLabel)}" placeholder="อ่านเพิ่มเติม"></div>
+ </div>`).join('');
+}
+function addSection(){captureSections();editorSections.push(emptySection());renderSectionEditors();notify('เพิ่มช่องเนื้อหาใหม่แล้ว');}
+function removeSection(i){captureSections();editorSections.splice(i,1);if(!editorSections.length)editorSections=[emptySection()];renderSectionEditors();}
+function moveSection(i,d){captureSections();const j=i+d;if(j<0||j>=editorSections.length)return;[editorSections[i],editorSections[j]]=[editorSections[j],editorSections[i]];renderSectionEditors();}
 function menuTypeChanged() {
   const type = $('mType').value;
   $('builderFields').classList.toggle('hidden', type !== 'builder');
@@ -942,7 +1127,7 @@ function menuTypeChanged() {
   $('externalFields').classList.toggle('hidden', type !== 'external');
 }
 function editMenu(i) {
-  const m = s.menus[i], v = readBuilderContent(m.content);
+  const m = s.menus[i]; editorSections = readBuilderSections(m.content);
   $('menuEditor').innerHTML = `<div class="admin-form-card" style="margin-top:20px;">
     <h2>แก้ไขเมนู: ${esc(m.title)}</h2>
     <div class="cols">
@@ -957,14 +1142,11 @@ function editMenu(i) {
         </select>
       </div>
     </div>
-    <div id="builderFields"><div class="form-section-heading"><span class="material-symbols-outlined">article</span>ข้อมูลหน้าเนื้อหา</div>
-      <div class="notice">เลือกหน้าเนื้อหาเพื่อกรอกข้อความตามช่องด้านล่าง โดยไม่ต้องเขียน HTML</div>
-      <div class="field"><label>หัวข้อเนื้อหา</label><input id="mHeading" value="${esc(v.heading)}" placeholder="เช่น ข่าวสารประจำสัปดาห์"></div>
-      <div class="field"><label>คำอธิบายสั้น</label><textarea id="mDescription" rows="3" placeholder="ข้อความแนะนำใต้หัวข้อ">${esc(v.description)}</textarea></div>
-      <div class="field"><label>รายละเอียดเนื้อหา</label><textarea id="mDetail" rows="7" placeholder="เขียนรายละเอียดได้หลายบรรทัด">${esc(v.detail)}</textarea></div>
-      <div class="field"><label>ลิงก์รูปภาพประกอบ (ไม่บังคับ)</label><input id="mImage" type="text" value="${esc(v.image)}" placeholder="https://..."></div>
-      ${imageUploader('menuUpload','mImage','single')}
-      <div class="notice">เมนูเก่าที่เขียน HTML ไว้ยังคงอยู่ หากต้องการรักษารูปแบบเดิม ให้เลือก “หน้า HTML แบบเต็ม” ก่อนบันทึก</div>
+    <div id="builderFields"><div class="form-section-heading">ข้อมูลหน้าเนื้อหา</div>
+      <p class="form-help">เพิ่มหัวข้อ รายละเอียด รูปภาพ และลิงก์ได้หลายรายการ กดเพิ่มเนื้อหาใหม่ได้ไม่จำกัด</p>
+      <div id="sectionEditors"></div>
+      <button type="button" class="btn ghost" onclick="addSection()">+ เพิ่มเนื้อหาใหม่</button>
+      <p class="form-help">เมนู HTML เดิมยังอยู่ หากต้องการรักษาโค้ดเดิมให้เลือกหน้า HTML ก่อนบันทึก</p>
     </div>
     <div id="htmlFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">code</span>โค้ด HTML</div>
       <div class="field"><label>โค้ด HTML ของหน้านี้</label><textarea id="mContent" rows="10">${esc(m.content)}</textarea></div>
@@ -976,22 +1158,26 @@ function editMenu(i) {
     <div class="row"><button class="btn" onclick="saveMenu(${i})">บันทึกเมนู</button></div>
   </div>`;
   menuTypeChanged();
+  renderSectionEditors();
   updateMenuIconPreview();
 }
 function saveMenu(i) {
   const m = s.menus[i], type = $('mType').value;
   let content = m.content;
   if (type === 'builder') {
-    const heading = $('mHeading').value.trim();
-    const description = $('mDescription').value.trim();
-    const detail = $('mDetail').value.trim();
-    const image = $('mImage').value.trim();
-    if (image && !/^https:\/\//i.test(image)) return toast('กรุณาใช้ลิงก์รูปภาพแบบ HTTPS');
-    content = `<article data-np-builder="1" style="line-height:1.8;overflow-wrap:anywhere">` +
-      (heading ? `<h2 data-part="heading">${esc(heading)}</h2>` : '') +
-      (description ? `<p data-part="description">${esc(description)}</p>` : '') +
-      (image ? `<img data-part="image" src="${esc(image)}" alt="รูปประกอบ" loading="lazy" style="max-width:100%;height:auto;border-radius:16px;margin:12px 0">` : '') +
-      (detail ? `<div data-part="detail" style="white-space:pre-wrap">${esc(detail)}</div>` : '') + '</article>';
+    captureSections();
+    for(const v of editorSections){
+      if(v.image.trim()&&!/^https:\/\//i.test(v.image.trim()))return toast('ลิงก์รูปภาพต้องขึ้นต้นด้วย https://');
+      if(v.link.trim()&&!/^https:\/\//i.test(v.link.trim()))return toast('ลิงก์เว็บไซต์ต้องขึ้นต้นด้วย https://');
+    }
+    content='<article data-np-builder="2" style="line-height:1.7;overflow-wrap:anywhere">'+editorSections.map(v=>
+      '<section class="np-content-section" data-np-section="1">'+
+      (v.heading.trim()?`<h2 data-part="heading">${esc(v.heading.trim())}</h2>`:'')+
+      (v.description.trim()?`<p data-part="description">${esc(v.description.trim())}</p>`:'')+
+      (v.image.trim()?`<img data-part="image" src="${esc(v.image.trim())}" alt="รูปประกอบ" loading="lazy">`:'')+
+      (v.detail.trim()?`<div data-part="detail" style="white-space:pre-wrap">${esc(v.detail.trim())}</div>`:'')+
+      (v.link.trim()?`<p><a data-part="link" href="${esc(v.link.trim())}" target="_blank" rel="noopener noreferrer">${esc(v.linkLabel.trim()||'อ่านเพิ่มเติม')} ↗</a></p>`:'')+
+      '</section>').join('')+'</article>';
   } else if (type === 'html') content = $('mContent').value;
   const rawIcon = $('mIcon').value.trim();
   if (rawIcon && !parseMaterialIcon(rawIcon)) return toast('โค้ดไอคอนไม่สมบูรณ์: ต้องมี icon_names หรือ <span> ระบุชื่อไอคอน');
@@ -1054,8 +1240,8 @@ function showPopup() {
   refresh();
   go('home');
   if (CLOUD) {
-    sb.channel('np404-live').on('postgres_changes', {event:'*',schema:'public',table:'np404_settings'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); } })
-      .on('postgres_changes', {event:'*',schema:'public',table:'np404_menus'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); } }).subscribe();
+    sb.channel('np404-live').on('postgres_changes', {event:'*',schema:'public',table:'np404_settings'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); notify('มีการอัปเดตข้อมูลเว็บไซต์'); } })
+      .on('postgres_changes', {event:'*',schema:'public',table:'np404_menus'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); notify('รายการเมนูมีการเปลี่ยนแปลง'); } }).subscribe();
   }
   if (s.popupEnabled && !s.maintenance) setTimeout(showPopup, 600);
 })();
