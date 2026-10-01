@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NP-404</title>
+<title>NP-404 | Executive Dashboard</title>
 <meta name="theme-color" content="#141824">
 <!-- Web Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -544,8 +544,7 @@ code { font-family: ui-monospace, monospace; }
     <div class="first-visit-progress" aria-hidden="true"><div id="firstVisitProgress"></div></div>
     <div id="firstVisitStatus" class="first-visit-status">กำลังโหลดวิดีโอ...</div>
     <div class="first-visit-actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-      <button id="firstVisitContinue" class="btn" disabled onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
-      <button id="firstVisitAdminBypass" class="btn ghost hidden" type="button" onclick="adminTutorialBypassClick()">เข้าใช้งานเว็บไซต์</button>
+      <button id="firstVisitContinue" class="btn" type="button" onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
     </div>
   </div>
 </div>
@@ -1678,17 +1677,10 @@ function buildFirstVisitTutorial() {
   const media = $('firstVisitMedia');
   media.replaceChildren();
   firstVisitVideoEnded = false;
-  $('firstVisitContinue').disabled = !admin;
+  $('firstVisitContinue').disabled = false;
   $('firstVisitProgress').style.width = '0%';
-
-  // แอดมินสามารถข้ามวิดีโอได้ทันทีด้วยปุ่ม "ดูจบแล้ว"
-  // และมีปุ่มสำรองที่ต้องกดรัว ๆ 5 ครั้ง
-  const adminBypass = $('firstVisitAdminBypass');
-  if (adminBypass) {
-    adminBypass.classList.toggle('hidden', !admin);
-    adminTutorialRapidClicks = 0;
-    clearTimeout(adminTutorialRapidTimer);
-  }
+  adminTutorialRapidClicks = 0;
+  clearTimeout(adminTutorialRapidTimer);
 
   const videoUrl = String(s.tutorialVideo || '').trim();
   const imageUrl = String(s.tutorialImage || '').trim();
@@ -1750,8 +1742,12 @@ function showFirstVisitTutorial() {
 
 function finishFirstVisitTutorial() {
   // ผู้ใช้ทั่วไปต้องดูวิดีโอจนจบก่อน
-  // แอดมินสามารถกด "ดูจบแล้ว" เพื่อข้ามได้ทันที
-  if (!admin && !firstVisitVideoEnded) {
+  if (!firstVisitVideoEnded) {
+    if (admin) {
+      // สำหรับแอดมิน: ใช้ปุ่มเดิมนี้กดรัว ๆ 5 ครั้งเพื่อข้าม
+      adminTutorialBypassClick();
+      return;
+    }
     return toast('กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
   }
   completeFirstVisitTutorial();
@@ -1770,7 +1766,7 @@ function completeFirstVisitTutorial() {
 }
 
 function adminTutorialBypassClick() {
-  if (!admin) return toast('ปุ่มนี้สำหรับแอดมินเท่านั้น');
+  if (!admin) return;
 
   adminTutorialRapidClicks++;
   clearTimeout(adminTutorialRapidTimer);
@@ -1780,12 +1776,9 @@ function adminTutorialBypassClick() {
     return;
   }
 
-  $('firstVisitStatus').textContent = `แอดมิน: กดอีก ${5 - adminTutorialRapidClicks} ครั้ง เพื่อเข้าเว็บไซต์`;
+  // ไม่แสดงข้อความหรือปุ่มพิเศษให้เห็นว่าเป็นทางลัดของแอดมิน
   adminTutorialRapidTimer = setTimeout(() => {
     adminTutorialRapidClicks = 0;
-    if ($('firstVisitTutorial')?.classList.contains('active')) {
-      $('firstVisitStatus').textContent = 'แอดมิน: กดปุ่ม "เข้าใช้งานเว็บไซต์" รัว ๆ 5 ครั้งเพื่อข้าม';
-    }
   }, 1500);
 }
 
