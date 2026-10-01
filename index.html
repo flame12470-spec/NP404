@@ -928,17 +928,44 @@ async function uploadTutorialVideo(){
     if(input) input.value='';
   }
 }
+function getGoogleDriveFileId(url){
+  const raw=String(url||'').trim();
+  if(!raw) return '';
+  const patterns=[
+    /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i,
+    /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/i,
+    /drive\.google\.com\/uc\?.*?[?&]id=([a-zA-Z0-9_-]+)/i,
+    /[?&]id=([a-zA-Z0-9_-]+)/i
+  ];
+  for(const re of patterns){ const m=raw.match(re); if(m) return m[1]; }
+  return '';
+}
+function getTutorialVideoSource(url){
+  const raw=String(url||'').trim();
+  const id=getGoogleDriveFileId(raw);
+  if(id) return {type:'drive',id,url:`https://drive.google.com/file/d/${id}/preview`};
+  return {type:'direct',id:'',url:raw};
+}
+function normalizeTutorialVideoUrl(url){
+  const src=getTutorialVideoSource(url);
+  return src.type==='drive' ? `https://drive.google.com/file/d/${src.id}/preview` : String(url||'').trim();
+}
 function tutorialVideoUploader(){
   const current=s.tutorialVideo||'';
+  const driveId=getGoogleDriveFileId(current);
   return `<div class="field">
-    <label>อัปโหลดวิดีโอแนะนำการใช้งาน (สูงสุด 500 MB)</label>
-    <div class="row">
-      <input id="tutorialVideoUpload" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" style="max-width:320px">
-      <button class="btn ghost" type="button" onclick="uploadTutorialVideo()"><span class="material-symbols-outlined">upload</span> อัปโหลดวิดีโอ</button>
-    </div>
-    <small style="color:var(--muted);">แสดงเปอร์เซ็นต์การอัปโหลดแบบเรียลไทม์ และเก็บใน Supabase Storage bucket np404-images</small>
-    ${renderCurrentMedia(current,'f_tutorialVideo','video','single')}
+    <label>วิดีโอแนะนำการใช้งาน</label>
+    ${field('ลิงก์วิดีโอ Google Drive (แนะนำสำหรับวิดีโอขนาดใหญ่)','tutorialVideo')}
+    <small style="display:block;color:var(--muted);margin-top:-8px;margin-bottom:12px;line-height:1.6;">ตั้งไฟล์ Google Drive เป็น “ทุกคนที่มีลิงก์ → ผู้ดู” แล้ววางลิงก์แบบ /file/d/.../view ได้ ระบบจะแปลงเป็นตัวเล่นให้อัตโนมัติ</small>
+    ${driveId ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>Google Drive พร้อมใช้งาน</b><div class="media-url">File ID: ${esc(driveId)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบลิงก์</button></div><iframe src="https://drive.google.com/file/d/${esc(driveId)}/preview" allow="autoplay" allowfullscreen style="display:block;width:100%;height:300px;border:0;border-radius:12px;background:#000"></iframe></div>` : ''}
+    <div style="margin-top:12px;padding:12px 14px;border:1px dashed var(--border);border-radius:14px;background:var(--surface-alt);color:var(--muted);font-size:.84rem;">หากใช้ Google Drive ไม่ต้องอัปโหลดวิดีโอเข้า Supabase และไม่ติดข้อจำกัดไฟล์ 50 MB ของ Supabase Free</div>
   </div>`;
+}
+function clearTutorialVideoLink(){
+  if(!confirm('ยืนยันลบลิงก์วิดีโอ Google Drive จากรายการนี้?')) return;
+  s.tutorialVideo='';
+  persist();
+  renderAdmin();
 }
 async function uploadTutorialImage(){
   await uploadImage('tutorialImageUpload','f_tutorialImage','single');
@@ -1669,59 +1696,63 @@ function lockFirstVisitUI(lock) {
   document.body.style.overflow = lock ? 'hidden' : '';
 }
 
-function buildFirstVisitTutorial() {
-  const overlay = $('firstVisitTutorial');
-  if (!overlay) return;
-  $('firstVisitTitle').textContent = s.tutorialTitle || 'วิธีการใช้งานเว็บไซต์';
-  $('firstVisitDescription').textContent = s.tutorialDescription || 'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์';
-  const media = $('firstVisitMedia');
+function buildFirstVisitTutorial(){
+  const overlay=$('firstVisitTutorial');
+  if(!overlay)return;
+  $('firstVisitTitle').textContent=s.tutorialTitle||'วิธีการใช้งานเว็บไซต์';
+  $('firstVisitDescription').textContent=s.tutorialDescription||'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์';
+  const media=$('firstVisitMedia');
   media.replaceChildren();
-  firstVisitVideoEnded = false;
-  $('firstVisitContinue').disabled = false;
-  $('firstVisitProgress').style.width = '0%';
-  adminTutorialRapidClicks = 0;
+  firstVisitVideoEnded=false;
+  $('firstVisitContinue').disabled=false;
+  $('firstVisitProgress').style.width='0%';
+  adminTutorialRapidClicks=0;
   clearTimeout(adminTutorialRapidTimer);
 
-  const videoUrl = String(s.tutorialVideo || '').trim();
-  const imageUrl = String(s.tutorialImage || '').trim();
-
-  if (!videoUrl) {
-    const empty = document.createElement('div');
-    empty.style.cssText = 'padding:40px 20px;text-align:center;color:var(--muted)';
-    empty.textContent = 'ยังไม่ได้ตั้งค่าวิดีโอแนะนำการใช้งาน';
+  const videoUrl=String(s.tutorialVideo||'').trim();
+  const imageUrl=String(s.tutorialImage||'').trim();
+  if(!videoUrl){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:40px 20px;text-align:center;color:var(--muted)';
+    empty.textContent='ยังไม่ได้ตั้งค่าวิดีโอแนะนำการใช้งาน';
     media.appendChild(empty);
-    $('firstVisitStatus').textContent = 'รอแอดมินเพิ่มวิดีโอ';
+    $('firstVisitStatus').textContent='รอแอดมินเพิ่มวิดีโอ';
     return;
   }
 
-  const video = document.createElement('video');
-  video.controls = true;
-  video.playsInline = true;
-  video.preload = 'metadata';
-  video.src = videoUrl;
-  if (imageUrl) video.poster = imageUrl;
-  video.addEventListener('loadedmetadata', () => {
-    $('firstVisitStatus').textContent = `วิดีโอความยาวประมาณ ${formatTutorialTime(video.duration)} • กรุณาดูจนจบ`;
+  const src=getTutorialVideoSource(videoUrl);
+  if(src.type==='drive'){
+    const frame=document.createElement('iframe');
+    frame.src=src.url;
+    frame.allow='autoplay';
+    frame.allowFullscreen=true;
+    frame.title='วิดีโอวิธีการใช้งานเว็บไซต์';
+    frame.style.cssText='display:block;width:100%;height:min(60dvh,520px);min-height:260px;border:0;background:#080b12';
+    media.appendChild(frame);
+    $('firstVisitStatus').textContent='วิดีโอจาก Google Drive • กรุณารับชมจนจบ แล้วกด “ดูจบแล้ว • เข้าเว็บไซต์”';
+    $('firstVisitProgress').style.width='0%';
+    firstVisitVideoEl=null;
+    return;
+  }
+
+  const video=document.createElement('video');
+  video.controls=true; video.playsInline=true; video.preload='metadata'; video.src=src.url;
+  if(imageUrl)video.poster=imageUrl;
+  video.addEventListener('loadedmetadata',()=>{ $('firstVisitStatus').textContent=`วิดีโอความยาวประมาณ ${formatTutorialTime(video.duration)} • กรุณาดูจนจบ`; });
+  video.addEventListener('timeupdate',()=>{
+    const duration=Number(video.duration),current=Number(video.currentTime);
+    if(Number.isFinite(duration)&&duration>0)$('firstVisitProgress').style.width=Math.min(100,(current/duration)*100)+'%';
   });
-  video.addEventListener('timeupdate', () => {
-    const duration = Number(video.duration);
-    const current = Number(video.currentTime);
-    if (Number.isFinite(duration) && duration > 0) {
-      $('firstVisitProgress').style.width = Math.min(100, (current / duration) * 100) + '%';
-    }
-  });
-  video.addEventListener('ended', () => {
-    firstVisitVideoEnded = true;
-    $('firstVisitProgress').style.width = '100%';
-    $('firstVisitStatus').textContent = 'รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้';
-    $('firstVisitContinue').disabled = false;
+  video.addEventListener('ended',()=>{
+    firstVisitVideoEnded=true;
+    $('firstVisitProgress').style.width='100%';
+    $('firstVisitStatus').textContent='รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้';
+    $('firstVisitContinue').disabled=false;
     $('firstVisitContinue').focus();
   });
-  video.addEventListener('error', () => {
-    $('firstVisitStatus').textContent = 'ไม่สามารถโหลดวิดีโอได้ กรุณาติดต่อแอดมิน';
-  });
+  video.addEventListener('error',()=>{ $('firstVisitStatus').textContent='ไม่สามารถโหลดวิดีโอได้ กรุณาตรวจสอบลิงก์วิดีโอ'; });
   media.appendChild(video);
-  firstVisitVideoEl = video;
+  firstVisitVideoEl=video;
 }
 
 function formatTutorialTime(seconds) {
@@ -1740,14 +1771,14 @@ function showFirstVisitTutorial() {
   // Do not autoplay: browsers often block it. The user presses play.
 }
 
-function finishFirstVisitTutorial() {
-  // ผู้ใช้ทั่วไปต้องดูวิดีโอจนจบก่อน
-  if (!firstVisitVideoEnded) {
-    if (admin) {
-      // สำหรับแอดมิน: ใช้ปุ่มเดิมนี้กดรัว ๆ 5 ครั้งเพื่อข้าม
-      adminTutorialBypassClick();
-      return;
-    }
+function finishFirstVisitTutorial(){
+  const src=getTutorialVideoSource(s.tutorialVideo||'');
+  if(src.type==='drive' && !admin){
+    completeFirstVisitTutorial();
+    return;
+  }
+  if(!firstVisitVideoEnded){
+    if(admin){ adminTutorialBypassClick(); return; }
     return toast('กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
   }
   completeFirstVisitTutorial();
