@@ -429,6 +429,30 @@ code { font-family: ui-monospace, monospace; }
   .first-visit-media video,.first-visit-poster { max-height:58dvh; min-height:180px; }
 }
 
+
+/* ===== Upload progress / media management ===== */
+.upload-progress-box{
+  margin-top:14px;padding:16px;border:1px solid var(--border);
+  border-radius:16px;background:var(--surface-alt);display:none;
+}
+.upload-progress-box.active{display:block}
+.upload-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.upload-progress-title{font-weight:700;overflow-wrap:anywhere}
+.upload-progress-percent{font-size:1rem;font-weight:700;color:var(--primary);white-space:nowrap}
+.upload-progress-track{height:10px;background:var(--surface);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.upload-progress-fill{height:100%;width:0%;background:var(--primary);border-radius:999px;transition:width .12s linear}
+.upload-progress-meta{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:var(--muted);font-size:.82rem;flex-wrap:wrap}
+.media-current{margin-top:12px;padding:12px;border:1px dashed var(--border);border-radius:14px;background:var(--surface-alt)}
+.media-current .media-url{font-size:.78rem;color:var(--muted);overflow-wrap:anywhere;word-break:break-word}
+.media-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--border)}
+.media-item:first-child{border-top:0}
+.media-thumb{width:72px;height:52px;object-fit:cover;border-radius:9px;border:1px solid var(--border);background:#000;flex:none}
+.media-item-info{min-width:0;flex:1}
+@media(max-width:600px){
+  .upload-progress-box{padding:13px}
+  .upload-progress-meta{font-size:.76rem}
+  .media-item{align-items:flex-start}
+}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&family=Material+Symbols+Sharp" rel="stylesheet">
 </head>
@@ -693,67 +717,241 @@ function persist() {
   }).catch(e => { console.error(e); toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); });
 }
 
-async function uploadImage(inputId, targetId, mode='single') {
-  const input = $(inputId), file = input?.files?.[0];
-  if (!file) return toast('กรุณาเลือกรูปภาพ');
-  if (!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
-  if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return toast('รองรับเฉพาะรูปภาพไม่เกิน 5 MB');
-  const ext = (file.name.split('.').pop() || 'png').toLowerCase();
-  if (!['png','jpg','jpeg','webp','gif'].includes(ext)) return toast('รองรับ PNG, JPG, WEBP และ GIF');
-  const path = `${crypto.randomUUID()}.${ext}`;
-  const {error} = await sb.storage.from('np404-images').upload(path, file, {contentType:file.type, upsert:false});
-  if (error) return toast('อัปโหลดไม่สำเร็จ: ' + error.message);
-  const {data} = sb.storage.from('np404-images').getPublicUrl(path);
-  const target = $(targetId);
-  if (target) target.value = mode === 'html' ? target.value + '\n<img src="' + data.publicUrl + '" alt="รูปภาพ">' : mode === 'append' ? [target.value.trim(), data.publicUrl].filter(Boolean).join('\n') : data.publicUrl;
-  toast('อัปโหลดแล้ว กรุณากดบันทึกการเปลี่ยนแปลง');
+/* ===== Robust Supabase Storage uploader =====
+   ใช้ XMLHttpRequest เพื่ออ่าน progress จริงของไฟล์ที่กำลังส่ง
+   และแสดงรายละเอียด error จาก Storage แทนข้อความ "อัปโหลดไม่สำเร็จ" แบบกว้าง ๆ
+*/
+let activeUploadXhr = null;
+
+function formatBytes(bytes){
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+  const units=['B','KB','MB','GB'];
+  const i=Math.min(Math.floor(Math.log(bytes)/Math.log(1024)),units.length-1);
+  return `${(bytes/Math.pow(1024,i)).toFixed(i?1:0)} ${units[i]}`;
 }
-function imageUploader(inputId, targetId, mode='single') {
-  return `<div class="field"><label>อัปโหลดรูปภาพจากเครื่อง (สูงสุด 5 MB)</label><div class="row"><input id="${inputId}" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:260px"><button class="btn ghost" type="button" onclick="uploadImage('${inputId}','${targetId}','${mode}')">อัปโหลดรูปภาพ</button></div></div>`;
+function formatUploadSpeed(bytesPerSec){
+  return `${formatBytes(bytesPerSec)}/วินาที`;
+}
+function uploadProgressUI(inputId, file){
+  const id='uploadProgressBox';
+  let box=$(id);
+  if(!box){
+    box=document.createElement('div');
+    box.id=id;
+    box.className='upload-progress-box';
+    const host=$(inputId)?.closest('.field') || $('adminBody');
+    host?.appendChild(box);
+  }
+  box.classList.add('active');
+  box.innerHTML=`
+    <div class="upload-progress-head">
+      <div class="upload-progress-title">กำลังอัปโหลด: ${esc(file.name)}</div>
+      <div class="upload-progress-percent" id="uploadPercent">0%</div>
+    </div>
+    <div class="upload-progress-track"><div class="upload-progress-fill" id="uploadFill"></div></div>
+    <div class="upload-progress-meta">
+      <span id="uploadBytes">0 B / ${formatBytes(file.size)}</span>
+      <span id="uploadSpeed">กำลังเริ่ม...</span>
+      <span id="uploadState">กำลังเชื่อมต่อ Storage…</span>
+    </div>`;
+  return box;
+}
+function setUploadProgress(percent, loaded, total, speed){
+  const p=Math.max(0,Math.min(100,percent||0));
+  const fill=$('uploadFill'), pct=$('uploadPercent'), bytes=$('uploadBytes'), spd=$('uploadSpeed');
+  if(fill) fill.style.width=p+'%';
+  if(pct) pct.textContent=Math.round(p)+'%';
+  if(bytes) bytes.textContent=`${formatBytes(loaded)} / ${formatBytes(total)}`;
+  if(spd && speed>0) spd.textContent=formatUploadSpeed(speed);
+}
+function finishUploadProgress(ok,message){
+  const state=$('uploadState');
+  if(state) state.textContent=message || (ok?'อัปโหลดสำเร็จ':'อัปโหลดไม่สำเร็จ');
+  const fill=$('uploadFill');
+  if(ok && fill){ fill.style.width='100%'; }
+  setTimeout(()=>{$('uploadProgressBox')?.classList.remove('active');}, ok?1400:4500);
+}
+function getStoragePathFromPublicUrl(url){
+  try{
+    const u=new URL(String(url||''));
+    const marker='/storage/v1/object/public/np404-images/';
+    const i=u.pathname.indexOf(marker);
+    if(i<0) return '';
+    return decodeURIComponent(u.pathname.slice(i+marker.length));
+  }catch{return '';}
+}
+async function removeStorageFile(url){
+  if(!CLOUD || !admin) throw new Error('ต้องเข้าสู่ระบบแอดมินก่อนลบไฟล์');
+  const path=getStoragePathFromPublicUrl(url);
+  if(!path) throw new Error('ไม่พบ path ของไฟล์ใน Supabase Storage');
+  const {error}=await sb.storage.from('np404-images').remove([path]);
+  if(error) throw error;
+  return path;
+}
+async function deleteMediaUrl(url,targetId,mode='single',afterDelete){
+  const clean=String(url||'').trim();
+  if(!clean) return;
+  if(!confirm('ยืนยันลบไฟล์นี้จาก Supabase Storage?\\nการลบแล้วไม่สามารถกู้คืนจากระบบนี้ได้')) return;
+  try{
+    await removeStorageFile(clean);
+    const target=$(targetId);
+    if(target){
+      if(mode==='append'){
+        target.value=target.value.split(/\\r?\\n/).map(x=>x.trim()).filter(x=>x && x!==clean).join('\\n');
+      }else{
+        target.value='';
+      }
+    }
+    if(typeof afterDelete==='function') afterDelete();
+    toast('ลบไฟล์เรียบร้อยแล้ว');
+  }catch(e){
+    console.error(e);
+    toast('ลบไฟล์ไม่สำเร็จ: '+(e?.message||e));
+  }
+}
+function mediaDeleteButton(url,targetId,mode='single'){
+  return `<button type="button" class="btn red" style="padding:7px 12px" onclick="deleteMediaUrl(${JSON.stringify(String(url||''))},${JSON.stringify(targetId)},${JSON.stringify(mode)})"><span class="material-symbols-outlined">delete</span> ลบไฟล์</button>`;
+}
+function renderCurrentMedia(url,targetId,type='image',mode='single'){
+  const clean=String(url||'').trim();
+  if(!clean) return '';
+  const preview=type==='video'
+    ? `<video src="${esc(clean)}" controls preload="metadata" style="display:block;width:100%;max-height:240px;border-radius:12px;background:#000"></video>`
+    : `<img src="${esc(clean)}" alt="สื่อปัจจุบัน" style="display:block;width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--surface-alt)">`;
+  return `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>ไฟล์ปัจจุบัน</b><div class="media-url">${esc(clean)}</div></div>${mediaDeleteButton(clean,targetId,mode)}</div>${preview}</div>`;
 }
 
-async function uploadTutorialVideo() {
-  const input = $('tutorialVideoUpload');
-  const file = input?.files?.[0];
-  if (!file) return toast('กรุณาเลือกวิดีโอ');
-  if (!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
-  if (!file.type.startsWith('video/')) return toast('รองรับเฉพาะไฟล์วิดีโอ');
-  if (file.size > 100 * 1024 * 1024) return toast('วิดีโอมีขนาดเกิน 100 MB');
-  const ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
-  const allowed = ['mp4','webm','mov','m4v','ogv'];
-  if (!allowed.includes(ext)) return toast('รองรับ MP4, WEBM, MOV, M4V และ OGV');
-  const path = `tutorial/${crypto.randomUUID()}.${ext}`;
-  const { error } = await sb.storage.from('np404-images').upload(path, file, {
-    contentType: file.type, upsert: false
+/* Direct XHR upload to Supabase Storage so upload.onprogress is available. */
+function storageUploadWithProgress(path,file,onProgress){
+  return new Promise((resolve,reject)=>{
+    if(!CLOUD || !sb) return reject(new Error('ไม่พบการเชื่อมต่อ Supabase'));
+    const xhr=new XMLHttpRequest();
+    activeUploadXhr=xhr;
+    const endpoint=`${SUPABASE_URL}/storage/v1/object/np404-images/${path}`;
+    xhr.open('POST',endpoint,true);
+    xhr.setRequestHeader('apikey',SUPABASE_ANON_KEY);
+    xhr.setRequestHeader('Authorization','Bearer '+SUPABASE_ANON_KEY);
+    xhr.setRequestHeader('Content-Type',file.type || 'application/octet-stream');
+    xhr.setRequestHeader('x-upsert','false');
+    const started=performance.now();
+    xhr.upload.onprogress=(ev)=>{
+      if(!ev.lengthComputable) return;
+      const elapsed=Math.max((performance.now()-started)/1000,.001);
+      const speed=ev.loaded/elapsed;
+      onProgress?.(ev.loaded,ev.total,(ev.loaded/ev.total)*100,speed);
+    };
+    xhr.onload=()=>{
+      activeUploadXhr=null;
+      let body={};
+      try{body=JSON.parse(xhr.responseText||'{}');}catch{}
+      if(xhr.status>=200 && xhr.status<300) resolve(body);
+      else reject(new Error(body.message || body.error || body.error_description || `Storage HTTP ${xhr.status}`));
+    };
+    xhr.onerror=()=>{activeUploadXhr=null;reject(new Error('เชื่อมต่อ Supabase Storage ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต/Storage Policy'));};
+    xhr.onabort=()=>{activeUploadXhr=null;reject(new Error('ยกเลิกการอัปโหลด'));};
+    xhr.send(file);
   });
-  if (error) return toast('อัปโหลดวิดีโอไม่สำเร็จ: ' + error.message);
-  const { data } = sb.storage.from('np404-images').getPublicUrl(path);
-  $('f_tutorialVideo').value = data.publicUrl;
-  toast('อัปโหลดวิดีโอแล้ว กรุณากดบันทึก');
+}
+function cancelActiveUpload(){
+  if(activeUploadXhr) activeUploadXhr.abort();
 }
 
-function tutorialVideoUploader() {
+async function uploadImage(inputId,targetId,mode='single'){
+  const input=$(inputId),file=input?.files?.[0];
+  if(!file) return toast('กรุณาเลือกรูปภาพ');
+  if(!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
+  if(!file.type.startsWith('image/')) return toast('รองรับเฉพาะไฟล์รูปภาพ');
+  if(file.size>20*1024*1024) return toast('รูปภาพมีขนาดเกิน 20 MB');
+  const ext=(file.name.split('.').pop()||'png').toLowerCase();
+  if(!['png','jpg','jpeg','webp','gif'].includes(ext)) return toast('รองรับ PNG, JPG, WEBP และ GIF');
+
+  const path=`images/${crypto.randomUUID()}.${ext}`;
+  uploadProgressUI(inputId,file);
+  $('uploadState').textContent='กำลังอัปโหลดรูปภาพ…';
+  try{
+    await storageUploadWithProgress(path,file,(loaded,total,pct,speed)=>setUploadProgress(pct,loaded,total,speed));
+    const {data}=sb.storage.from('np404-images').getPublicUrl(path);
+    const target=$(targetId);
+    if(target){
+      target.value=mode==='html'
+        ? target.value+'\\n<img src="'+data.publicUrl+'" alt="รูปภาพ">'
+        : mode==='append'
+          ? [target.value.trim(),data.publicUrl].filter(Boolean).join('\\n')
+          : data.publicUrl;
+    }
+    setUploadProgress(100,file.size,file.size,0);
+    finishUploadProgress(true,'อัปโหลดสำเร็จ');
+    toast('อัปโหลดรูปภาพสำเร็จ • กรุณากดบันทึกการเปลี่ยนแปลง');
+    if(tab==='popup'||tab==='tutorial') renderAdmin();
+    return data.publicUrl;
+  }catch(e){
+    console.error(e);
+    finishUploadProgress(false,'อัปโหลดไม่สำเร็จ');
+    toast('อัปโหลดรูปภาพไม่สำเร็จ: '+(e?.message||e));
+    return null;
+  }finally{
+    if(input) input.value='';
+  }
+}
+function imageUploader(inputId,targetId,mode='single'){
+  return `<div class="field"><label>อัปโหลดรูปภาพจากเครื่อง (สูงสุด 20 MB)</label><div class="row"><input id="${inputId}" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:320px"><button class="btn ghost" type="button" onclick="uploadImage('${inputId}','${targetId}','${mode}')"><span class="material-symbols-outlined">upload</span> อัปโหลดรูปภาพ</button></div></div>`;
+}
+
+async function uploadTutorialVideo(){
+  const input=$('tutorialVideoUpload'),file=input?.files?.[0];
+  if(!file) return toast('กรุณาเลือกวิดีโอ');
+  if(!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
+  if(!file.type.startsWith('video/')) return toast('รองรับเฉพาะไฟล์วิดีโอ');
+  if(file.size>500*1024*1024) return toast('วิดีโอมีขนาดเกิน 500 MB');
+  const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+  const allowed=['mp4','webm','mov','m4v','ogv'];
+  if(!allowed.includes(ext)) return toast('รองรับ MP4, WEBM, MOV, M4V และ OGV');
+
+  const path=`tutorial/${crypto.randomUUID()}.${ext}`;
+  uploadProgressUI('tutorialVideoUpload',file);
+  $('uploadState').textContent='กำลังอัปโหลดวิดีโอ…';
+  try{
+    await storageUploadWithProgress(path,file,(loaded,total,pct,speed)=>setUploadProgress(pct,loaded,total,speed));
+    const {data}=sb.storage.from('np404-images').getPublicUrl(path);
+    $('f_tutorialVideo').value=data.publicUrl;
+    setUploadProgress(100,file.size,file.size,0);
+    finishUploadProgress(true,'อัปโหลดวิดีโอสำเร็จ');
+    toast('อัปโหลดวิดีโอสำเร็จ • กรุณากดบันทึก');
+    renderAdmin();
+    return data.publicUrl;
+  }catch(e){
+    console.error(e);
+    finishUploadProgress(false,'อัปโหลดไม่สำเร็จ');
+    toast('อัปโหลดวิดีโอไม่สำเร็จ: '+(e?.message||e));
+    return null;
+  }finally{
+    if(input) input.value='';
+  }
+}
+function tutorialVideoUploader(){
+  const current=s.tutorialVideo||'';
   return `<div class="field">
-    <label>อัปโหลดวิดีโอแนะนำการใช้งาน (แนะนำ MP4 / สูงสุด 100 MB)</label>
+    <label>อัปโหลดวิดีโอแนะนำการใช้งาน (สูงสุด 500 MB)</label>
     <div class="row">
       <input id="tutorialVideoUpload" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" style="max-width:320px">
-      <button class="btn ghost" type="button" onclick="uploadTutorialVideo()">อัปโหลดวิดีโอ</button>
+      <button class="btn ghost" type="button" onclick="uploadTutorialVideo()"><span class="material-symbols-outlined">upload</span> อัปโหลดวิดีโอ</button>
     </div>
-    <small style="color:var(--muted);">วิดีโอจะถูกเก็บใน Supabase Storage bucket เดิมชื่อ np404-images</small>
+    <small style="color:var(--muted);">แสดงเปอร์เซ็นต์การอัปโหลดแบบเรียลไทม์ และเก็บใน Supabase Storage bucket np404-images</small>
+    ${renderCurrentMedia(current,'f_tutorialVideo','video','single')}
   </div>`;
 }
-
-async function uploadTutorialImage() {
-  await uploadImage('tutorialImageUpload', 'f_tutorialImage', 'single');
+async function uploadTutorialImage(){
+  await uploadImage('tutorialImageUpload','f_tutorialImage','single');
 }
-
-function tutorialImageUploader() {
+function tutorialImageUploader(){
+  const current=s.tutorialImage||'';
   return `<div class="field">
     <label>รูปภาพประกอบ / ภาพปก</label>
     <div class="row">
       <input id="tutorialImageUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:320px">
-      <button class="btn ghost" type="button" onclick="uploadTutorialImage()">อัปโหลดรูปภาพ</button>
+      <button class="btn ghost" type="button" onclick="uploadTutorialImage()"><span class="material-symbols-outlined">upload</span> อัปโหลดรูปภาพ</button>
     </div>
+    ${renderCurrentMedia(current,'f_tutorialImage','image','single')}
   </div>`;
 }
 
@@ -1104,6 +1302,19 @@ function saveFields(keys) {
   renderAdmin();
 }
 
+function renderPopupMediaList(){
+  const urls=String(s.popupImages||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(!urls.length) return '<small style="color:var(--muted)">ยังไม่มีรูปภาพในรายการนี้</small>';
+  return `<b>รูปภาพในรายการนี้</b>${urls.map((url,i)=>`
+    <div class="media-item">
+      <div class="media-item-info" style="display:flex;align-items:center;gap:10px;">
+        <img class="media-thumb" src="${esc(url)}" alt="รูป ${i+1}">
+        <div><div>รูปภาพที่ ${i+1}</div><div class="media-url">${esc(url)}</div></div>
+      </div>
+      ${mediaDeleteButton(url,'f_popupImages','append')}
+    </div>`).join('')}`;
+}
+
 function renderAdmin() {
   const names = [
     ['overview', 'ภาพรวม'],
@@ -1232,6 +1443,9 @@ function renderAdmin() {
       ${field('รายละเอียดประกาศ', 'popupText', 'textarea')}
       ${field('ลิงก์รูปภาพ (หนึ่งลิงก์ต่อบรรทัด)', 'popupImages', 'textarea')}
       ${imageUploader('popupUpload','f_popupImages','append')}
+      <div class="media-current" id="popupMediaList">
+        ${renderPopupMediaList()}
+      </div>
       <div class="row">
         <button class="btn" onclick="s.popupEnabled=$('popupSwitch').checked;saveFields(['popupTitle','popupText','popupImages'])">บันทึกประกาศ</button>
         <button class="btn ghost" onclick="previewPopup()">แสดงตัวอย่าง</button>
