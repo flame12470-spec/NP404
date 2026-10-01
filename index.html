@@ -1236,6 +1236,7 @@ function renderAdmin() {
         <button class="btn ghost" onclick="previewPopup()">แสดงตัวอย่าง</button>
       </div>
     </div>`;
+  }
 
   if (tab === 'tutorial') {
     html = `<div class="admin-form-card">
@@ -1267,8 +1268,6 @@ function renderAdmin() {
         </div>
       </div>
     </div>`;
-  }
-
   }
 
   $('adminBody').innerHTML = html;
