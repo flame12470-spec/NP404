@@ -344,8 +344,8 @@ code { font-family: ui-monospace, monospace; }
 }
 #firstVisitTutorial.active { display: grid; }
 .first-visit-dialog {
-  width: min(900px, 96vw);
-  max-height: 94dvh;
+  width: min(1100px, 98vw);
+  max-height: 96dvh;
   overflow: auto;
   background: var(--surface);
   color: var(--text);
@@ -362,23 +362,29 @@ code { font-family: ui-monospace, monospace; }
   width:100%;
   overflow:hidden;
   border-radius:20px;
-  background:#080b12;
-  border:1px solid var(--border);
+  background:transparent;
+  display:flex;
+  justify-content:center;
+  --fv-h:min(72dvh,calc(100dvh - 250px));
 }
 .first-visit-media video {
   display:block;
   width:100%;
-  max-height:60dvh;
-  min-height:220px;
+  height:auto;
+  max-width:100%;
+  max-height:var(--fv-h);
   object-fit:contain;
-  background:#080b12;
+  background:transparent;
+  border-radius:16px;
 }
 .first-visit-drive-wrap{
-  position:relative;width:100%;background:#080b12;overflow:hidden;
-  min-height:260px;
+  position:relative;overflow:hidden;background:transparent;border-radius:16px;
+  --r:1.7778;
+  aspect-ratio:var(--r);
+  width:min(100%,calc(var(--fv-h) * var(--r)));
 }
 .first-visit-drive-frame{
-  display:block;width:100%;height:min(60dvh,520px);min-height:260px;
+  position:absolute;inset:0;display:block;width:100%;height:100%;
   border:0;background:#080b12;
 }
 .first-visit-drive-shield{
@@ -398,9 +404,9 @@ code { font-family: ui-monospace, monospace; }
 .first-visit-poster {
   display:block;
   width:100%;
-  max-height:60dvh;
+  max-height:min(72dvh,calc(100dvh - 250px));
   object-fit:contain;
-  background:#080b12;
+  background:transparent;
 }
 .first-visit-progress {
   height:7px;
@@ -449,8 +455,11 @@ code { font-family: ui-monospace, monospace; }
 }
 @media(max-width:600px){
   #firstVisitTutorial { padding:8px; }
-  .first-visit-dialog { width:100%; max-height:97dvh; padding:16px; border-radius:20px; }
-  .first-visit-media video,.first-visit-poster { max-height:58dvh; min-height:180px; }
+  .first-visit-dialog { width:100%; max-height:98dvh; padding:12px; border-radius:18px; }
+  .first-visit-head { margin-bottom:10px; }
+  .first-visit-head h2 { font-size:1.15rem; }
+  .first-visit-progress { margin-top:10px; }
+  .first-visit-actions { margin-top:12px; }
 }
 
 
@@ -650,6 +659,7 @@ const DEFAULT = {
   tutorialTitle: 'วิธีการใช้งานเว็บไซต์',
   tutorialDescription: 'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์',
   tutorialVideo: '',
+  tutorialAspect: '0.5625',
   tutorialImage: '',
   tutorialDurationMinutes: 0,
   menus: [
@@ -819,8 +829,9 @@ async function deleteMediaUrl(url,targetId,mode='single',afterDelete){
   if(!confirm('ยืนยันลบไฟล์นี้จาก Supabase Storage?\\nการลบแล้วไม่สามารถกู้คืนจากระบบนี้ได้')) return;
   try{
     await removeStorageFile(clean);
+    if(targetId==='f_tutorialImage'){ s.tutorialImage=data.publicUrl; persist(); }
     const target=$(targetId);
-    if(target){
+    if(target && targetId!=='f_tutorialImage'){
       if(mode==='append'){
         target.value=target.value.split(/\\r?\\n/).map(x=>x.trim()).filter(x=>x && x!==clean).join('\\n');
       }else{
@@ -847,15 +858,20 @@ function renderCurrentMedia(url,targetId,type='image',mode='single'){
 }
 
 /* Direct XHR upload to Supabase Storage so upload.onprogress is available. */
-function storageUploadWithProgress(path,file,onProgress){
+async function storageUploadWithProgress(path,file,onProgress){
+  if(!CLOUD || !sb) throw new Error('ไม่พบการเชื่อมต่อ Supabase');
+  /* ต้องใช้ access token ของแอดมินที่ล็อกอินอยู่ ไม่ใช่ anon key
+     ไม่เช่นนั้น Storage จะมองเป็นผู้ใช้ทั่วไปและติด RLS policy */
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session?.access_token) throw new Error('เซสชันแอดมินหมดอายุ กรุณาเข้าสู่ระบบแอดมินใหม่');
+  const token=session.access_token;
   return new Promise((resolve,reject)=>{
-    if(!CLOUD || !sb) return reject(new Error('ไม่พบการเชื่อมต่อ Supabase'));
     const xhr=new XMLHttpRequest();
     activeUploadXhr=xhr;
     const endpoint=`${SUPABASE_URL}/storage/v1/object/np404-images/${path}`;
     xhr.open('POST',endpoint,true);
     xhr.setRequestHeader('apikey',SUPABASE_ANON_KEY);
-    xhr.setRequestHeader('Authorization','Bearer '+SUPABASE_ANON_KEY);
+    xhr.setRequestHeader('Authorization','Bearer '+token);
     xhr.setRequestHeader('Content-Type',file.type || 'application/octet-stream');
     xhr.setRequestHeader('x-upsert','false');
     const started=performance.now();
@@ -870,6 +886,8 @@ function storageUploadWithProgress(path,file,onProgress){
       let body={};
       try{body=JSON.parse(xhr.responseText||'{}');}catch{}
       if(xhr.status>=200 && xhr.status<300) resolve(body);
+      else if(xhr.status===413) reject(new Error('ไฟล์ใหญ่เกินที่ Supabase Storage อนุญาต (แพ็กเกจ Free จำกัด 50 MB) — ลดขนาดคลิป หรือใช้ลิงก์ Google Drive แทน'));
+      else if(xhr.status===401 || xhr.status===403 || /row-level security/i.test(body.message||'')) reject(new Error('Storage ไม่อนุญาตให้บัญชีนี้อัปโหลด (RLS) — ต้องเพิ่ม Storage Policy ให้แอดมินใน Supabase ตามคำแนะนำ SQL'));
       else reject(new Error(body.message || body.error || body.error_description || `Storage HTTP ${xhr.status}`));
     };
     xhr.onerror=()=>{activeUploadXhr=null;reject(new Error('เชื่อมต่อ Supabase Storage ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต/Storage Policy'));};
@@ -938,10 +956,12 @@ async function uploadTutorialVideo(){
   try{
     await storageUploadWithProgress(path,file,(loaded,total,pct,speed)=>setUploadProgress(pct,loaded,total,speed));
     const {data}=sb.storage.from('np404-images').getPublicUrl(path);
-    $('f_tutorialVideo').value=data.publicUrl;
+    /* เก็บลง state แล้วบันทึกลง Supabase ทันที (เดิมใส่แค่ในช่อง input แล้ว renderAdmin() ทำให้ค่าหาย) */
+    s.tutorialVideo=data.publicUrl;
     setUploadProgress(100,file.size,file.size,0);
     finishUploadProgress(true,'อัปโหลดวิดีโอสำเร็จ');
-    toast('อัปโหลดวิดีโอสำเร็จ • กรุณากดบันทึก');
+    toast('อัปโหลดวิดีโอสำเร็จ');
+    persist();
     renderAdmin();
     return data.publicUrl;
   }catch(e){
@@ -978,16 +998,21 @@ function normalizeTutorialVideoUrl(url){
 function tutorialVideoUploader(){
   const current=s.tutorialVideo||'';
   const driveId=getGoogleDriveFileId(current);
+  const isDirect=!!current && !driveId;
   return `<div class="field">
-    <label>วิดีโอแนะนำการใช้งาน</label>
-    ${field('ลิงก์วิดีโอ Google Drive (แนะนำสำหรับวิดีโอขนาดใหญ่)','tutorialVideo')}
-    <small style="display:block;color:var(--muted);margin-top:-8px;margin-bottom:12px;line-height:1.6;">ตั้งไฟล์ Google Drive เป็น “ทุกคนที่มีลิงก์ → ผู้ดู” แล้ววางลิงก์แบบ /file/d/.../view ได้ ระบบจะแปลงเป็นตัวเล่นให้อัตโนมัติ</small>
-    ${driveId ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>Google Drive พร้อมใช้งาน</b><div class="media-url">File ID: ${esc(driveId)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบลิงก์</button></div><iframe src="https://drive.google.com/file/d/${esc(driveId)}/preview?autoplay=1&controls=0&disablekb=1&rm=minimal" allow="autoplay" allowfullscreen style="display:block;width:100%;height:300px;border:0;border-radius:12px;background:#000"></iframe></div>` : ''}
-    <div style="margin-top:12px;padding:12px 14px;border:1px dashed var(--border);border-radius:14px;background:var(--surface-alt);color:var(--muted);font-size:.84rem;">หากใช้ Google Drive ไม่ต้องอัปโหลดวิดีโอเข้า Supabase และไม่ติดข้อจำกัดไฟล์ 50 MB ของ Supabase Free</div>
+    <label>อัปโหลดวิดีโอจากเครื่อง (MP4 / WEBM / MOV / M4V / OGV)</label>
+    <div class="row">
+      <input id="tutorialVideoUpload" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg,.mp4,.webm,.mov,.m4v,.ogv" style="max-width:320px">
+      <button class="btn ghost" type="button" onclick="uploadTutorialVideo()"><span class="material-symbols-outlined">upload</span> อัปโหลดวิดีโอ</button>
+      <button class="btn ghost" type="button" onclick="cancelActiveUpload()">ยกเลิก</button>
+    </div>
+    <small style="display:block;color:var(--muted);margin-top:8px;line-height:1.6;">อัปโหลดเสร็จระบบจะบันทึกลงระบบให้อัตโนมัติ • Supabase Free รับไฟล์ได้ไม่เกิน 50 MB ถ้าใหญ่กว่านี้ให้วางลิงก์ Google Drive ในช่อง “ลิงก์วิดีโอแนะนำการใช้งาน” ด้านบน (ตั้งเป็น “ทุกคนที่มีลิงก์ → ผู้ดู”)</small>
+    ${isDirect ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>วิดีโอในระบบพร้อมใช้งาน</b><div class="media-url">${esc(current)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบวิดีโอ</button></div><video src="${esc(current)}" controls playsinline preload="metadata" style="display:block;width:100%;height:auto;max-height:360px;object-fit:contain;border-radius:12px;background:transparent"></video></div>` : ''}
+    ${driveId ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>Google Drive พร้อมใช้งาน</b><div class="media-url">File ID: ${esc(driveId)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบลิงก์</button></div><iframe src="https://drive.google.com/file/d/${esc(driveId)}/preview" allow="autoplay" allowfullscreen style="display:block;width:100%;aspect-ratio:16/9;height:auto;border:0;border-radius:12px;background:#000"></iframe></div>` : ''}
   </div>`;
 }
 function clearTutorialVideoLink(){
-  if(!confirm('ยืนยันลบลิงก์วิดีโอ Google Drive จากรายการนี้?')) return;
+  if(!confirm('ยืนยันลบวิดีโอ/ลิงก์วิดีโอนี้ออกจากการตั้งค่า?')) return;
   s.tutorialVideo='';
   persist();
   renderAdmin();
@@ -1524,12 +1549,13 @@ function renderAdmin() {
       ${field('คำอธิบาย', 'tutorialDescription', 'textarea')}
       ${field('ลิงก์วิดีโอแนะนำการใช้งาน', 'tutorialVideo')}
       ${field('เวลาที่ต้องรับชมขั้นต่ำ (นาที)', 'tutorialDurationMinutes', 'number')}
+      ${field('สัดส่วนคลิป (ใช้กับลิงก์ Google Drive เท่านั้น คลิปที่อัปโหลดเองจะปรับอัตโนมัติ)', 'tutorialAspect', 'select', '1.7778:แนวนอน 16 ต่อ 9|0.5625:แนวตั้ง 9 ต่อ 16 (คลิปจากมือถือ)|1.3333:แนวนอน 4 ต่อ 3|1:สี่เหลี่ยมจัตุรัส')}
       ${tutorialVideoUploader()}
       ${field('ลิงก์รูปภาพประกอบ / ภาพปก', 'tutorialImage')}
       ${tutorialImageUploader()}
 
       <div class="row">
-        <button class="btn" onclick="s.tutorialEnabled=$('tutorialEnabledSwitch').checked;saveFields(['tutorialTitle','tutorialDescription','tutorialVideo','tutorialDurationMinutes','tutorialImage'])">บันทึกการตั้งค่า</button>
+        <button class="btn" onclick="s.tutorialEnabled=$('tutorialEnabledSwitch').checked;saveFields(['tutorialTitle','tutorialDescription','tutorialVideo','tutorialDurationMinutes','tutorialAspect','tutorialImage'])">บันทึกการตั้งค่า</button>
         <button class="btn ghost" onclick="previewFirstVisitTutorial()">ดูตัวอย่าง</button>
       </div>
 
@@ -1845,6 +1871,7 @@ function buildFirstVisitTutorial(){
     /* Google Drive: เล่นอัตโนมัติ + ชั้นใสป้องกันการกด/ลากวิดีโอ */
     const wrap=document.createElement('div');
     wrap.className='first-visit-drive-wrap';
+    wrap.style.setProperty('--r',String(Number(s.tutorialAspect)||0.5625));
     const frame=document.createElement('iframe');
     const sep=src.url.includes('?')?'&':'?';
     frame.src=src.url;
@@ -1903,6 +1930,7 @@ function buildFirstVisitTutorial(){
   video.autoplay=true;
   video.muted=true;
   video.preload='auto';
+  video.style.aspectRatio='16/9';
   video.src=src.url+(src.url.includes('#')?'':'#t=0.1');
   video.setAttribute('controlsList','nodownload noplaybackrate nofullscreen');
   video.disablePictureInPicture=true;
@@ -1910,6 +1938,11 @@ function buildFirstVisitTutorial(){
   video.style.pointerEvents='none';
   if(imageUrl)video.poster=imageUrl;
   video.addEventListener('loadedmetadata',()=>{
+    if(video.videoWidth&&video.videoHeight){
+      const r=video.videoWidth/video.videoHeight;
+      video.style.aspectRatio=String(r);
+      video.style.width=`min(100%,calc(var(--fv-h) * ${r}))`;
+    }
     const d=Number(video.duration);
     setFirstVisitStatus(`วิดีโอความยาว ${formatTutorialTime(d)} • เล่นอัตโนมัติ`);
   });
