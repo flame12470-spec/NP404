@@ -616,7 +616,7 @@ try {
   s = structuredClone(DEFAULT);
 }
 
-let admin = false, tab = null, adminMenuOpen = false, popupTimer = null, sideOpen = window.innerWidth > 820;
+let admin = false, tab = null, adminMenuOpen = true, popupTimer = null, sideOpen = window.innerWidth > 820;
 
 const $ = id => document.getElementById(id);
 const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1052,6 +1052,7 @@ async function login() {
         return;
       }
       admin = true;
+    adminMenuOpen = true;
       try { await cloudLoad(); }
       catch (e) { console.error('Load error:', e); toast('เข้าสู่ระบบแล้ว แต่โหลดข้อมูลไม่สำเร็จ: ' + e.message); }
     } else {
