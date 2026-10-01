@@ -329,6 +329,106 @@ code { font-family: ui-monospace, monospace; }
   .top .ticker-wrap { display:none; }
   .top .notify-toggle { margin-left:auto; }
 }
+
+/* ===== First-visit tutorial overlay ===== */
+#firstVisitTutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 8, 18, .82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+#firstVisitTutorial.active { display: grid; }
+.first-visit-dialog {
+  width: min(900px, 96vw);
+  max-height: 94dvh;
+  overflow: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: clamp(18px, 3vw, 32px);
+  box-shadow: 0 30px 90px rgba(0,0,0,.38);
+}
+.first-visit-head { text-align:center; margin-bottom:18px; }
+.first-visit-head h2 { margin:0 0 8px; font-size:clamp(1.35rem,3vw,2rem); }
+.first-visit-head p { margin:0 auto; }
+.first-visit-media {
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  border-radius:20px;
+  background:#080b12;
+  border:1px solid var(--border);
+}
+.first-visit-media video {
+  display:block;
+  width:100%;
+  max-height:60dvh;
+  min-height:220px;
+  object-fit:contain;
+  background:#080b12;
+}
+.first-visit-poster {
+  display:block;
+  width:100%;
+  max-height:60dvh;
+  object-fit:contain;
+  background:#080b12;
+}
+.first-visit-progress {
+  height:7px;
+  background:var(--surface-alt);
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:14px;
+}
+.first-visit-progress > div {
+  width:0%;
+  height:100%;
+  background:var(--primary);
+  transition:width .15s linear;
+}
+.first-visit-status {
+  margin:10px 0 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:.9rem;
+}
+.first-visit-actions {
+  display:flex;
+  justify-content:center;
+  margin-top:18px;
+}
+.first-visit-actions .btn { min-width:190px; }
+.first-visit-actions .btn:disabled { opacity:.55; }
+
+.tutorial-admin-preview {
+  margin-top:16px;
+  border:1px dashed var(--border);
+  border-radius:18px;
+  padding:14px;
+  background:var(--surface-alt);
+}
+.tutorial-admin-preview img,
+.tutorial-admin-preview video {
+  display:block;
+  width:100%;
+  max-height:360px;
+  object-fit:contain;
+  border-radius:14px;
+  background:#080b12;
+}
+@media(max-width:600px){
+  #firstVisitTutorial { padding:8px; }
+  .first-visit-dialog { width:100%; max-height:97dvh; padding:16px; border-radius:20px; }
+  .first-visit-media video,.first-visit-poster { max-height:58dvh; min-height:180px; }
+}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&family=Material+Symbols+Sharp" rel="stylesheet">
 </head>
@@ -408,6 +508,23 @@ code { font-family: ui-monospace, monospace; }
   </main>
 </div>
 
+
+<!-- First-visit tutorial: locked until the video reaches its natural end -->
+<div id="firstVisitTutorial" aria-modal="true" role="dialog" aria-labelledby="firstVisitTitle">
+  <div class="first-visit-dialog">
+    <div class="first-visit-head">
+      <h2 id="firstVisitTitle">วิธีการใช้งานเว็บไซต์</h2>
+      <p id="firstVisitDescription">กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์</p>
+    </div>
+    <div id="firstVisitMedia" class="first-visit-media"></div>
+    <div class="first-visit-progress" aria-hidden="true"><div id="firstVisitProgress"></div></div>
+    <div id="firstVisitStatus" class="first-visit-status">กำลังโหลดวิดีโอ...</div>
+    <div class="first-visit-actions">
+      <button id="firstVisitContinue" class="btn" disabled onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
+    </div>
+  </div>
+</div>
+
 <aside id="notificationPanel" class="notification-panel hidden" aria-label="รายการแจ้งเตือน"><div class="row between"><h2 style="margin:0">การแจ้งเตือน</h2><button class="btn ghost" onclick="clearNotifications()">ล้างทั้งหมด</button></div><div id="notificationList" class="notification-list"><p>ยังไม่มีการแจ้งเตือน</p></div></aside>
 <!-- Announcement Popup Modal -->
 <div id="popup" class="modal hidden">
@@ -480,6 +597,12 @@ const DEFAULT = {
   popupAlign: 'center',
   popupTitleWeight: '700',
   popupTextWeight: '400',
+  // First-visit tutorial / onboarding
+  tutorialEnabled: true,
+  tutorialTitle: 'วิธีการใช้งานเว็บไซต์',
+  tutorialDescription: 'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์',
+  tutorialVideo: '',
+  tutorialImage: '',
   menus: [
     { id: 'menu0', title: 'ข่าวสาร', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>ข่าวสารและประกาศ</h2><p>พื้นที่สำหรับแสดงข่าวสารของเว็บไซต์</p>', url: '', requiresLogin: false, visible: true },
     { id: 'menu1', title: 'กิจกรรม', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>กิจกรรม</h2><p>เพิ่มเนื้อหาหรือรูปภาพจากแผงควบคุม</p>', url: '', requiresLogin: false, visible: true }
@@ -587,6 +710,51 @@ async function uploadImage(inputId, targetId, mode='single') {
 }
 function imageUploader(inputId, targetId, mode='single') {
   return `<div class="field"><label>อัปโหลดรูปภาพจากเครื่อง (สูงสุด 5 MB)</label><div class="row"><input id="${inputId}" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:260px"><button class="btn ghost" type="button" onclick="uploadImage('${inputId}','${targetId}','${mode}')">อัปโหลดรูปภาพ</button></div></div>`;
+}
+
+async function uploadTutorialVideo() {
+  const input = $('tutorialVideoUpload');
+  const file = input?.files?.[0];
+  if (!file) return toast('กรุณาเลือกวิดีโอ');
+  if (!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
+  if (!file.type.startsWith('video/')) return toast('รองรับเฉพาะไฟล์วิดีโอ');
+  if (file.size > 100 * 1024 * 1024) return toast('วิดีโอมีขนาดเกิน 100 MB');
+  const ext = (file.name.split('.').pop() || 'mp4').toLowerCase();
+  const allowed = ['mp4','webm','mov','m4v','ogv'];
+  if (!allowed.includes(ext)) return toast('รองรับ MP4, WEBM, MOV, M4V และ OGV');
+  const path = `tutorial/${crypto.randomUUID()}.${ext}`;
+  const { error } = await sb.storage.from('np404-images').upload(path, file, {
+    contentType: file.type, upsert: false
+  });
+  if (error) return toast('อัปโหลดวิดีโอไม่สำเร็จ: ' + error.message);
+  const { data } = sb.storage.from('np404-images').getPublicUrl(path);
+  $('f_tutorialVideo').value = data.publicUrl;
+  toast('อัปโหลดวิดีโอแล้ว กรุณากดบันทึก');
+}
+
+function tutorialVideoUploader() {
+  return `<div class="field">
+    <label>อัปโหลดวิดีโอแนะนำการใช้งาน (แนะนำ MP4 / สูงสุด 100 MB)</label>
+    <div class="row">
+      <input id="tutorialVideoUpload" type="file" accept="video/mp4,video/webm,video/quicktime,video/x-m4v,video/ogg" style="max-width:320px">
+      <button class="btn ghost" type="button" onclick="uploadTutorialVideo()">อัปโหลดวิดีโอ</button>
+    </div>
+    <small style="color:var(--muted);">วิดีโอจะถูกเก็บใน Supabase Storage bucket เดิมชื่อ np404-images</small>
+  </div>`;
+}
+
+async function uploadTutorialImage() {
+  await uploadImage('tutorialImageUpload', 'f_tutorialImage', 'single');
+}
+
+function tutorialImageUploader() {
+  return `<div class="field">
+    <label>รูปภาพประกอบ / ภาพปก</label>
+    <div class="row">
+      <input id="tutorialImageUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:320px">
+      <button class="btn ghost" type="button" onclick="uploadTutorialImage()">อัปโหลดรูปภาพ</button>
+    </div>
+  </div>`;
 }
 
 /* ===== Supabase data layer ===== */
@@ -942,7 +1110,8 @@ function renderAdmin() {
     ['branding', 'เว็บไซต์และธีม'],
     ['homepage', 'หน้าแรก'],
     ['menus', 'จัดการเมนู'],
-    ['popup', 'ป๊อปอัป']
+    ['popup', 'ป๊อปอัป'],
+    ['tutorial', 'วิธีการใช้งานครั้งแรก']
   ];
   
   $('adminTabs').innerHTML = `<button class="${adminMenuOpen ? 'active' : ''}" onclick="adminMenuOpen=!adminMenuOpen;renderAdmin()">
@@ -1067,6 +1236,39 @@ function renderAdmin() {
         <button class="btn ghost" onclick="previewPopup()">แสดงตัวอย่าง</button>
       </div>
     </div>`;
+
+  if (tab === 'tutorial') {
+    html = `<div class="admin-form-card">
+      <h3>วิธีการใช้งานครั้งแรก</h3>
+      <p class="form-help">ผู้ใช้ที่เข้าชมเว็บไซต์ครั้งแรกจะถูกล็อกหน้านี้และต้องรับชมวิดีโอจนจบก่อนเข้าเว็บไซต์ เมื่อดูจบแล้วระบบจะจำสถานะไว้ในเครื่องนั้นและจะไม่แสดงซ้ำ</p>
+
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:18px;">
+        <input type="checkbox" id="tutorialEnabledSwitch" ${s.tutorialEnabled ? 'checked' : ''}>
+        เปิดใช้งานหน้าวิธีการใช้งานครั้งแรก
+      </label>
+
+      ${field('หัวข้อ', 'tutorialTitle')}
+      ${field('คำอธิบาย', 'tutorialDescription', 'textarea')}
+      ${field('ลิงก์วิดีโอแนะนำการใช้งาน', 'tutorialVideo')}
+      ${tutorialVideoUploader()}
+      ${field('ลิงก์รูปภาพประกอบ / ภาพปก', 'tutorialImage')}
+      ${tutorialImageUploader()}
+
+      <div class="row">
+        <button class="btn" onclick="s.tutorialEnabled=$('tutorialEnabledSwitch').checked;saveFields(['tutorialTitle','tutorialDescription','tutorialVideo','tutorialImage'])">บันทึกการตั้งค่า</button>
+        <button class="btn ghost" onclick="previewFirstVisitTutorial()">ดูตัวอย่าง</button>
+      </div>
+
+      <div class="tutorial-admin-preview">
+        <b>สถานะสื่อปัจจุบัน</b>
+        <div style="margin-top:10px;color:var(--muted);overflow-wrap:anywhere;">
+          ${s.tutorialVideo ? 'มีวิดีโอแล้ว' : 'ยังไม่ได้กำหนดวิดีโอ'}
+          ${s.tutorialImage ? ' • มีรูปภาพแล้ว' : ' • ยังไม่มีรูปภาพ'}
+        </div>
+      </div>
+    </div>`;
+  }
+
   }
 
   $('adminBody').innerHTML = html;
@@ -1235,6 +1437,115 @@ function showPopup() {
   }
 }
 
+
+/* ===== First-visit tutorial runtime ===== */
+const FIRST_VISIT_KEY = 'np404_first_visit_tutorial_completed_v1';
+let firstVisitVideoEnded = false;
+let firstVisitVideoEl = null;
+
+function firstVisitCompleted() {
+  try { return localStorage.getItem(FIRST_VISIT_KEY) === '1'; }
+  catch { return false; }
+}
+
+function lockFirstVisitUI(lock) {
+  document.documentElement.style.overflow = lock ? 'hidden' : '';
+  document.body.style.overflow = lock ? 'hidden' : '';
+}
+
+function buildFirstVisitTutorial() {
+  const overlay = $('firstVisitTutorial');
+  if (!overlay) return;
+  $('firstVisitTitle').textContent = s.tutorialTitle || 'วิธีการใช้งานเว็บไซต์';
+  $('firstVisitDescription').textContent = s.tutorialDescription || 'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์';
+  const media = $('firstVisitMedia');
+  media.replaceChildren();
+  firstVisitVideoEnded = false;
+  $('firstVisitContinue').disabled = true;
+  $('firstVisitProgress').style.width = '0%';
+
+  const videoUrl = String(s.tutorialVideo || '').trim();
+  const imageUrl = String(s.tutorialImage || '').trim();
+
+  if (!videoUrl) {
+    const empty = document.createElement('div');
+    empty.style.cssText = 'padding:40px 20px;text-align:center;color:var(--muted)';
+    empty.textContent = 'ยังไม่ได้ตั้งค่าวิดีโอแนะนำการใช้งาน';
+    media.appendChild(empty);
+    $('firstVisitStatus').textContent = 'รอแอดมินเพิ่มวิดีโอ';
+    return;
+  }
+
+  const video = document.createElement('video');
+  video.controls = true;
+  video.playsInline = true;
+  video.preload = 'metadata';
+  video.src = videoUrl;
+  if (imageUrl) video.poster = imageUrl;
+  video.addEventListener('loadedmetadata', () => {
+    $('firstVisitStatus').textContent = `วิดีโอความยาวประมาณ ${formatTutorialTime(video.duration)} • กรุณาดูจนจบ`;
+  });
+  video.addEventListener('timeupdate', () => {
+    const duration = Number(video.duration);
+    const current = Number(video.currentTime);
+    if (Number.isFinite(duration) && duration > 0) {
+      $('firstVisitProgress').style.width = Math.min(100, (current / duration) * 100) + '%';
+    }
+  });
+  video.addEventListener('ended', () => {
+    firstVisitVideoEnded = true;
+    $('firstVisitProgress').style.width = '100%';
+    $('firstVisitStatus').textContent = 'รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้';
+    $('firstVisitContinue').disabled = false;
+    $('firstVisitContinue').focus();
+  });
+  video.addEventListener('error', () => {
+    $('firstVisitStatus').textContent = 'ไม่สามารถโหลดวิดีโอได้ กรุณาติดต่อแอดมิน';
+  });
+  media.appendChild(video);
+  firstVisitVideoEl = video;
+}
+
+function formatTutorialTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return 'ไม่ทราบความยาว';
+  const total = Math.round(seconds);
+  const m = Math.floor(total / 60);
+  const s2 = total % 60;
+  return `${m}:${String(s2).padStart(2,'0')} นาที`;
+}
+
+function showFirstVisitTutorial() {
+  if (!s.tutorialEnabled || firstVisitCompleted() || !s.tutorialVideo) return;
+  buildFirstVisitTutorial();
+  $('firstVisitTutorial').classList.add('active');
+  lockFirstVisitUI(true);
+  // Do not autoplay: browsers often block it. The user presses play.
+}
+
+function finishFirstVisitTutorial() {
+  if (!firstVisitVideoEnded) {
+    return toast('กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
+  }
+  try { localStorage.setItem(FIRST_VISIT_KEY, '1'); } catch {}
+  $('firstVisitTutorial').classList.remove('active');
+  lockFirstVisitUI(false);
+  if (firstVisitVideoEl) {
+    firstVisitVideoEl.pause();
+    firstVisitVideoEl = null;
+  }
+}
+
+function resetFirstVisitTutorial() {
+  try { localStorage.removeItem(FIRST_VISIT_KEY); } catch {}
+  toast('รีเซ็ตสถานะการดูครั้งแรกแล้ว — เมื่อเปิดเว็บไซต์ใหม่จะแสดงอีกครั้ง');
+}
+
+function previewFirstVisitTutorial() {
+  buildFirstVisitTutorial();
+  $('firstVisitTutorial').classList.add('active');
+  lockFirstVisitUI(true);
+}
+
 // Startup Execution
 (async () => {
   if (CLOUD) {
@@ -1253,6 +1564,8 @@ function showPopup() {
   }
   refresh();
   go('home');
+  // Show the locked tutorial only for first-time visitors.
+  setTimeout(showFirstVisitTutorial, 350);
   if (CLOUD) {
     sb.channel('np404-live').on('postgres_changes', {event:'*',schema:'public',table:'np404_settings'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); notify('มีการอัปเดตข้อมูลเว็บไซต์'); } })
       .on('postgres_changes', {event:'*',schema:'public',table:'np404_menus'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); notify('รายการเมนูมีการเปลี่ยนแปลง'); } }).subscribe();
