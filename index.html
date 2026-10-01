@@ -2045,8 +2045,10 @@ function finishFirstVisitTutorial(){
   const minSeconds=firstVisitGateSeconds();
   const blocked=$('firstVisitContinue')?.dataset.locked==='1' || !firstVisitVideoEnded || (minSeconds>0 && firstVisitWatchSeconds<minSeconds);
   if(blocked){
-    /* แอดมิน: กดปุ่มรัว ๆ 9 ครั้งเพื่อข้ามทันที — ไม่มีข้อความหรือสัญญาณใด ๆ */
-    if(admin){ adminTutorialBypassClick(); return; }
+    /* แอดมินที่ล็อกอินอยู่: กดครั้งเดียวเข้าได้ทันที */
+    if(admin){ completeFirstVisitTutorial(); return; }
+    /* ยังไม่ได้ล็อกอิน: กดรัว ๆ 5 ครั้งเพื่อข้าม (ไม่มีข้อความแจ้ง) */
+    if(adminTutorialBypassClick()) return;
     return toast(minSeconds>0 ? `กรุณารับชมวิดีโอให้ครบ ${s.tutorialDurationMinutes} นาที ก่อนเข้าเว็บไซต์` : 'กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
   }
   completeFirstVisitTutorial();
@@ -2067,16 +2069,16 @@ function completeFirstVisitTutorial() {
 }
 
 function adminTutorialBypassClick() {
-  if (!admin) return;
   adminTutorialRapidClicks++;
   clearTimeout(adminTutorialRapidTimer);
-  if (adminTutorialRapidClicks >= 9) {
+  if (adminTutorialRapidClicks >= 5) {
     completeFirstVisitTutorial();
-    return;
+    return true;
   }
   adminTutorialRapidTimer = setTimeout(() => {
     adminTutorialRapidClicks = 0;
   }, 2000);
+  return false;
 }
 
 function resetFirstVisitTutorial() {
