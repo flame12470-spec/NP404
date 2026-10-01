@@ -383,9 +383,10 @@ code { font-family: ui-monospace, monospace; }
 }
 .first-visit-drive-shield{
   position:absolute;inset:0;z-index:5;background:transparent;
-  pointer-events:auto;touch-action:none;
+  pointer-events:none;touch-action:none;display:none;
   cursor:default;
 }
+.first-visit-drive-shield.on{display:block;pointer-events:auto;}
 .first-visit-drive-shield::after{
   content:'';position:absolute;inset:0;background:transparent;
 }
@@ -1723,6 +1724,7 @@ let firstVisitLastTick = 0;
 let firstVisitPlaying = false;
 let firstVisitVideoEl = null;
 let firstVisitDriveLoaded = false;
+let firstVisitDriveStarted = false;
 let adminTutorialRapidClicks = 0;
 let adminTutorialRapidTimer = null;
 
@@ -1817,6 +1819,7 @@ function buildFirstVisitTutorial(){
   firstVisitLastTick=0;
   firstVisitPlaying=false;
   firstVisitDriveLoaded=false;
+  firstVisitDriveStarted=false;
   stopFirstVisitTimer();
   $('firstVisitContinue').disabled=true;
   $('firstVisitProgress').style.width='0%';
@@ -1844,7 +1847,7 @@ function buildFirstVisitTutorial(){
     wrap.className='first-visit-drive-wrap';
     const frame=document.createElement('iframe');
     const sep=src.url.includes('?')?'&':'?';
-    frame.src=src.url + sep + 'autoplay=1&rm=minimal';
+    frame.src=src.url;
     frame.className='first-visit-drive-frame';
     frame.allow='autoplay; fullscreen';
     frame.allowFullscreen=true;
@@ -1863,11 +1866,32 @@ function buildFirstVisitTutorial(){
     wrap.appendChild(shield);
     media.appendChild(wrap);
 
+    /* Google Drive ไม่ยอมให้ autoplay ข้าม origin → ผู้ใช้ต้องกดปุ่มเล่นเอง
+       พอกดแล้ว (iframe ได้ focus) ค่อยเปิดชั้นใสกันการกรอ/หยุด และเริ่มนับเวลา */
+    let driveStarted=false;
+    const startDrive=()=>{
+      if(driveStarted) return;
+      driveStarted=true;
+      firstVisitDriveStarted=true;
+      clearInterval(driveWatch);
+      shield.classList.add('on');
+      wrap.querySelector('.first-visit-drive-note')?.remove();
+      markFirstVisitPlaying(true);
+      setFirstVisitStatus(minSeconds>0?`กำลังเล่นวิดีโอ • เหลือ ${minMinutes}:00`:'กำลังเล่นวิดีโอ');
+    };
+    const driveWatch=setInterval(()=>{
+      if(!document.body.contains(frame)){ clearInterval(driveWatch); return; }
+      if(document.activeElement===frame) startDrive();
+    },300);
+    window.addEventListener('blur',()=>{ setTimeout(()=>{ if(document.activeElement===frame) startDrive(); },0); });
     frame.addEventListener('load',()=>{
       firstVisitDriveLoaded=true;
-      markFirstVisitPlaying(true);
-      setFirstVisitStatus(minSeconds>0?`กำลังเล่นวิดีโออัตโนมัติ • เหลือ ${minMinutes}:00`:'กำลังเล่นวิดีโออัตโนมัติ');
+      setFirstVisitStatus('กดปุ่ม ▶ ที่วิดีโอเพื่อเริ่มเล่น');
     });
+    const note=document.createElement('div');
+    note.className='first-visit-drive-note';
+    note.textContent='กดปุ่ม ▶ เพื่อเริ่มเล่นวิดีโอ';
+    wrap.appendChild(note);
     setFirstVisitStatus('กำลังโหลดวิดีโอ...');
     firstVisitVideoEl=null;
     return;
@@ -1879,7 +1903,7 @@ function buildFirstVisitTutorial(){
   video.autoplay=true;
   video.muted=true;
   video.preload='auto';
-  video.src=src.url;
+  video.src=src.url+(src.url.includes('#')?'':'#t=0.1');
   video.setAttribute('controlsList','nodownload noplaybackrate nofullscreen');
   video.disablePictureInPicture=true;
   video.disableRemotePlayback=true;
@@ -1931,7 +1955,9 @@ function buildFirstVisitTutorial(){
   firstVisitVideoEl=video;
   setFirstVisitStatus('กำลังโหลดวิดีโอ...');
   video.play().catch(()=>{
-    setFirstVisitStatus('เบราว์เซอร์ไม่อนุญาตให้เล่นอัตโนมัติ กรุณาลองเปิดใหม่');
+    setFirstVisitStatus('แตะที่วิดีโอเพื่อเริ่มเล่น');
+    video.style.pointerEvents='auto';
+    video.addEventListener('click',()=>{ video.play().then(()=>{video.style.pointerEvents='none';}).catch(()=>{}); },{once:true});
   });
 }
 
@@ -2004,7 +2030,7 @@ document.addEventListener('visibilitychange',()=>{
   }else{
     if(firstVisitVideoEl && !firstVisitVideoEl.paused && !firstVisitVideoEl.ended){
       markFirstVisitPlaying(true);
-    }else if(firstVisitDriveLoaded && $('firstVisitTutorial')?.classList.contains('active')){
+    }else if(firstVisitDriveStarted && $('firstVisitTutorial')?.classList.contains('active')){
       markFirstVisitPlaying(true);
     }
   }
