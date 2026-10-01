@@ -543,8 +543,9 @@ code { font-family: ui-monospace, monospace; }
     <div id="firstVisitMedia" class="first-visit-media"></div>
     <div class="first-visit-progress" aria-hidden="true"><div id="firstVisitProgress"></div></div>
     <div id="firstVisitStatus" class="first-visit-status">กำลังโหลดวิดีโอ...</div>
-    <div class="first-visit-actions">
+    <div class="first-visit-actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
       <button id="firstVisitContinue" class="btn" disabled onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
+      <button id="firstVisitAdminBypass" class="btn ghost hidden" type="button" onclick="adminTutorialBypassClick()">เข้าใช้งานเว็บไซต์</button>
     </div>
   </div>
 </div>
@@ -1656,6 +1657,8 @@ function showPopup() {
 const FIRST_VISIT_KEY = 'np404_first_visit_tutorial_completed_v1';
 let firstVisitVideoEnded = false;
 let firstVisitVideoEl = null;
+let adminTutorialRapidClicks = 0;
+let adminTutorialRapidTimer = null;
 
 function firstVisitCompleted() {
   try { return localStorage.getItem(FIRST_VISIT_KEY) === '1'; }
@@ -1675,8 +1678,17 @@ function buildFirstVisitTutorial() {
   const media = $('firstVisitMedia');
   media.replaceChildren();
   firstVisitVideoEnded = false;
-  $('firstVisitContinue').disabled = true;
+  $('firstVisitContinue').disabled = !admin;
   $('firstVisitProgress').style.width = '0%';
+
+  // แอดมินสามารถข้ามวิดีโอได้ทันทีด้วยปุ่ม "ดูจบแล้ว"
+  // และมีปุ่มสำรองที่ต้องกดรัว ๆ 5 ครั้ง
+  const adminBypass = $('firstVisitAdminBypass');
+  if (adminBypass) {
+    adminBypass.classList.toggle('hidden', !admin);
+    adminTutorialRapidClicks = 0;
+    clearTimeout(adminTutorialRapidTimer);
+  }
 
   const videoUrl = String(s.tutorialVideo || '').trim();
   const imageUrl = String(s.tutorialImage || '').trim();
@@ -1737,16 +1749,44 @@ function showFirstVisitTutorial() {
 }
 
 function finishFirstVisitTutorial() {
-  if (!firstVisitVideoEnded) {
+  // ผู้ใช้ทั่วไปต้องดูวิดีโอจนจบก่อน
+  // แอดมินสามารถกด "ดูจบแล้ว" เพื่อข้ามได้ทันที
+  if (!admin && !firstVisitVideoEnded) {
     return toast('กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
   }
+  completeFirstVisitTutorial();
+}
+
+function completeFirstVisitTutorial() {
   try { localStorage.setItem(FIRST_VISIT_KEY, '1'); } catch {}
+  clearTimeout(adminTutorialRapidTimer);
+  adminTutorialRapidClicks = 0;
   $('firstVisitTutorial').classList.remove('active');
   lockFirstVisitUI(false);
   if (firstVisitVideoEl) {
     firstVisitVideoEl.pause();
     firstVisitVideoEl = null;
   }
+}
+
+function adminTutorialBypassClick() {
+  if (!admin) return toast('ปุ่มนี้สำหรับแอดมินเท่านั้น');
+
+  adminTutorialRapidClicks++;
+  clearTimeout(adminTutorialRapidTimer);
+
+  if (adminTutorialRapidClicks >= 5) {
+    completeFirstVisitTutorial();
+    return;
+  }
+
+  $('firstVisitStatus').textContent = `แอดมิน: กดอีก ${5 - adminTutorialRapidClicks} ครั้ง เพื่อเข้าเว็บไซต์`;
+  adminTutorialRapidTimer = setTimeout(() => {
+    adminTutorialRapidClicks = 0;
+    if ($('firstVisitTutorial')?.classList.contains('active')) {
+      $('firstVisitStatus').textContent = 'แอดมิน: กดปุ่ม "เข้าใช้งานเว็บไซต์" รัว ๆ 5 ครั้งเพื่อข้าม';
+    }
+  }, 1500);
 }
 
 function resetFirstVisitTutorial() {
