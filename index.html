@@ -384,6 +384,10 @@ code { font-family: ui-monospace, monospace; }
 .first-visit-drive-shield{
   position:absolute;inset:0;z-index:5;background:transparent;
   pointer-events:auto;touch-action:none;
+  cursor:default;
+}
+.first-visit-drive-shield::after{
+  content:'';position:absolute;inset:0;background:transparent;
 }
 .first-visit-drive-note{
   position:absolute;left:12px;right:12px;bottom:10px;z-index:6;
@@ -1835,31 +1839,28 @@ function buildFirstVisitTutorial(){
   const src=getTutorialVideoSource(videoUrl);
 
   if(src.type==='drive'){
-    /*
-      Google Drive /preview เป็น cross-origin iframe จึงไม่สามารถอ่าน currentTime/ended
-      จากหน้าหลักได้โดยตรง. ใช้ autoplay + controls=0 + rm=minimal และชั้นกันแตะ
-      เพื่อไม่ให้ผู้ใช้เปิด/ลาก/กดตัวเล่น. ตัวจับเวลาจะเดินเฉพาะตอนหน้าเว็บมองเห็น
-      และ iframe โหลดแล้ว จึงไม่กินเวลาต่อเมื่อผู้ใช้ออกจากเว็บไซต์/สลับแอป.
-    */
+    /* Google Drive: เล่นอัตโนมัติ + ชั้นใสป้องกันการกด/ลากวิดีโอ */
     const wrap=document.createElement('div');
     wrap.className='first-visit-drive-wrap';
     const frame=document.createElement('iframe');
     const sep=src.url.includes('?')?'&':'?';
-    frame.src=src.url + sep + 'autoplay=1&controls=1&rm=minimal';
+    frame.src=src.url + sep + 'autoplay=1&rm=minimal';
     frame.className='first-visit-drive-frame';
     frame.allow='autoplay; fullscreen';
     frame.allowFullscreen=true;
     frame.title='วิดีโอวิธีการใช้งานเว็บไซต์';
-    frame.setAttribute('tabindex','-1');
     frame.setAttribute('scrolling','no');
-    // ไม่ใส่ sandbox เพราะ Google Drive player อาจไม่แสดง/เล่นวิดีโอบนมือถือเมื่อถูก sandbox
+    wrap.appendChild(frame);
+
     const shield=document.createElement('div');
     shield.className='first-visit-drive-shield';
     shield.setAttribute('aria-hidden','true');
-    const note=document.createElement('div');
-    note.className='first-visit-drive-note';
-    note.textContent='วิดีโอเล่นอัตโนมัติ • ไม่สามารถควบคุมวิดีโอได้';
-    wrap.append(frame,shield,note);
+    shield.addEventListener('click',e=>e.preventDefault());
+    shield.addEventListener('pointerdown',e=>e.preventDefault());
+    shield.addEventListener('pointerup',e=>e.preventDefault());
+    shield.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+    shield.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+    wrap.appendChild(shield);
     media.appendChild(wrap);
 
     frame.addEventListener('load',()=>{
