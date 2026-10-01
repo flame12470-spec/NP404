@@ -373,6 +373,23 @@ code { font-family: ui-monospace, monospace; }
   object-fit:contain;
   background:#080b12;
 }
+.first-visit-drive-wrap{
+  position:relative;width:100%;background:#080b12;overflow:hidden;
+  min-height:260px;
+}
+.first-visit-drive-frame{
+  display:block;width:100%;height:min(60dvh,520px);min-height:260px;
+  border:0;background:#080b12;
+}
+.first-visit-drive-shield{
+  position:absolute;inset:0;z-index:5;background:transparent;
+  pointer-events:auto;touch-action:none;
+}
+.first-visit-drive-note{
+  position:absolute;left:12px;right:12px;bottom:10px;z-index:6;
+  text-align:center;font-size:.72rem;color:rgba(255,255,255,.72);
+  pointer-events:none;text-shadow:0 1px 3px #000;
+}
 .first-visit-poster {
   display:block;
   width:100%;
@@ -960,7 +977,7 @@ function tutorialVideoUploader(){
     <label>วิดีโอแนะนำการใช้งาน</label>
     ${field('ลิงก์วิดีโอ Google Drive (แนะนำสำหรับวิดีโอขนาดใหญ่)','tutorialVideo')}
     <small style="display:block;color:var(--muted);margin-top:-8px;margin-bottom:12px;line-height:1.6;">ตั้งไฟล์ Google Drive เป็น “ทุกคนที่มีลิงก์ → ผู้ดู” แล้ววางลิงก์แบบ /file/d/.../view ได้ ระบบจะแปลงเป็นตัวเล่นให้อัตโนมัติ</small>
-    ${driveId ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>Google Drive พร้อมใช้งาน</b><div class="media-url">File ID: ${esc(driveId)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบลิงก์</button></div><iframe src="https://drive.google.com/file/d/${esc(driveId)}/preview" allow="autoplay" allowfullscreen style="display:block;width:100%;height:300px;border:0;border-radius:12px;background:#000"></iframe></div>` : ''}
+    ${driveId ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>Google Drive พร้อมใช้งาน</b><div class="media-url">File ID: ${esc(driveId)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบลิงก์</button></div><iframe src="https://drive.google.com/file/d/${esc(driveId)}/preview?autoplay=1&controls=0&disablekb=1&rm=minimal" allow="autoplay" allowfullscreen style="display:block;width:100%;height:300px;border:0;border-radius:12px;background:#000"></iframe></div>` : ''}
     <div style="margin-top:12px;padding:12px 14px;border:1px dashed var(--border);border-radius:14px;background:var(--surface-alt);color:var(--muted);font-size:.84rem;">หากใช้ Google Drive ไม่ต้องอัปโหลดวิดีโอเข้า Supabase และไม่ติดข้อจำกัดไฟล์ 50 MB ของ Supabase Free</div>
   </div>`;
 }
@@ -1697,8 +1714,11 @@ function showPopup() {
 const FIRST_VISIT_KEY = 'np404_first_visit_tutorial_completed_v1';
 let firstVisitVideoEnded = false;
 let firstVisitTimer = null;
-let firstVisitStartedAt = 0;
+let firstVisitWatchSeconds = 0;
+let firstVisitLastTick = 0;
+let firstVisitPlaying = false;
 let firstVisitVideoEl = null;
+let firstVisitDriveLoaded = false;
 let adminTutorialRapidClicks = 0;
 let adminTutorialRapidTimer = null;
 
@@ -1712,6 +1732,75 @@ function lockFirstVisitUI(lock) {
   document.body.style.overflow = lock ? 'hidden' : '';
 }
 
+function setFirstVisitStatus(text){
+  const el=$('firstVisitStatus');
+  if(el) el.textContent=text;
+}
+
+function firstVisitGateSeconds(){
+  return Math.max(0,Number(s.tutorialDurationMinutes)||0)*60;
+}
+
+function updateFirstVisitGate(){
+  const minSeconds=firstVisitGateSeconds();
+  const percent=minSeconds>0 ? Math.min(100,(firstVisitWatchSeconds/minSeconds)*100) : 0;
+  $('firstVisitProgress').style.width=percent+'%';
+  if(minSeconds<=0){
+    $('firstVisitContinue').disabled=!firstVisitVideoEnded;
+    return;
+  }
+  const remaining=Math.max(0,minSeconds-firstVisitWatchSeconds);
+  const mm=Math.floor(remaining/60), ss=Math.floor(remaining%60);
+  if(remaining>0){
+    setFirstVisitStatus(`กรุณารับชมวิดีโอ • เหลือ ${mm}:${String(ss).padStart(2,'0')}`);
+    $('firstVisitContinue').disabled=true;
+  }else if(firstVisitVideoEnded){
+    $('firstVisitProgress').style.width='100%';
+    setFirstVisitStatus('รับชมครบตามเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
+    $('firstVisitContinue').disabled=false;
+  }
+}
+
+function stopFirstVisitTimer(){
+  clearInterval(firstVisitTimer);
+  firstVisitTimer=null;
+  firstVisitLastTick=0;
+}
+
+function startFirstVisitTimer(){
+  if(firstVisitTimer || !firstVisitPlaying) return;
+  firstVisitLastTick=Date.now();
+  firstVisitTimer=setInterval(()=>{
+    if(document.hidden || !firstVisitPlaying) return;
+    const now=Date.now();
+    const delta=Math.min(1,(now-firstVisitLastTick)/1000);
+    firstVisitLastTick=now;
+    if(delta>0) firstVisitWatchSeconds+=delta;
+    const minSeconds=firstVisitGateSeconds();
+    if(minSeconds>0 && firstVisitWatchSeconds>=minSeconds){
+      firstVisitWatchSeconds=minSeconds;
+      /* Google Drive iframe ไม่ส่ง ended event ออกมาข้าม origin จึงใช้เวลาขั้นต่ำ
+         ที่แอดมินกำหนดเป็นเงื่อนไขปลดล็อกสำหรับ Drive */
+      const driveMode = !!$('firstVisitMedia')?.querySelector('.first-visit-drive-frame');
+      if(driveMode) firstVisitVideoEnded=true;
+      if(firstVisitVideoEnded){
+        $('firstVisitContinue').disabled=false;
+        setFirstVisitStatus('รับชมครบตามเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
+      }
+      $('firstVisitProgress').style.width='100%';
+      stopFirstVisitTimer();
+      return;
+    }
+    updateFirstVisitGate();
+  },250);
+}
+
+function markFirstVisitPlaying(isPlaying){
+  firstVisitPlaying=!!isPlaying && !document.hidden;
+  if(firstVisitPlaying) startFirstVisitTimer();
+  else stopFirstVisitTimer();
+}
+
 function buildFirstVisitTutorial(){
   const overlay=$('firstVisitTutorial');
   if(!overlay)return;
@@ -1720,9 +1809,11 @@ function buildFirstVisitTutorial(){
   const media=$('firstVisitMedia');
   media.replaceChildren();
   firstVisitVideoEnded=false;
-  clearInterval(firstVisitTimer);
-  firstVisitTimer=null;
-  firstVisitStartedAt=0;
+  firstVisitWatchSeconds=0;
+  firstVisitLastTick=0;
+  firstVisitPlaying=false;
+  firstVisitDriveLoaded=false;
+  stopFirstVisitTimer();
   $('firstVisitContinue').disabled=true;
   $('firstVisitProgress').style.width='0%';
   adminTutorialRapidClicks=0;
@@ -1737,76 +1828,110 @@ function buildFirstVisitTutorial(){
     empty.style.cssText='padding:40px 20px;text-align:center;color:var(--muted)';
     empty.textContent='ยังไม่ได้ตั้งค่าวิดีโอแนะนำการใช้งาน';
     media.appendChild(empty);
-    $('firstVisitStatus').textContent='รอแอดมินเพิ่มวิดีโอ';
+    setFirstVisitStatus('รอแอดมินเพิ่มวิดีโอ');
     return;
   }
 
-  const startTimer=()=>{
-    firstVisitStartedAt=Date.now();
-    clearInterval(firstVisitTimer);
-    const tick=()=>{
-      const elapsed=(Date.now()-firstVisitStartedAt)/1000;
-      const percent=minSeconds>0?Math.min(100,(elapsed/minSeconds)*100):0;
-      if(minSeconds>0) $('firstVisitProgress').style.width=percent+'%';
-      const remaining=Math.max(0,minSeconds-elapsed);
-      if(minSeconds>0 && remaining>0){
-        const mm=Math.floor(remaining/60), ss=Math.floor(remaining%60);
-        $('firstVisitStatus').textContent=`กรุณารับชมวิดีโอ • เหลือ ${mm}:${String(ss).padStart(2,'0')}`;
-      }
-      if((minSeconds<=0 || elapsed>=minSeconds) && (firstVisitVideoEnded || src.type==='drive')){
-        firstVisitVideoEnded=true;
-        $('firstVisitProgress').style.width='100%';
-        $('firstVisitStatus').textContent='ครบเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้';
-        $('firstVisitContinue').disabled=false;
-        clearInterval(firstVisitTimer);
-      }
-    };
-    tick();
-    firstVisitTimer=setInterval(tick,250);
-  };
-
   const src=getTutorialVideoSource(videoUrl);
+
   if(src.type==='drive'){
+    /*
+      Google Drive /preview เป็น cross-origin iframe จึงไม่สามารถอ่าน currentTime/ended
+      จากหน้าหลักได้โดยตรง. ใช้ autoplay + controls=0 + rm=minimal และชั้นกันแตะ
+      เพื่อไม่ให้ผู้ใช้เปิด/ลาก/กดตัวเล่น. ตัวจับเวลาจะเดินเฉพาะตอนหน้าเว็บมองเห็น
+      และ iframe โหลดแล้ว จึงไม่กินเวลาต่อเมื่อผู้ใช้ออกจากเว็บไซต์/สลับแอป.
+    */
+    const wrap=document.createElement('div');
+    wrap.className='first-visit-drive-wrap';
     const frame=document.createElement('iframe');
-    frame.src=src.url + (src.url.includes('?')?'&':'?') + 'autoplay=1';
+    const sep=src.url.includes('?')?'&':'?';
+    frame.src=src.url + sep + 'autoplay=1&controls=0&disablekb=1&rm=minimal';
+    frame.className='first-visit-drive-frame';
     frame.allow='autoplay; fullscreen';
     frame.allowFullscreen=true;
     frame.title='วิดีโอวิธีการใช้งานเว็บไซต์';
     frame.setAttribute('tabindex','-1');
-    frame.style.cssText='display:block;width:100%;height:min(60dvh,520px);min-height:260px;border:0;background:#080b12;pointer-events:none';
-    media.appendChild(frame);
-    $('firstVisitStatus').textContent=minSeconds>0?`กำลังเริ่มวิดีโออัตโนมัติ • ต้องรับชมอย่างน้อย ${minMinutes} นาที`:'กำลังเล่นวิดีโออัตโนมัติ';
+    frame.setAttribute('scrolling','no');
+    frame.sandbox='allow-scripts allow-same-origin allow-popups';
+    const shield=document.createElement('div');
+    shield.className='first-visit-drive-shield';
+    shield.setAttribute('aria-hidden','true');
+    const note=document.createElement('div');
+    note.className='first-visit-drive-note';
+    note.textContent='วิดีโอเล่นอัตโนมัติ • ไม่สามารถควบคุมวิดีโอได้';
+    wrap.append(frame,shield,note);
+    media.appendChild(wrap);
+
+    frame.addEventListener('load',()=>{
+      firstVisitDriveLoaded=true;
+      markFirstVisitPlaying(true);
+      setFirstVisitStatus(minSeconds>0?`กำลังเล่นวิดีโออัตโนมัติ • เหลือ ${minMinutes}:00`:'กำลังเล่นวิดีโออัตโนมัติ');
+    });
+    setFirstVisitStatus('กำลังโหลดวิดีโอ...');
     firstVisitVideoEl=null;
-    // Drive iframe cannot reliably expose its playback ended event to the parent page.
-    // Therefore the admin-configured minimum duration is the gate for Drive videos.
-    startTimer();
     return;
   }
 
   const video=document.createElement('video');
-  video.controls=false; video.playsInline=true; video.autoplay=true; video.muted=true; video.preload='auto'; video.src=src.url;
+  video.controls=false;
+  video.playsInline=true;
+  video.autoplay=true;
+  video.muted=true;
+  video.preload='auto';
+  video.src=src.url;
   video.setAttribute('controlsList','nodownload noplaybackrate nofullscreen');
   video.disablePictureInPicture=true;
+  video.disableRemotePlayback=true;
   video.style.pointerEvents='none';
   if(imageUrl)video.poster=imageUrl;
   video.addEventListener('loadedmetadata',()=>{
     const d=Number(video.duration);
-    $('firstVisitStatus').textContent=`วิดีโอความยาว ${formatTutorialTime(d)} • เล่นอัตโนมัติ`;
+    setFirstVisitStatus(`วิดีโอความยาว ${formatTutorialTime(d)} • เล่นอัตโนมัติ`);
   });
-  video.addEventListener('play',()=>startTimer());
+  video.addEventListener('play',()=>{
+    markFirstVisitPlaying(true);
+    updateFirstVisitGate();
+  });
+  video.addEventListener('pause',()=>markFirstVisitPlaying(false));
+  video.addEventListener('waiting',()=>{
+    markFirstVisitPlaying(false);
+    setFirstVisitStatus('กำลังโหลดวิดีโอ...');
+  });
+  video.addEventListener('playing',()=>{
+    markFirstVisitPlaying(true);
+    updateFirstVisitGate();
+  });
   video.addEventListener('timeupdate',()=>{
     const duration=Number(video.duration),current=Number(video.currentTime);
-    if(Number.isFinite(duration)&&duration>0 && minSeconds<=0)$('firstVisitProgress').style.width=Math.min(100,(current/duration)*100)+'%';
+    if(Number.isFinite(duration)&&duration>0 && minSeconds<=0){
+      $('firstVisitProgress').style.width=Math.min(100,(current/duration)*100)+'%';
+    }
   });
   video.addEventListener('ended',()=>{
     firstVisitVideoEnded=true;
-    if(minSeconds<=0){ $('firstVisitProgress').style.width='100%'; $('firstVisitStatus').textContent='รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้'; $('firstVisitContinue').disabled=false; }
-    else if((Date.now()-firstVisitStartedAt)/1000>=minSeconds){ $('firstVisitProgress').style.width='100%'; $('firstVisitStatus').textContent='รับชมครบและครบเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้'; $('firstVisitContinue').disabled=false; }
+    markFirstVisitPlaying(false);
+    if(minSeconds<=0){
+      $('firstVisitProgress').style.width='100%';
+      setFirstVisitStatus('รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้');
+      $('firstVisitContinue').disabled=false;
+    }else if(firstVisitWatchSeconds>=minSeconds){
+      $('firstVisitProgress').style.width='100%';
+      setFirstVisitStatus('รับชมครบและครบเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
+      $('firstVisitContinue').disabled=false;
+    }else{
+      updateFirstVisitGate();
+    }
   });
-  video.addEventListener('error',()=>{ $('firstVisitStatus').textContent='ไม่สามารถโหลดวิดีโอได้ กรุณาตรวจสอบลิงก์วิดีโอ'; });
+  video.addEventListener('error',()=>{
+    markFirstVisitPlaying(false);
+    setFirstVisitStatus('ไม่สามารถโหลดวิดีโอได้ กรุณาตรวจสอบลิงก์วิดีโอ');
+  });
   media.appendChild(video);
   firstVisitVideoEl=video;
-  video.play().catch(()=>{});
+  setFirstVisitStatus('กำลังโหลดวิดีโอ...');
+  video.play().catch(()=>{
+    setFirstVisitStatus('เบราว์เซอร์ไม่อนุญาตให้เล่นอัตโนมัติ กรุณาลองเปิดใหม่');
+  });
 }
 
 function formatTutorialTime(seconds) {
@@ -1822,14 +1947,12 @@ function showFirstVisitTutorial() {
   buildFirstVisitTutorial();
   $('firstVisitTutorial').classList.add('active');
   lockFirstVisitUI(true);
-  // Do not autoplay: browsers often block it. The user presses play.
 }
 
 function finishFirstVisitTutorial(){
   if(admin && !firstVisitVideoEnded){ adminTutorialBypassClick(); return; }
-  const minSeconds=Math.max(0,Number(s.tutorialDurationMinutes)||0)*60;
-  const elapsed=firstVisitStartedAt ? (Date.now()-firstVisitStartedAt)/1000 : 0;
-  if(!firstVisitVideoEnded || (minSeconds>0 && elapsed<minSeconds)){
+  const minSeconds=firstVisitGateSeconds();
+  if(!firstVisitVideoEnded || (minSeconds>0 && firstVisitWatchSeconds<minSeconds)){
     return toast(minSeconds>0 ? `กรุณารับชมวิดีโอให้ครบ ${s.tutorialDurationMinutes} นาที ก่อนเข้าเว็บไซต์` : 'กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
   }
   completeFirstVisitTutorial();
@@ -1838,7 +1961,7 @@ function finishFirstVisitTutorial(){
 function completeFirstVisitTutorial() {
   try { localStorage.setItem(FIRST_VISIT_KEY, '1'); } catch {}
   clearTimeout(adminTutorialRapidTimer);
-  clearInterval(firstVisitTimer);
+  stopFirstVisitTimer();
   adminTutorialRapidClicks = 0;
   $('firstVisitTutorial').classList.remove('active');
   lockFirstVisitUI(false);
@@ -1846,20 +1969,17 @@ function completeFirstVisitTutorial() {
     firstVisitVideoEl.pause();
     firstVisitVideoEl = null;
   }
+  firstVisitPlaying=false;
 }
 
 function adminTutorialBypassClick() {
   if (!admin) return;
-
   adminTutorialRapidClicks++;
   clearTimeout(adminTutorialRapidTimer);
-
   if (adminTutorialRapidClicks >= 5) {
     completeFirstVisitTutorial();
     return;
   }
-
-  // ไม่แสดงข้อความหรือปุ่มพิเศษให้เห็นว่าเป็นทางลัดของแอดมิน
   adminTutorialRapidTimer = setTimeout(() => {
     adminTutorialRapidClicks = 0;
   }, 1500);
@@ -1875,6 +1995,21 @@ function previewFirstVisitTutorial() {
   $('firstVisitTutorial').classList.add('active');
   lockFirstVisitUI(true);
 }
+
+/* หยุดนับทันทีเมื่อออกจากหน้า/สลับแอป และเริ่มต่อเมื่อกลับมา */
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    stopFirstVisitTimer();
+  }else{
+    if(firstVisitVideoEl && !firstVisitVideoEl.paused && !firstVisitVideoEl.ended){
+      markFirstVisitPlaying(true);
+    }else if(firstVisitDriveLoaded && $('firstVisitTutorial')?.classList.contains('active')){
+      markFirstVisitPlaying(true);
+    }
+  }
+});
+
+window.addEventListener('pagehide',()=>stopFirstVisitTimer());
 
 // Startup Execution
 (async () => {
