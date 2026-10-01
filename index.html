@@ -1845,14 +1845,14 @@ function buildFirstVisitTutorial(){
     wrap.className='first-visit-drive-wrap';
     const frame=document.createElement('iframe');
     const sep=src.url.includes('?')?'&':'?';
-    frame.src=src.url + sep + 'autoplay=1&controls=0&disablekb=1&rm=minimal';
+    frame.src=src.url + sep + 'autoplay=1&controls=1&rm=minimal';
     frame.className='first-visit-drive-frame';
     frame.allow='autoplay; fullscreen';
     frame.allowFullscreen=true;
     frame.title='วิดีโอวิธีการใช้งานเว็บไซต์';
     frame.setAttribute('tabindex','-1');
     frame.setAttribute('scrolling','no');
-    frame.sandbox='allow-scripts allow-same-origin allow-popups';
+    // ไม่ใส่ sandbox เพราะ Google Drive player อาจไม่แสดง/เล่นวิดีโอบนมือถือเมื่อถูก sandbox
     const shield=document.createElement('div');
     shield.className='first-visit-drive-shield';
     shield.setAttribute('aria-hidden','true');
