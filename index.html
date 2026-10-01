@@ -1,0 +1,2069 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NP-404 | Executive Dashboard</title>
+<meta name="theme-color" content="#141824">
+<!-- Web Fonts & Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-hover: #2563eb;
+  --primary-light: color-mix(in srgb, var(--primary) 10%, transparent);
+  --primary-soft: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  --bg: #f3f4f7;
+  --surface: #ffffff;
+  --surface-alt: #eceef3;
+  --text: #171a23;
+  --muted: #667085;
+  --border: #e1e4ec;
+  --side-bg: #141824;
+  --side-text: #a9b0c3;
+  --shadow-sm: 0 1px 2px rgba(20, 24, 36, .04);
+  --shadow-md: 0 8px 24px -8px rgba(20, 24, 36, .14);
+  --shadow-lg: 0 24px 60px -12px rgba(20, 24, 36, .28);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --radius-full: 9999px;
+  --weight: 400;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+}
+body.dark {
+  --bg: #0c0f16;
+  --surface: #151a26;
+  --surface-alt: #1d2333;
+  --text: #f1f3f9;
+  --muted: #98a1b8;
+  --border: #252c3f;
+  --side-bg: #090b11;
+  --shadow-md: 0 8px 24px -8px rgba(0, 0, 0, .6);
+  --shadow-lg: 0 24px 60px -12px rgba(0, 0, 0, .7);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; font-size: 15px; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Anuphan', 'Prompt', system-ui, sans-serif;
+  font-weight: var(--weight);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+}
+.material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; vertical-align: middle; line-height: 1; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* Top bar */
+.top {
+  height: 68px;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 0 24px; position: sticky; top: 0; z-index: 40;
+}
+.left-header { display: flex; align-items: center; gap: 14px; }
+.brand { font-weight: 700; font-size: 1.15rem; display: flex; align-items: center; gap: 12px; color: var(--text); text-decoration: none; letter-spacing: -.01em; }
+.brand img { width: 38px; height: 38px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--border); }
+.hamburger {
+  border: 0; background: var(--surface-alt); color: var(--text);
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.hamburger:hover { background: var(--primary); color: #fff; }
+.ticker-wrap {
+  flex: 1; max-width: 520px; overflow: hidden;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-full); padding: 7px 18px; margin: 0 12px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.ticker { display: inline-block; white-space: nowrap; color: var(--muted); font-size: .85rem; animation: marquee 24s linear infinite; }
+@keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+/* Sidebar */
+.shell { display: flex; min-height: calc(100vh - 68px); }
+.side {
+  width: 264px; flex-shrink: 0; background: var(--side-bg);
+  padding: 22px 14px; overflow-y: auto;
+  transition: width .3s var(--ease), transform .3s var(--ease), padding .3s;
+}
+.side.closed { width: 0; padding: 22px 0; overflow: hidden; }
+.side .nav-group-label { font-size: .78rem; font-weight: 600; color: #6b7390; margin: 26px 14px 8px; }
+.side .nav-group-label:first-child { margin-top: 2px; }
+.side button {
+  position: relative; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  border: 0; background: transparent; color: var(--side-text);
+  padding: 11px 14px; border-radius: 12px; margin-bottom: 3px;
+  font: inherit; font-size: .92rem; font-weight: 500; cursor: pointer;
+  transition: background .18s, color .18s;
+}
+.side button:hover { background: rgba(255, 255, 255, .07); color: #fff; }
+.side button.active { background: rgba(255, 255, 255, .1); color: #fff; font-weight: 600; }
+.side button.active::before {
+  content: ''; position: absolute; left: -14px; top: 9px; bottom: 9px; width: 4px;
+  border-radius: 0 4px 4px 0; background: var(--primary);
+}
+.side button .material-symbols-outlined { font-size: 22px; }
+
+/* Content */
+.main { flex: 1; min-width: 0; padding: 32px 44px 56px; max-width: 1360px; margin: 0 auto; }
+.hero {
+  position: relative; padding: 52px 48px; border-radius: var(--radius-lg);
+  background: var(--surface); border: 1px solid var(--border);
+  margin-bottom: 28px; overflow: hidden; isolation: isolate;
+}
+.hero::before, .hero::after {
+  content: ''; position: absolute; z-index: -1; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  pointer-events: none;
+}
+.hero::before { width: 360px; height: 360px; right: -90px; top: -120px; background: var(--primary-light); }
+.hero::after { width: 560px; height: 560px; right: -190px; top: -220px; }
+.hero.center { text-align: center; }
+.hero.right { text-align: right; }
+.hero.left { text-align: left; }
+.hero-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 56px; height: 56px; border-radius: 18px;
+  background: var(--primary); color: #fff; font-size: 1.6rem; margin-bottom: 22px;
+  box-shadow: 0 10px 24px -8px color-mix(in srgb, var(--primary) 70%, transparent);
+}
+h1 { font-size: clamp(1.9rem, 3.6vw, 2.9rem); line-height: 1.2; font-weight: 700; margin: 0 0 14px; letter-spacing: -.02em; max-width: 20ch; }
+.hero.center h1 { margin-inline: auto; }
+.hero.right h1 { margin-left: auto; }
+h2 { font-size: 1.3rem; font-weight: 600; margin: 0 0 16px; letter-spacing: -.01em; }
+p { color: var(--muted); line-height: 1.7; margin: 0 0 22px; font-size: 1rem; max-width: 62ch; }
+.hero.center p { margin-inline: auto; }
+.hero.right p { margin-left: auto; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 18px; margin-top: 24px; }
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; padding: 26px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease), border-color .2s;
+}
+.card h2, .card h3 { margin-bottom: 8px; }
+.card p:last-child { margin-bottom: 0; }
+.cards .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: color-mix(in srgb, var(--primary) 45%, var(--border)); }
+.card .icon {
+  width: 46px; height: 46px; border-radius: 14px; background: var(--primary-soft); color: var(--primary);
+  display: flex; align-items: center; justify-content: center; font-size: 1.3rem; margin-bottom: 18px;
+  transition: background .25s, color .25s;
+}
+.cards .card:hover .icon { background: var(--primary); color: #fff; }
+
+/* Buttons & forms */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  border: 1px solid transparent; border-radius: var(--radius-full);
+  background: var(--primary); color: #fff; padding: 11px 24px;
+  font: inherit; font-size: .92rem; font-weight: 600; cursor: pointer;
+  transition: filter .18s, transform .18s, background .18s, border-color .18s;
+}
+.btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn.ghost { background: var(--surface); color: var(--text); border-color: var(--border); }
+.btn.ghost:hover { filter: none; background: var(--surface-alt); }
+.btn.red { background: #e5484d; color: #fff; }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.field { margin-bottom: 18px; }
+.field label { display: block; font-weight: 600; font-size: .86rem; margin-bottom: 7px; }
+input[type="text"], input[type="password"], input[type="color"], select, textarea {
+  width: 100%; background: var(--surface-alt); color: var(--text);
+  border: 1px solid transparent; border-radius: var(--radius-sm);
+  padding: 11px 14px; font: inherit; font-size: .92rem;
+  transition: border-color .18s, box-shadow .18s, background .18s;
+}
+input[type="color"] { padding: 4px; height: 44px; cursor: pointer; }
+input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus {
+  outline: none; background: var(--surface); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light);
+}
+input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; vertical-align: middle; }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.between { justify-content: space-between; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+
+/* Admin */
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.tabs > button {
+  display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border);
+  background: var(--surface); color: var(--text); border-radius: var(--radius-full);
+  padding: 9px 18px; font: inherit; font-size: .9rem; font-weight: 500; cursor: pointer; white-space: nowrap;
+  transition: background .18s, color .18s, border-color .18s;
+}
+.tabs > button:hover { border-color: var(--primary); color: var(--primary); }
+.tabs > button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.admin-menu-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; width: 100%; animation: fadeIn .2s ease-out; }
+.admin-menu-list button {
+  background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; border-radius: 14px;
+  text-align: left; font: inherit; font-size: .88rem; font-weight: 500; color: var(--text); cursor: pointer;
+  transition: background .18s, border-color .18s, color .18s;
+}
+.admin-menu-list button:hover { border-color: var(--primary); background: var(--primary-light); color: var(--primary); }
+.admin-menu-list button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+.notice {
+  padding: 16px 20px; border-radius: 16px; background: var(--primary-light);
+  color: var(--text); font-size: .9rem; margin-bottom: 22px;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+}
+.hidden { display: none !important; }
+.preview { border: 1px dashed var(--border); background: var(--surface-alt); border-radius: 16px; padding: 22px; margin-top: 16px; }
+.menuitem { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px; margin-bottom: 12px; }
+.main.fullpage { padding: 0; max-width: none; margin: 0; }
+.fullframe { display: block; width: 100%; height: calc(100vh - 68px); height: calc(100dvh - 68px); border: 0; border-radius: 0; background: #fff; }
+iframe { width: 100%; height: 400px; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+code { font-family: ui-monospace, monospace; }
+
+/* Modals */
+.modal {
+  position: fixed; inset: 0; background: rgba(12, 15, 24, .55);
+  backdrop-filter: blur(8px); display: grid; place-items: center; z-index: 100; padding: 20px;
+  animation: fadeIn .2s ease-out;
+}
+.dialog {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 34px;
+  width: min(540px, 100%); max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow-lg);
+  animation: scaleUp .25s var(--ease);
+}
+.dialog img { width: 100%; max-height: 240px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; }
+/* Popup images: show the entire original image without cropping. */
+#popup .dialog { width: min(960px, 96vw); max-height: 94dvh; padding: clamp(14px, 3vw, 28px); overflow-y: auto; }
+#popupImageBox { width: 100%; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; }
+#popupImageBox img { display: block; width: auto; max-width: 100%; height: auto; max-height: 72dvh; object-fit: contain; border-radius: 12px; margin: 0 auto; }
+#popupText { max-width: none; white-space: pre-line; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  #popup { padding: 8px; }
+  #popup .dialog { width: 100%; max-height: 96dvh; padding: 14px; }
+  #popupImageBox img { max-height: 68dvh; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleUp { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (max-width: 820px) {
+  .top { padding: 0 16px; }
+  .side { position: fixed; top: 68px; bottom: 0; left: 0; z-index: 50; box-shadow: var(--shadow-lg); }
+  .side.closed { transform: translateX(-100%); width: 264px; }
+  .main { padding: 20px 16px 40px; }
+  .hero { padding: 32px 24px; border-radius: 22px; }
+  .ticker-wrap { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+/* Refined dashboard form controls */
+.admin-form-card{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:clamp(18px,3vw,30px);margin-bottom:20px;box-shadow:var(--shadow-sm)}
+.admin-form-card h3{margin:0 0 6px;font-size:1.12rem}.form-help{font-size:.82rem;color:var(--muted);margin:4px 0 15px;line-height:1.6}
+.field{margin-bottom:19px}.field label{display:flex;align-items:center;gap:7px;margin-bottom:9px;font-weight:600;color:var(--text)}
+.field input:not([type=checkbox]),.field select,.field textarea,#menuEditor input,#menuEditor textarea,#menuEditor select{width:100%;max-width:100%;border:1px solid var(--border);border-radius:13px;background:var(--surface);color:var(--text);padding:13px 15px;min-height:47px;font:inherit;box-shadow:var(--shadow-sm);transition:border-color .2s,box-shadow .2s,background .2s}
+.field textarea,#menuEditor textarea{resize:vertical;min-height:100px;line-height:1.7}
+.field input:focus,.field select:focus,.field textarea:focus,#menuEditor input:focus,#menuEditor textarea:focus,#menuEditor select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-light)}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted);opacity:.8}
+.field select,#menuEditor select{cursor:pointer}.form-section-heading{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1.08rem;margin:20px 0 15px}.form-section-heading .material-symbols-outlined{color:var(--primary)}
+.icon-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin:12px 0}.icon-choice{border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);padding:12px 6px;display:flex;align-items:center;flex-direction:column;gap:6px;font:inherit;font-size:.73rem;cursor:pointer;min-height:76px}.icon-choice:hover,.icon-choice.selected{border-color:var(--primary);background:var(--primary-light)}.icon-choice .material-symbols-outlined{font-size:27px}.icon-preview{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--surface-alt);border:1px solid var(--border);border-radius:13px;margin:10px 0}.icon-preview .material-symbols-outlined,.icon-preview .material-symbols-rounded,.icon-preview .material-symbols-sharp{font-size:32px;color:var(--primary)}
+@media(max-width:600px){.icon-picker{grid-template-columns:repeat(4,minmax(0,1fr))}.admin-form-card{padding:16px}.cols{grid-template-columns:1fr}}
+
+/* Full-width custom maintenance HTML, isolated from dashboard styling */
+.maintenance-full { padding:0 !important; margin:0 !important; border:0 !important; border-radius:0 !important; background:transparent !important; }
+.maintenance-full::before,.maintenance-full::after { display:none !important; }
+.maintenance-full #maintenanceCustom { width:100%; }
+@media(max-width:600px){ #maintenanceFrame { height:calc(100dvh - 58px) !important; min-height:0 !important; } }
+/* Compact, readable layout for small screens; keep full images uncropped. */
+@media (max-width: 600px) {
+  html { font-size: 14px; }
+  .top { height: 58px; padding: 0 12px; gap: 8px; }
+  .brand { font-size: 1rem; gap: 8px; }
+  .brand img { width: 32px; height: 32px; }
+  .hamburger { width: 36px; height: 36px; }
+  .shell { min-height: calc(100dvh - 58px); }
+  .side { top: 58px; }
+  .main { padding: 14px 12px 28px; }
+  .hero { padding: 22px 18px; margin-bottom: 16px; border-radius: 16px; }
+  .hero-badge { width: 42px; height: 42px; font-size: 1.25rem; margin-bottom: 14px; }
+  h1 { font-size: clamp(1.5rem, 6vw, 1.9rem); }
+  h2 { font-size: 1.15rem; }
+  p { font-size: .94rem; margin-bottom: 14px; }
+  .cards { grid-template-columns: minmax(0, 1fr); gap: 12px; margin-top: 14px; }
+  .card { min-width: 0; padding: 16px; border-radius: 15px; }
+  .btn { padding: 9px 16px; font-size: .9rem; }
+  .dialog { padding: 20px 16px; border-radius: 18px; }
+  .fullframe { height: calc(100dvh - 58px); max-width: 100vw; }
+  .admin-form-card { padding: 14px; }
+  #builderContent { overflow-wrap: anywhere; }
+  #builderContent img, #builderContent video { display:block; max-width:100%; height:auto; object-fit:contain; }
+  #builderContent table { display:block; max-width:100%; overflow-x:auto; }
+  #popup .dialog { padding: 12px; }
+  #popupImageBox img { max-height: 68dvh; width:auto; height:auto; object-fit:contain; }
+}
+
+/* Notification center and repeatable content editor */
+.notify-toggle{position:relative;display:flex;align-items:center;justify-content:center;flex:none;width:40px;height:40px;border:1px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);cursor:pointer}
+.notify-count{position:absolute;right:-5px;top:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:99px;background:#dc2626;color:#fff;font:700 11px/18px system-ui;text-align:center}
+.notification-panel{position:fixed;right:14px;top:75px;width:min(400px,calc(100vw - 28px));max-height:min(72dvh,620px);overflow:auto;z-index:90;background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--shadow-lg)}
+.notification-list{margin-top:12px}.notification-item{padding:12px 0;border-top:1px solid var(--border);overflow-wrap:anywhere}.notification-item small{display:block;color:var(--muted);margin-top:4px}
+#toastStack{position:fixed;right:12px;bottom:12px;z-index:110;display:grid;gap:8px;max-width:min(420px,calc(100vw - 24px));pointer-events:none}.np-toast{background:var(--text);color:var(--surface);border-radius:12px;padding:12px 16px;box-shadow:var(--shadow-lg);font-size:.88rem;overflow-wrap:anywhere}
+.content-editor{padding:16px;margin:12px 0;border:1px solid var(--border);border-radius:16px;background:var(--surface-alt)}.content-editor .field{margin-bottom:12px}.content-editor .row{margin-bottom:12px}.np-content-section{padding:clamp(14px,3vw,24px) 0;border-bottom:1px solid var(--border)}.np-content-section:last-child{border-bottom:0}.np-content-section img{max-width:100%;height:auto;object-fit:contain;border-radius:12px}.np-content-section a{color:var(--primary);overflow-wrap:anywhere}
+@media(max-width:600px){.notification-panel{top:64px}.content-editor{padding:12px}.np-content-section{padding:12px 0}}
+
+/* Right-aligned notification bell, after the announcement ticker. */
+.top { width:100%; }
+.top .left-header { flex:0 0 auto; min-width:0; }
+.top .ticker-wrap { flex:1 1 auto; max-width:none; min-width:0; margin:0 8px 0 auto; }
+.top .notify-toggle { order:99; flex:0 0 40px; margin-left:auto; margin-right:0; }
+@media (max-width:820px) {
+  .top .ticker-wrap { display:block; flex:1 1 auto; min-width:0; margin:0 8px; }
+  .top .notify-toggle { margin-left:0; }
+}
+@media (max-width:600px) {
+  .top .ticker-wrap { display:none; }
+  .top .notify-toggle { margin-left:auto; }
+}
+
+/* ===== First-visit tutorial overlay ===== */
+#firstVisitTutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 8, 18, .82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+#firstVisitTutorial.active { display: grid; }
+.first-visit-dialog {
+  width: min(900px, 96vw);
+  max-height: 94dvh;
+  overflow: auto;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: clamp(18px, 3vw, 32px);
+  box-shadow: 0 30px 90px rgba(0,0,0,.38);
+}
+.first-visit-head { text-align:center; margin-bottom:18px; }
+.first-visit-head h2 { margin:0 0 8px; font-size:clamp(1.35rem,3vw,2rem); }
+.first-visit-head p { margin:0 auto; }
+.first-visit-media {
+  position:relative;
+  width:100%;
+  overflow:hidden;
+  border-radius:20px;
+  background:#080b12;
+  border:1px solid var(--border);
+}
+.first-visit-media video {
+  display:block;
+  width:100%;
+  max-height:60dvh;
+  min-height:220px;
+  object-fit:contain;
+  background:#080b12;
+}
+.first-visit-drive-wrap{
+  position:relative;width:100%;background:#080b12;overflow:hidden;
+  min-height:260px;
+}
+.first-visit-drive-frame{
+  display:block;width:100%;height:min(60dvh,520px);min-height:260px;
+  border:0;background:#080b12;
+}
+.first-visit-drive-shield{
+  position:absolute;inset:0;z-index:5;background:transparent;
+  pointer-events:none;touch-action:none;display:none;
+  cursor:default;
+}
+.first-visit-drive-shield.on{display:block;pointer-events:auto;}
+.first-visit-drive-shield::after{
+  content:'';position:absolute;inset:0;background:transparent;
+}
+.first-visit-drive-note{
+  position:absolute;left:12px;right:12px;bottom:10px;z-index:6;
+  text-align:center;font-size:.72rem;color:rgba(255,255,255,.72);
+  pointer-events:none;text-shadow:0 1px 3px #000;
+}
+.first-visit-poster {
+  display:block;
+  width:100%;
+  max-height:60dvh;
+  object-fit:contain;
+  background:#080b12;
+}
+.first-visit-progress {
+  height:7px;
+  background:var(--surface-alt);
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:14px;
+}
+.first-visit-progress > div {
+  width:0%;
+  height:100%;
+  background:var(--primary);
+  transition:width .15s linear;
+}
+.first-visit-status {
+  margin:10px 0 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:.9rem;
+}
+.first-visit-actions {
+  display:flex;
+  justify-content:center;
+  margin-top:18px;
+}
+.first-visit-actions .btn { min-width:190px; }
+.first-visit-actions .btn:disabled { opacity:.55; }
+
+.tutorial-admin-preview {
+  margin-top:16px;
+  border:1px dashed var(--border);
+  border-radius:18px;
+  padding:14px;
+  background:var(--surface-alt);
+}
+.np-content-section img { max-width:100%; border-radius:14px; display:block; margin:12px 0; }
+.np-content-section a[data-part="imageLink"] { display:block; }
+.tutorial-admin-preview img,
+.tutorial-admin-preview video {
+  display:block;
+  width:100%;
+  max-height:360px;
+  object-fit:contain;
+  border-radius:14px;
+  background:#080b12;
+}
+@media(max-width:600px){
+  #firstVisitTutorial { padding:8px; }
+  .first-visit-dialog { width:100%; max-height:97dvh; padding:16px; border-radius:20px; }
+  .first-visit-media video,.first-visit-poster { max-height:58dvh; min-height:180px; }
+}
+
+
+/* ===== Upload progress / media management ===== */
+.upload-progress-box{
+  margin-top:14px;padding:16px;border:1px solid var(--border);
+  border-radius:16px;background:var(--surface-alt);display:none;
+}
+.upload-progress-box.active{display:block}
+.upload-progress-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.upload-progress-title{font-weight:700;overflow-wrap:anywhere}
+.upload-progress-percent{font-size:1rem;font-weight:700;color:var(--primary);white-space:nowrap}
+.upload-progress-track{height:10px;background:var(--surface);border:1px solid var(--border);border-radius:999px;overflow:hidden}
+.upload-progress-fill{height:100%;width:0%;background:var(--primary);border-radius:999px;transition:width .12s linear}
+.upload-progress-meta{display:flex;justify-content:space-between;gap:10px;margin-top:8px;color:var(--muted);font-size:.82rem;flex-wrap:wrap}
+.media-current{margin-top:12px;padding:12px;border:1px dashed var(--border);border-radius:14px;background:var(--surface-alt)}
+.media-current .media-url{font-size:.78rem;color:var(--muted);overflow-wrap:anywhere;word-break:break-word}
+.media-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--border)}
+.media-item:first-child{border-top:0}
+.media-thumb{width:72px;height:52px;object-fit:cover;border-radius:9px;border:1px solid var(--border);background:#000;flex:none}
+.media-item-info{min-width:0;flex:1}
+@media(max-width:600px){
+  .upload-progress-box{padding:13px}
+  .upload-progress-meta{font-size:.76rem}
+  .media-item{align-items:flex-start}
+}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&family=Material+Symbols+Sharp" rel="stylesheet">
+</head>
+<body>
+
+<header class="top">
+  <div class="left-header">
+    <button class="hamburger" onclick="toggleSide()" aria-label="เปิดเมนู">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <a href="#" class="brand" onclick="go('home'); return false;">
+      <img id="topLogo" src="https://i.postimg.cc/ZqwL8RKR/Untitled-design.png" alt="Logo">
+      <span id="topName">NP-404</span>
+    </a>
+  </div>
+  
+  <div class="ticker-wrap">
+    <div class="ticker" id="ticker">ยินดีต้อนรับสู่เว็บไซต์ NP-404 • เว็บไซต์สำหรับจัดการข้อมูลและข่าวสาร</div>
+  </div>
+  <button type="button" id="notificationToggle" class="notify-toggle" onclick="toggleNotifications()" aria-label="การแจ้งเตือน"><span class="material-symbols-outlined">notifications</span><span id="notifyCount" class="notify-count hidden">0</span></button>
+
+</header>
+
+<div class="shell">
+  <aside id="side" class="side">
+    <div class="nav-group-label">เมนูหลัก</div>
+    <div id="publicNav"></div>
+    <div class="nav-group-label">ระบบจัดการ</div>
+    <button onclick="go('admin')">
+      <span id="adminSideIcon" class="material-symbols-outlined">admin_panel_settings</span>
+      <span id="adminSideLabel">แผงควบคุม</span>
+    </button>
+    <button id="logoutBtn" class="hidden" onclick="logout()" style="color: #ef4444;">
+      <span class="material-symbols-outlined">logout</span> ออกจากระบบ
+    </button>
+  </aside>
+
+  <main class="main">
+    <!-- Home Section -->
+    <section id="home">
+      <div class="hero" id="homeHero">
+        
+        <h1 id="homeTitle">ยินดีต้อนรับสู่ NP-404</h1>
+        <p id="homeDescription">เว็บไซต์สำหรับจัดการข้อมูล ข่าวสาร และประกาศต่าง ๆ</p>
+        
+      </div>
+      <div class="cards" id="homeCards"></div>
+    </section>
+
+    <!-- Maintenance Section (503) -->
+    <section id="maintenance" class="hidden">
+      <div class="hero center">
+        <div class="hero-badge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+          <span class="material-symbols-outlined">build</span>
+        </div>
+        <h1 id="maintenanceTitle">503 • ปิดปรับปรุงชั่วคราว</h1>
+        <p id="maintenanceText">ขณะนี้เว็บไซต์อยู่ระหว่างปรับปรุง กรุณากลับมาใหม่ภายหลัง</p>
+        <div id="maintenanceCustom"></div>
+      </div>
+    </section>
+
+    <!-- Dynamic Menu Section -->
+    <section id="dynamic" class="hidden"></section>
+
+    <!-- Admin Panel Section -->
+    <section id="admin" class="hidden">
+      <div class="hero">
+        <h1>แผงควบคุมเว็บไซต์</h1>
+        <p>จัดการข้อมูลและการตั้งค่าเว็บไซต์ผ่าน Supabase</p>
+      </div>
+      <div class="notice">
+        <b>ระบบข้อมูล:</b> การเปลี่ยนแปลงจะบันทึกลง Supabase เมื่อเชื่อมต่อและมีสิทธิ์แอดมิน
+      </div>
+      <div class="tabs" id="adminTabs"></div>
+      <div id="adminBody"></div>
+    </section>
+  </main>
+</div>
+
+
+<!-- First-visit tutorial: locked until the video reaches its natural end -->
+<div id="firstVisitTutorial" aria-modal="true" role="dialog" aria-labelledby="firstVisitTitle">
+  <div class="first-visit-dialog">
+    <div class="first-visit-head">
+      <h2 id="firstVisitTitle">วิธีการใช้งานเว็บไซต์</h2>
+      <p id="firstVisitDescription">กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์</p>
+    </div>
+    <div id="firstVisitMedia" class="first-visit-media"></div>
+    <div class="first-visit-progress" aria-hidden="true"><div id="firstVisitProgress"></div></div>
+    <div id="firstVisitStatus" class="first-visit-status">กำลังโหลดวิดีโอ...</div>
+    <div class="first-visit-actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+      <button id="firstVisitContinue" class="btn" type="button" onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
+    </div>
+  </div>
+</div>
+
+<aside id="notificationPanel" class="notification-panel hidden" aria-label="รายการแจ้งเตือน"><div class="row between"><h2 style="margin:0">การแจ้งเตือน</h2><button class="btn ghost" onclick="clearNotifications()">ล้างทั้งหมด</button></div><div id="notificationList" class="notification-list"><p>ยังไม่มีการแจ้งเตือน</p></div></aside>
+<!-- Announcement Popup Modal -->
+<div id="popup" class="modal hidden">
+  <div class="dialog">
+    <div class="row between" style="margin-bottom: 16px;">
+      <h2 id="popupTitle" style="margin:0;">ประกาศ</h2>
+      <button class="btn ghost" onclick="closePopup()" style="padding:6px 12px;">ปิด ×</button>
+    </div>
+    <div id="popupImageBox"></div>
+    <p id="popupText"></p>
+  </div>
+</div>
+
+<!-- Admin Login Modal -->
+<div id="login" class="modal hidden">
+  <div class="dialog">
+    <h2 id="loginTitle">เข้าสู่ระบบแอดมิน</h2>
+    <p id="loginHint">ใช้อีเมลและรหัสผ่านบัญชีแอดมิน</p>
+    <div class="field hidden" id="emailField">
+      <label for="email">อีเมล</label>
+      <input id="email" type="text" autocomplete="username" placeholder="อีเมลแอดมิน" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <div class="field">
+      <label for="password">รหัสผ่าน</label>
+      <input id="password" type="password" autocomplete="current-password" placeholder="กรอกรหัสผ่าน" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <div id="loginError" style="color: #ef4444; font-size: 0.85rem; margin-bottom: 14px;"></div>
+    <div class="row">
+      <button id="loginSubmit" class="btn" onclick="login()">เข้าสู่ระบบ</button>
+      <button class="btn ghost" onclick="document.getElementById('login').classList.add('hidden')">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+/* ===== Supabase config =====
+   ใส่ anon public key (Project Settings → API) ห้ามใช้ service_role key
+   ต้องมี Supabase SDK และ publishable key จึงจะทำงานกับฐานข้อมูลจริง */
+const SUPABASE_URL = 'https://iejmwihipfvtkbvjtude.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_PybXrP5brR32CHIw3nm8Lg_-SruBwlg';
+const CLOUD = !!SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.startsWith('PASTE') && !!window.supabase;
+const sb = CLOUD ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+const DEFAULT = {
+  adminLabel: 'แอดมิน',
+  adminSideLabel: 'แผงควบคุม',
+  adminIcon: 'admin_panel_settings',
+  adminIconFill: '0',
+  adminIconWeight: '400',
+  adminIconOnly: false,
+  siteName: 'NP-404',
+  logo: 'https://i.postimg.cc/ZqwL8RKR/Untitled-design.png',
+  primary: '#2563eb',
+  theme: 'light',
+  fontWeight: '400',
+  ticker: 'ยินดีต้อนรับสู่เว็บไซต์ NP-404 • เว็บไซต์สำหรับจัดการข้อมูลและข่าวสาร',
+  homeTitle: 'ยินดีต้อนรับสู่ NP-404',
+  homeDescription: 'เว็บไซต์สำหรับจัดการข้อมูล ข่าวสาร และประกาศต่าง ๆ',
+  homeAlign: 'left',
+  homeWeight: '700',
+  maintenance: false,
+  maintenanceTitle: '503 • ปิดปรับปรุงชั่วคราว',
+  maintenanceText: 'ขณะนี้เว็บไซต์อยู่ระหว่างปรับปรุง กรุณากลับมาใหม่ภายหลัง',
+  maintenanceHtml: '',
+  popupEnabled: true,
+  popupTitle: 'ประกาศจาก NP-404',
+  popupText: 'ยินดีต้อนรับสู่เว็บไซต์ตัวอย่าง สามารถแก้ไขประกาศนี้ได้ในแผงควบคุม',
+  popupImages: '',
+  popupAlign: 'center',
+  popupTitleWeight: '700',
+  popupTextWeight: '400',
+  // First-visit tutorial / onboarding
+  tutorialEnabled: true,
+  tutorialTitle: 'วิธีการใช้งานเว็บไซต์',
+  tutorialDescription: 'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์',
+  tutorialVideo: '',
+  tutorialImage: '',
+  tutorialDurationMinutes: 0,
+  menus: [
+    { id: 'menu0', title: 'ข่าวสาร', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>ข่าวสารและประกาศ</h2><p>พื้นที่สำหรับแสดงข่าวสารของเว็บไซต์</p>', url: '', requiresLogin: false, visible: true },
+    { id: 'menu1', title: 'กิจกรรม', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>กิจกรรม</h2><p>เพิ่มเนื้อหาหรือรูปภาพจากแผงควบคุม</p>', url: '', requiresLogin: false, visible: true }
+  ]
+};
+
+let s;
+try {
+  s = structuredClone(DEFAULT);
+} catch {
+  s = structuredClone(DEFAULT);
+}
+
+let admin = false, tab = null, menuEditIndex = null, adminMenuOpen = true, popupTimer = null, sideOpen = window.innerWidth > 820;
+
+const $ = id => document.getElementById(id);
+const esc = x => String(x ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+// Only pasted Material Symbols code is used. No preset icon or placeholder.
+function parseMaterialIcon(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  const link = raw.match(/<link\b[^>]*href\s*=\s*["'](https:\/\/fonts\.googleapis\.com\/css2\?[^"']+)["'][^>]*\/?>/i);
+  const span = raw.match(/<span\b[^>]*class\s*=\s*["'][^"']*material-symbols-(outlined|rounded|sharp)[^"']*["'][^>]*>\s*([a-z][a-z0-9_]*)\s*<\/span>/i);
+  const style = raw.match(/<style\b[^>]*>([\s\S]*?)<\/style>/i);
+  const directUrl = /^https:\/\/fonts\.googleapis\.com\/css2\?\S+$/i.test(raw) ? raw : null;
+  let variant = span?.[1]?.toLowerCase() || 'outlined';
+  let icon = span?.[2] || '';
+  const url = link?.[1] || directUrl;
+  if (url) {
+    try {
+      const u = new URL(url.replace(/&amp;/g, '&'));
+      if (u.hostname !== 'fonts.googleapis.com' || u.pathname !== '/css2') return null;
+      const family = u.searchParams.get('family') || '';
+      const match = family.match(/Material[+ ]Symbols[+ ](Outlined|Rounded|Sharp)/i);
+      if (!match) return null;
+      variant = match[1].toLowerCase();
+      const names = (u.searchParams.get('icon_names') || '').split(',');
+      if (!icon) icon = names.find(n => /^[a-z][a-z0-9_]*$/.test(n)) || '';
+    } catch { return null; }
+  }
+  // CSS alone changes appearance but does not identify a glyph.
+  if (!icon || !/^[a-z][a-z0-9_]*$/.test(icon)) return null;
+  if (!url && !span) return null;
+  const settings = {FILL:0,wght:400,GRAD:0,opsz:24};
+  if (style) {
+    const block = style[1].match(/\.material-symbols-(?:outlined|rounded|sharp)\s*\{([^}]*)\}/i)?.[1] || '';
+    for (const m of block.matchAll(/['"](FILL|wght|GRAD|opsz)['"]\s*(-?\d+)/gi)) {
+      const k = Object.keys(settings).find(k => k.toLowerCase() === m[1].toLowerCase());
+      if (k) settings[k] = Number(m[2]);
+    }
+  }
+  settings.FILL=Math.max(0,Math.min(1,settings.FILL));
+  settings.wght=Math.max(100,Math.min(700,settings.wght));
+  settings.GRAD=Math.max(-50,Math.min(200,settings.GRAD));
+  settings.opsz=Math.max(20,Math.min(48,settings.opsz));
+  return {icon,variant,settings};
+}
+function menuIconMarkup(value) {
+  const parsed = parseMaterialIcon(value);
+  if (!parsed) return '';
+  const {icon,variant,settings}=parsed;
+  // Use a fixed, trusted font URL; never inject pasted HTML into the page.
+  const fontId='np404-symbols-'+variant;
+  if (!document.getElementById(fontId)) {
+    const sheet=document.createElement('link');
+    sheet.id=fontId; sheet.rel='stylesheet';
+    sheet.href='https://fonts.googleapis.com/css2?family=Material+Symbols+'+variant[0].toUpperCase()+variant.slice(1)+':opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200';
+    document.head.appendChild(sheet);
+  }
+  return `<span class="material-symbols-${variant}" style="font-variation-settings:'FILL' ${settings.FILL},'wght' ${settings.wght},'GRAD' ${settings.GRAD},'opsz' ${settings.opsz}" aria-hidden="true">${esc(icon)}</span>`;
+}
+function updateMenuIconPreview() {
+  const raw=$('mIcon')?.value || '';
+  const parsed=parseMaterialIcon(raw);
+  $('menuIconPreview').innerHTML=parsed ? menuIconMarkup(raw) : '';
+  $('iconValidation').textContent=!raw.trim() ? 'ยังไม่ได้วางโค้ด (เมนูจะแสดงเฉพาะชื่อ)' : parsed ? 'แสดงไอคอนจากโค้ดที่วาง' : 'ต้องวางลิงก์ที่มี icon_names หรือโค้ด <span> พร้อมชื่อไอคอน; <style> อย่างเดียวไม่ระบุรูปไอคอน';
+}
+
+let saveQueue = Promise.resolve();
+function persist() {
+  if (!CLOUD) { toast('ไม่พบการเชื่อมต่อ Supabase: ไม่สามารถบันทึกข้อมูลจริง'); return; }
+  if (!admin) { toast('ต้องเข้าสู่ระบบแอดมินก่อนบันทึก'); return; }
+  const snapshot = structuredClone(s);
+  saveQueue = saveQueue.catch(() => {}).then(async () => {
+    await cloudSave(snapshot);
+    refresh();
+    toast('บันทึกลง Supabase สำเร็จ');
+  }).catch(e => { console.error(e); toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); });
+}
+
+/* ===== Robust Supabase Storage uploader =====
+   ใช้ XMLHttpRequest เพื่ออ่าน progress จริงของไฟล์ที่กำลังส่ง
+   และแสดงรายละเอียด error จาก Storage แทนข้อความ "อัปโหลดไม่สำเร็จ" แบบกว้าง ๆ
+*/
+let activeUploadXhr = null;
+
+function formatBytes(bytes){
+  if (!Number.isFinite(bytes) || bytes <= 0) return '0 B';
+  const units=['B','KB','MB','GB'];
+  const i=Math.min(Math.floor(Math.log(bytes)/Math.log(1024)),units.length-1);
+  return `${(bytes/Math.pow(1024,i)).toFixed(i?1:0)} ${units[i]}`;
+}
+function formatUploadSpeed(bytesPerSec){
+  return `${formatBytes(bytesPerSec)}/วินาที`;
+}
+function uploadProgressUI(inputId, file){
+  const id='uploadProgressBox';
+  let box=$(id);
+  if(!box){
+    box=document.createElement('div');
+    box.id=id;
+    box.className='upload-progress-box';
+    const host=$(inputId)?.closest('.field') || $('adminBody');
+    host?.appendChild(box);
+  }
+  box.classList.add('active');
+  box.innerHTML=`
+    <div class="upload-progress-head">
+      <div class="upload-progress-title">กำลังอัปโหลด: ${esc(file.name)}</div>
+      <div class="upload-progress-percent" id="uploadPercent">0%</div>
+    </div>
+    <div class="upload-progress-track"><div class="upload-progress-fill" id="uploadFill"></div></div>
+    <div class="upload-progress-meta">
+      <span id="uploadBytes">0 B / ${formatBytes(file.size)}</span>
+      <span id="uploadSpeed">กำลังเริ่ม...</span>
+      <span id="uploadState">กำลังเชื่อมต่อ Storage…</span>
+    </div>`;
+  return box;
+}
+function setUploadProgress(percent, loaded, total, speed){
+  const p=Math.max(0,Math.min(100,percent||0));
+  const fill=$('uploadFill'), pct=$('uploadPercent'), bytes=$('uploadBytes'), spd=$('uploadSpeed');
+  if(fill) fill.style.width=p+'%';
+  if(pct) pct.textContent=Math.round(p)+'%';
+  if(bytes) bytes.textContent=`${formatBytes(loaded)} / ${formatBytes(total)}`;
+  if(spd && speed>0) spd.textContent=formatUploadSpeed(speed);
+}
+function finishUploadProgress(ok,message){
+  const state=$('uploadState');
+  if(state) state.textContent=message || (ok?'อัปโหลดสำเร็จ':'อัปโหลดไม่สำเร็จ');
+  const fill=$('uploadFill');
+  if(ok && fill){ fill.style.width='100%'; }
+  setTimeout(()=>{$('uploadProgressBox')?.classList.remove('active');}, ok?1400:4500);
+}
+function getStoragePathFromPublicUrl(url){
+  try{
+    const u=new URL(String(url||''));
+    const marker='/storage/v1/object/public/np404-images/';
+    const i=u.pathname.indexOf(marker);
+    if(i<0) return '';
+    return decodeURIComponent(u.pathname.slice(i+marker.length));
+  }catch{return '';}
+}
+async function removeStorageFile(url){
+  if(!CLOUD || !admin) throw new Error('ต้องเข้าสู่ระบบแอดมินก่อนลบไฟล์');
+  const path=getStoragePathFromPublicUrl(url);
+  if(!path) throw new Error('ไม่พบ path ของไฟล์ใน Supabase Storage');
+  const {error}=await sb.storage.from('np404-images').remove([path]);
+  if(error) throw error;
+  return path;
+}
+async function deleteMediaUrl(url,targetId,mode='single',afterDelete){
+  const clean=String(url||'').trim();
+  if(!clean) return;
+  if(!confirm('ยืนยันลบไฟล์นี้จาก Supabase Storage?\\nการลบแล้วไม่สามารถกู้คืนจากระบบนี้ได้')) return;
+  try{
+    await removeStorageFile(clean);
+    const target=$(targetId);
+    if(target){
+      if(mode==='append'){
+        target.value=target.value.split(/\\r?\\n/).map(x=>x.trim()).filter(x=>x && x!==clean).join('\\n');
+      }else{
+        target.value='';
+      }
+    }
+    if(typeof afterDelete==='function') afterDelete();
+    toast('ลบไฟล์เรียบร้อยแล้ว');
+  }catch(e){
+    console.error(e);
+    toast('ลบไฟล์ไม่สำเร็จ: '+(e?.message||e));
+  }
+}
+function mediaDeleteButton(url,targetId,mode='single'){
+  return `<button type="button" class="btn red" style="padding:7px 12px" onclick="deleteMediaUrl(${JSON.stringify(String(url||''))},${JSON.stringify(targetId)},${JSON.stringify(mode)})"><span class="material-symbols-outlined">delete</span> ลบไฟล์</button>`;
+}
+function renderCurrentMedia(url,targetId,type='image',mode='single'){
+  const clean=String(url||'').trim();
+  if(!clean) return '';
+  const preview=type==='video'
+    ? `<video src="${esc(clean)}" controls preload="metadata" style="display:block;width:100%;max-height:240px;border-radius:12px;background:#000"></video>`
+    : `<img src="${esc(clean)}" alt="สื่อปัจจุบัน" style="display:block;width:100%;max-height:240px;object-fit:contain;border-radius:12px;background:var(--surface-alt)">`;
+  return `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>ไฟล์ปัจจุบัน</b><div class="media-url">${esc(clean)}</div></div>${mediaDeleteButton(clean,targetId,mode)}</div>${preview}</div>`;
+}
+
+/* Direct XHR upload to Supabase Storage so upload.onprogress is available. */
+function storageUploadWithProgress(path,file,onProgress){
+  return new Promise((resolve,reject)=>{
+    if(!CLOUD || !sb) return reject(new Error('ไม่พบการเชื่อมต่อ Supabase'));
+    const xhr=new XMLHttpRequest();
+    activeUploadXhr=xhr;
+    const endpoint=`${SUPABASE_URL}/storage/v1/object/np404-images/${path}`;
+    xhr.open('POST',endpoint,true);
+    xhr.setRequestHeader('apikey',SUPABASE_ANON_KEY);
+    xhr.setRequestHeader('Authorization','Bearer '+SUPABASE_ANON_KEY);
+    xhr.setRequestHeader('Content-Type',file.type || 'application/octet-stream');
+    xhr.setRequestHeader('x-upsert','false');
+    const started=performance.now();
+    xhr.upload.onprogress=(ev)=>{
+      if(!ev.lengthComputable) return;
+      const elapsed=Math.max((performance.now()-started)/1000,.001);
+      const speed=ev.loaded/elapsed;
+      onProgress?.(ev.loaded,ev.total,(ev.loaded/ev.total)*100,speed);
+    };
+    xhr.onload=()=>{
+      activeUploadXhr=null;
+      let body={};
+      try{body=JSON.parse(xhr.responseText||'{}');}catch{}
+      if(xhr.status>=200 && xhr.status<300) resolve(body);
+      else reject(new Error(body.message || body.error || body.error_description || `Storage HTTP ${xhr.status}`));
+    };
+    xhr.onerror=()=>{activeUploadXhr=null;reject(new Error('เชื่อมต่อ Supabase Storage ไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ต/Storage Policy'));};
+    xhr.onabort=()=>{activeUploadXhr=null;reject(new Error('ยกเลิกการอัปโหลด'));};
+    xhr.send(file);
+  });
+}
+function cancelActiveUpload(){
+  if(activeUploadXhr) activeUploadXhr.abort();
+}
+
+async function uploadImage(inputId,targetId,mode='single'){
+  const input=$(inputId),file=input?.files?.[0];
+  if(!file) return toast('กรุณาเลือกรูปภาพ');
+  if(!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
+  if(!file.type.startsWith('image/')) return toast('รองรับเฉพาะไฟล์รูปภาพ');
+  if(file.size>20*1024*1024) return toast('รูปภาพมีขนาดเกิน 20 MB');
+  const ext=(file.name.split('.').pop()||'png').toLowerCase();
+  if(!['png','jpg','jpeg','webp','gif'].includes(ext)) return toast('รองรับ PNG, JPG, WEBP และ GIF');
+
+  const path=`images/${crypto.randomUUID()}.${ext}`;
+  uploadProgressUI(inputId,file);
+  $('uploadState').textContent='กำลังอัปโหลดรูปภาพ…';
+  try{
+    await storageUploadWithProgress(path,file,(loaded,total,pct,speed)=>setUploadProgress(pct,loaded,total,speed));
+    const {data}=sb.storage.from('np404-images').getPublicUrl(path);
+    const target=$(targetId);
+    if(target){
+      target.value=mode==='html'
+        ? target.value+'\\n<img src="'+data.publicUrl+'" alt="รูปภาพ">'
+        : mode==='append'
+          ? [target.value.trim(),data.publicUrl].filter(Boolean).join('\\n')
+          : data.publicUrl;
+    }
+    setUploadProgress(100,file.size,file.size,0);
+    finishUploadProgress(true,'อัปโหลดสำเร็จ');
+    toast('อัปโหลดรูปภาพสำเร็จ • กรุณากดบันทึกการเปลี่ยนแปลง');
+    if(tab==='popup'||tab==='tutorial') renderAdmin();
+    return data.publicUrl;
+  }catch(e){
+    console.error(e);
+    finishUploadProgress(false,'อัปโหลดไม่สำเร็จ');
+    toast('อัปโหลดรูปภาพไม่สำเร็จ: '+(e?.message||e));
+    return null;
+  }finally{
+    if(input) input.value='';
+  }
+}
+function imageUploader(inputId,targetId,mode='single'){
+  return `<div class="field"><label>อัปโหลดรูปภาพจากเครื่อง (สูงสุด 20 MB)</label><div class="row"><input id="${inputId}" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:320px"><button class="btn ghost" type="button" onclick="uploadImage('${inputId}','${targetId}','${mode}')"><span class="material-symbols-outlined">upload</span> อัปโหลดรูปภาพ</button></div></div>`;
+}
+
+async function uploadTutorialVideo(){
+  const input=$('tutorialVideoUpload'),file=input?.files?.[0];
+  if(!file) return toast('กรุณาเลือกวิดีโอ');
+  if(!CLOUD || !admin) return toast('ต้องเข้าสู่ระบบแอดมินและเชื่อมต่อ Supabase');
+  if(!file.type.startsWith('video/')) return toast('รองรับเฉพาะไฟล์วิดีโอ');
+  if(file.size>500*1024*1024) return toast('วิดีโอมีขนาดเกิน 500 MB');
+  const ext=(file.name.split('.').pop()||'mp4').toLowerCase();
+  const allowed=['mp4','webm','mov','m4v','ogv'];
+  if(!allowed.includes(ext)) return toast('รองรับ MP4, WEBM, MOV, M4V และ OGV');
+
+  const path=`tutorial/${crypto.randomUUID()}.${ext}`;
+  uploadProgressUI('tutorialVideoUpload',file);
+  $('uploadState').textContent='กำลังอัปโหลดวิดีโอ…';
+  try{
+    await storageUploadWithProgress(path,file,(loaded,total,pct,speed)=>setUploadProgress(pct,loaded,total,speed));
+    const {data}=sb.storage.from('np404-images').getPublicUrl(path);
+    $('f_tutorialVideo').value=data.publicUrl;
+    setUploadProgress(100,file.size,file.size,0);
+    finishUploadProgress(true,'อัปโหลดวิดีโอสำเร็จ');
+    toast('อัปโหลดวิดีโอสำเร็จ • กรุณากดบันทึก');
+    renderAdmin();
+    return data.publicUrl;
+  }catch(e){
+    console.error(e);
+    finishUploadProgress(false,'อัปโหลดไม่สำเร็จ');
+    toast('อัปโหลดวิดีโอไม่สำเร็จ: '+(e?.message||e));
+    return null;
+  }finally{
+    if(input) input.value='';
+  }
+}
+function getGoogleDriveFileId(url){
+  const raw=String(url||'').trim();
+  if(!raw) return '';
+  const patterns=[
+    /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i,
+    /drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/i,
+    /drive\.google\.com\/uc\?.*?[?&]id=([a-zA-Z0-9_-]+)/i,
+    /[?&]id=([a-zA-Z0-9_-]+)/i
+  ];
+  for(const re of patterns){ const m=raw.match(re); if(m) return m[1]; }
+  return '';
+}
+function getTutorialVideoSource(url){
+  const raw=String(url||'').trim();
+  const id=getGoogleDriveFileId(raw);
+  if(id) return {type:'drive',id,url:`https://drive.google.com/file/d/${id}/preview`};
+  return {type:'direct',id:'',url:raw};
+}
+function normalizeTutorialVideoUrl(url){
+  const src=getTutorialVideoSource(url);
+  return src.type==='drive' ? `https://drive.google.com/file/d/${src.id}/preview` : String(url||'').trim();
+}
+function tutorialVideoUploader(){
+  const current=s.tutorialVideo||'';
+  const driveId=getGoogleDriveFileId(current);
+  return `<div class="field">
+    <label>วิดีโอแนะนำการใช้งาน</label>
+    ${field('ลิงก์วิดีโอ Google Drive (แนะนำสำหรับวิดีโอขนาดใหญ่)','tutorialVideo')}
+    <small style="display:block;color:var(--muted);margin-top:-8px;margin-bottom:12px;line-height:1.6;">ตั้งไฟล์ Google Drive เป็น “ทุกคนที่มีลิงก์ → ผู้ดู” แล้ววางลิงก์แบบ /file/d/.../view ได้ ระบบจะแปลงเป็นตัวเล่นให้อัตโนมัติ</small>
+    ${driveId ? `<div class="media-current"><div class="media-item"><div class="media-item-info"><b>Google Drive พร้อมใช้งาน</b><div class="media-url">File ID: ${esc(driveId)}</div></div><button type="button" class="btn red" style="padding:7px 12px" onclick="clearTutorialVideoLink()"><span class="material-symbols-outlined">delete</span> ลบลิงก์</button></div><iframe src="https://drive.google.com/file/d/${esc(driveId)}/preview?autoplay=1&controls=0&disablekb=1&rm=minimal" allow="autoplay" allowfullscreen style="display:block;width:100%;height:300px;border:0;border-radius:12px;background:#000"></iframe></div>` : ''}
+    <div style="margin-top:12px;padding:12px 14px;border:1px dashed var(--border);border-radius:14px;background:var(--surface-alt);color:var(--muted);font-size:.84rem;">หากใช้ Google Drive ไม่ต้องอัปโหลดวิดีโอเข้า Supabase และไม่ติดข้อจำกัดไฟล์ 50 MB ของ Supabase Free</div>
+  </div>`;
+}
+function clearTutorialVideoLink(){
+  if(!confirm('ยืนยันลบลิงก์วิดีโอ Google Drive จากรายการนี้?')) return;
+  s.tutorialVideo='';
+  persist();
+  renderAdmin();
+}
+async function uploadTutorialImage(){
+  await uploadImage('tutorialImageUpload','f_tutorialImage','single');
+}
+function tutorialImageUploader(){
+  const current=s.tutorialImage||'';
+  return `<div class="field">
+    <label>รูปภาพประกอบ / ภาพปก</label>
+    <div class="row">
+      <input id="tutorialImageUpload" type="file" accept="image/png,image/jpeg,image/webp,image/gif" style="max-width:320px">
+      <button class="btn ghost" type="button" onclick="uploadTutorialImage()"><span class="material-symbols-outlined">upload</span> อัปโหลดรูปภาพ</button>
+    </div>
+    ${renderCurrentMedia(current,'f_tutorialImage','image','single')}
+  </div>`;
+}
+
+/* ===== Supabase data layer ===== */
+const rowToMenu = r => ({ id: r.id, title: r.title, icon: r.icon, category: r.category, type: r.type,
+  content: r.content, url: r.url, requiresLogin: r.requires_login, visible: r.visible });
+const menuToRow = (m, i) => ({ id: m.id, position: i, title: m.title, icon: m.icon, category: m.category, type: m.type,
+  content: m.content, url: m.url, requires_login: !!m.requiresLogin, visible: m.visible !== false,
+  updated_at: new Date().toISOString() });
+
+async function checkAdmin() {
+  const { data: { session }, error: sessionError } = await sb.auth.getSession();
+  if (sessionError) throw sessionError;
+  if (!session) return false;
+  const { data, error } = await sb.from('np404_admins')
+    .select('user_id').eq('user_id', session.user.id).maybeSingle();
+  if (error) throw new Error('ตรวจสอบสิทธิ์แอดมินไม่ได้: ' + error.message +
+    ' (ตรวจสอบตาราง np404_admins และนโยบาย RLS)');
+  return !!data;
+}
+
+async function cloudLoad() {
+  const [st, mn] = await Promise.all([
+    sb.from('np404_settings').select('data').eq('id', 1).maybeSingle(),
+    sb.from('np404_menus').select('*').order('position')
+  ]);
+  if (st.error) throw st.error;
+  if (mn.error) throw mn.error;
+  const menus = mn.data.map(rowToMenu);
+  s = { ...DEFAULT, ...(st.data?.data || {}), menus };
+}
+
+async function cloudSave(snapshot) {
+  const { menus, ...settings } = snapshot;
+  const a = await sb.from('np404_settings').upsert({ id: 1, data: settings, updated_at: new Date().toISOString() });
+  if (a.error) throw a.error;
+  if (menus.length) {
+    const b = await sb.from('np404_menus').upsert(menus.map(menuToRow));
+    if (b.error) throw b.error;
+  }
+  const del = sb.from('np404_menus').delete();
+  const c = await (menus.length ? del.not('id', 'in', `(${menus.map(m => m.id).join(',')})`) : del.neq('id', ''));
+  if (c.error) throw c.error;
+}
+
+const notificationHistory = [];
+function notify(message, kind='info') {
+  const item={message:String(message),kind,time:new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})};
+  notificationHistory.unshift(item);
+  if(notificationHistory.length>50) notificationHistory.pop();
+  renderNotifications();
+  let stack=$('toastStack');
+  if(!stack){stack=document.createElement('div');stack.id='toastStack';stack.setAttribute('role','status');document.body.appendChild(stack);}
+  const n=document.createElement('div');n.className='np-toast';n.textContent=item.message;stack.appendChild(n);
+  setTimeout(()=>n.remove(),4200);
+}
+function toast(t){notify(t,/ไม่สำเร็จ|ผิด|ไม่ได้|กรุณา|ล้มเหลว/.test(t)?'error':'success');}
+function renderNotifications(){
+  const count=$('notifyCount'),list=$('notificationList');if(!count||!list)return;
+  count.textContent=notificationHistory.length;count.classList.toggle('hidden',!notificationHistory.length);
+  list.replaceChildren();
+  if(!notificationHistory.length){const p=document.createElement('p');p.textContent='ยังไม่มีการแจ้งเตือน';list.appendChild(p);return;}
+  notificationHistory.forEach(n=>{const el=document.createElement('div');el.className='notification-item';
+    const t=document.createElement('div');t.textContent=n.message;
+    const time=document.createElement('small');time.textContent=n.time;el.append(t,time);list.appendChild(el);});
+}
+function toggleNotifications(){$('notificationPanel').classList.toggle('hidden');renderNotifications();}
+function clearNotifications(){notificationHistory.length=0;renderNotifications();}
+
+function toggleSide() {
+  sideOpen = !sideOpen;
+  $('side').classList.toggle('closed', !sideOpen);
+}
+
+function refresh() {
+  document.documentElement.style.setProperty('--primary', s.primary);
+  document.documentElement.style.setProperty('--primary-hover', s.primary);
+  document.body.classList.toggle('dark', s.theme === 'dark');
+  document.body.style.setProperty('--weight', s.fontWeight);
+  
+  $('topName').textContent = s.siteName;
+  
+  document.querySelectorAll('.admin-icon').forEach(el => {
+    el.textContent = s.adminIcon || 'admin_panel_settings';
+    el.style.fontVariationSettings = `'FILL' ${s.adminIconFill || '0'}, 'wght' ${s.adminIconWeight || '400'}, 'GRAD' 0, 'opsz' 24`;
+  });
+  
+  $('adminSideLabel').textContent = s.adminSideLabel || '';
+  $('adminSideLabel').classList.toggle('hidden', !!s.adminIconOnly);
+  
+  $('topLogo').src = s.logo;
+  $('ticker').textContent = s.ticker;
+  $('homeTitle').textContent = s.homeTitle;
+  $('homeDescription').textContent = s.homeDescription;
+  $('homeHero').className = 'hero ' + s.homeAlign;
+  $('homeTitle').style.fontWeight = s.homeWeight;
+  
+  $('maintenanceTitle').textContent = s.maintenanceTitle;
+  $('maintenanceText').textContent = s.maintenanceText;
+  renderMaintenance();
+  
+  $('publicNav').innerHTML = '<button onclick="go(\'home\')"><span class="material-symbols-outlined">home</span> หน้าแรก</button>' +
+    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}</button>`).join('');
+    
+  $('homeCards').innerHTML = s.menus.filter(m => m.visible).map(m => `
+    <div class="card">
+      ${menuIconMarkup(m.icon) ? `<div class="icon">${menuIconMarkup(m.icon)}</div>` : ''}
+      <h2>${esc(m.title)}</h2>
+      <p><small style="color:var(--muted);">${esc(m.category)}</small></p>
+      <button class="btn ghost" onclick="go('${esc(m.id)}')">เปิดเมนู →</button>
+    </div>
+  `).join('');
+  
+  $('logoutBtn').classList.toggle('hidden', !admin);
+}
+
+/* Compact embedded HTML on phones without changing the saved Supabase content. */
+function responsiveHtml(source) {
+  const doc = new DOMParser().parseFromString(String(source || ''), 'text/html');
+  let viewport = doc.querySelector('meta[name="viewport"]');
+  if (!viewport) {
+    viewport = doc.createElement('meta');
+    doc.head.prepend(viewport);
+  }
+  viewport.setAttribute('content', 'width=device-width, initial-scale=1');
+  const style = doc.createElement('style');
+  style.id = 'np404-mobile-fit';
+  style.textContent = `
+    *, *::before, *::after { box-sizing: border-box; }
+    html { width: 100%; max-width: 100%; -webkit-text-size-adjust: 100%; }
+    body { width: 100%; max-width: 100%; min-width: 0; margin: 0; overflow-x: hidden; }
+    img, video, svg, canvas { max-width: 100%; height: auto; }
+    table { display: block; max-width: 100%; overflow-x: auto; }
+    pre, code { max-width: 100%; overflow-wrap: anywhere; }
+    @media (max-width: 600px) {
+      html { font-size: 13px !important; }
+      body { font-size: 13px !important; line-height: 1.5 !important; }
+      h1, .hero h1, .title, .page-title { font-size: clamp(19px, 5.3vw, 24px) !important; line-height: 1.3 !important; }
+      h2 { font-size: clamp(17px, 4.5vw, 20px) !important; line-height: 1.35 !important; }
+      h3 { font-size: 16px !important; }
+      p, li, label, td, th, small, .subtitle, .description { font-size: 13px !important; overflow-wrap: anywhere; }
+      button, input, select, textarea { max-width: 100%; font-size: 14px !important; }
+      input, select, textarea { min-width: 0 !important; }
+      button { padding: 8px 12px !important; }
+      header, nav, .navbar, .topbar, .header, .nav { max-width: 100%; }
+      nav, .tabs, .nav-tabs, .tab-list, [role="tablist"] { overflow-x: auto !important; max-width: 100%; scrollbar-width: thin; }
+      nav a, .tabs button, .nav-tabs a, [role="tab"] { font-size: 13px !important; white-space: nowrap; }
+      .container, .wrapper, .content, .main, main, section, article, .card, .hero, .panel { max-width: 100% !important; min-width: 0 !important; }
+      .hero, .card, .panel { padding: 12px !important; }
+      .grid, .cards { min-width: 0; }
+      [style*="min-width: 1000px"], [style*="min-width:1000px"], [style*="width: 1200px"], [style*="width:1200px"] { min-width: 0 !important; max-width: 100% !important; }
+    }
+  `;
+  doc.head.append(style);
+  // Existing pages sometimes use desktop-only pixel widths. Scale those layouts
+  // only when they actually overflow a narrow phone viewport.
+  const script = doc.createElement('script');
+  script.textContent = `(() => {
+    function fit() {
+      if (window.innerWidth > 600) return;
+      const body = document.body;
+      if (!body) return;
+      body.style.zoom = '';
+      const width = Math.max(document.documentElement.scrollWidth, body.scrollWidth);
+      const viewport = window.innerWidth;
+      if (width > viewport + 24) {
+        const scale = Math.max(.48, Math.min(1, viewport / width));
+        body.style.zoom = String(scale);
+        body.style.width = (100 / scale) + '%';
+      }
+    }
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    document.addEventListener('DOMContentLoaded', fit);
+    if (document.readyState !== 'loading') fit();
+  })();`;
+  doc.body.append(script);
+  return '<!doctype html>\n' + doc.documentElement.outerHTML;
+}
+
+function renderMaintenance() {
+  const code = String(s.maintenanceHtml || '').trim();
+  const custom = $('maintenanceCustom');
+  const title = $('maintenanceTitle');
+  const description = $('maintenanceText');
+  if (!code) {
+    custom.replaceChildren();
+    title.classList.remove('hidden');
+    description.classList.remove('hidden');
+    $('maintenance').querySelector('.hero-badge').classList.remove('hidden');
+    return;
+  }
+  title.classList.add('hidden');
+  description.classList.add('hidden');
+  $('maintenance').querySelector('.hero-badge').classList.add('hidden');
+  custom.innerHTML = '<iframe id="maintenanceFrame" title="หน้าปิดปรับปรุง" sandbox="allow-scripts allow-forms allow-popups" style="display:block;width:100%;height:calc(100dvh - 68px);min-height:500px;border:0;background:transparent"></iframe>';
+  $('maintenanceFrame').srcdoc = responsiveHtml(code);
+}
+function preview503() {
+  const code = $('f_maintenanceHtml')?.value.trim() || '';
+  const title = $('f_maintenanceTitle')?.value || '503 • ปิดปรับปรุงชั่วคราว';
+  const detail = $('f_maintenanceText')?.value || '';
+  const target = $('maintPreview');
+  if (!target) return;
+  target.innerHTML = '<div class="preview"><h3 style="margin-top:0">ตัวอย่างหน้า 503</h3><div id="preview503Content"></div></div>';
+  const box = $('preview503Content');
+  if (code) {
+    box.innerHTML = '<iframe title="ตัวอย่าง HTML หน้า 503" sandbox="allow-scripts allow-forms allow-popups" style="width:100%;height:min(65dvh,600px);min-height:320px;border:1px solid var(--border);border-radius:12px;background:white"></iframe>';
+    box.querySelector('iframe').srcdoc = responsiveHtml(code);
+  } else {
+    const heading = document.createElement('h2'); heading.textContent = title;
+    const paragraph = document.createElement('p'); paragraph.textContent = detail;
+    box.append(heading, paragraph);
+  }
+}
+function go(page) {
+  if (page === 'admin' && !admin) {
+    $('login').classList.remove('hidden');
+    return;
+  }
+  
+  if (s.maintenance && !admin && page !== 'admin') page = 'maintenance';
+  
+  $('home').classList.add('hidden');
+  $('admin').classList.add('hidden');
+  $('dynamic').classList.add('hidden');
+  $('maintenance').classList.add('hidden');
+  document.querySelector('.main').classList.remove('fullpage');
+  
+  if (['home', 'admin', 'maintenance'].includes(page)) {
+    $(page).classList.remove('hidden');
+    if (page === 'maintenance' && String(s.maintenanceHtml || '').trim()) {
+      document.querySelector('.main').classList.add('fullpage');
+      $('maintenance').querySelector('.hero').classList.add('maintenance-full');
+    } else {
+      $('maintenance').querySelector('.hero').classList.remove('maintenance-full');
+    }
+    if (page === 'admin') {
+      tab = null;
+      adminMenuOpen = false;
+      renderAdmin();
+    }
+  } else {
+    const m = s.menus.find(x => x.id === page);
+    if (!m) return go('home');
+    if (m.requiresLogin && !admin) {
+      $('login').classList.remove('hidden');
+      return;
+    }
+    if (m.type === 'external') {
+      if (m.url && /^https?:\/\//i.test(m.url)) window.open(m.url, '_blank', 'noopener,noreferrer');
+      else toast('กรุณากำหนดลิงก์ที่ถูกต้อง');
+      return;
+    }
+    
+    $('dynamic').classList.remove('hidden');
+    if (m.type === 'html') {
+      document.querySelector('.main').classList.add('fullpage');
+      $('dynamic').innerHTML = `<iframe id="customFrame" class="fullframe" title="${esc(m.title)}" sandbox="allow-scripts allow-forms allow-popups"></iframe>`;
+      $('customFrame').srcdoc = responsiveHtml(m.content);
+
+    } else {
+      $('dynamic').innerHTML = `<div class="card" id="builderContent"></div>`;
+      if (m.type === 'builder') $('builderContent').innerHTML = m.content;
+    }
+  }
+  
+  if (window.innerWidth <= 820) {
+    sideOpen = false;
+    $('side').classList.add('closed');
+  }
+  window.scrollTo(0, 0);
+}
+
+let loginBusy = false;
+async function login() {
+  if (loginBusy) return;
+  const submit = $('loginSubmit');
+  const email = $('email').value.trim();
+  const password = $('password').value;
+  $('loginError').textContent = '';
+  if (CLOUD && (!email || !password)) {
+    $('loginError').textContent = 'กรุณากรอกอีเมลและรหัสผ่าน';
+    return;
+  }
+  loginBusy = true;
+  submit.disabled = true;
+  submit.textContent = 'กำลังตรวจสอบ...';
+  try {
+    if (CLOUD) {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      const permitted = await checkAdmin();
+      if (!permitted) {
+        $('loginError').textContent = 'เข้าสู่ระบบสำเร็จ แต่บัญชีนี้ยังไม่มีสิทธิ์แอดมิน กรุณาให้ผู้ดูแลเพิ่ม user_id ในตาราง np404_admins';
+        return;
+      }
+      admin = true;
+    adminMenuOpen = true;
+      try { await cloudLoad(); }
+      catch (e) { console.error('Load error:', e); toast('เข้าสู่ระบบแล้ว แต่โหลดข้อมูลไม่สำเร็จ: ' + e.message); }
+    } else {
+      throw new Error('ไม่สามารถโหลด Supabase SDK ได้ โปรดเชื่อมต่ออินเทอร์เน็ตและเปิดเว็บผ่าน HTTPS');
+    }
+    $('login').classList.add('hidden');
+    $('password').value = '';
+    refresh();
+    go('admin');
+    notify('เข้าสู่ระบบแอดมินสำเร็จ');
+  } catch (error) {
+    console.error('Login error:', error);
+    const message = error.message || String(error);
+    $('loginError').textContent =
+      /invalid login credentials/i.test(message) ? 'อีเมลหรือรหัสผ่านไม่ถูกต้อง หรือยังไม่มีบัญชีใน Supabase Authentication' :
+      /email not confirmed/i.test(message) ? 'ยังไม่ได้ยืนยันอีเมลใน Supabase Authentication' :
+      /failed to fetch|network|fetch failed/i.test(message) ? 'เชื่อมต่อ Supabase ไม่ได้ กรุณาตรวจสอบอินเทอร์เน็ตและ Project URL' :
+      'เข้าสู่ระบบไม่สำเร็จ: ' + message;
+  } finally {
+    loginBusy = false;
+    submit.disabled = false;
+    submit.textContent = 'เข้าสู่ระบบ';
+  }
+}
+
+async function logout() {
+  admin = false;
+  if (CLOUD) { await sb.auth.signOut(); await cloudLoad().catch(console.error); }
+  refresh();
+  go('home');
+}
+
+function field(label, key, type = 'text', extra = '') {
+  let val = s[key] ?? '';
+  return `<div class="field">
+    <label>${label}</label>
+    ${type === 'textarea' ? `<textarea id="f_${key}" rows="4">${esc(val)}</textarea>` :
+      type === 'select' ? `<select id="f_${key}">${extra.split('|').map(v => `<option value="${esc(v.split(':')[0])}" ${String(val) === v.split(':')[0] ? 'selected' : ''}>${esc(v.split(':')[1] || v)}</option>`).join('')}</select>` :
+      `<input id="f_${key}" type="${type}" value="${esc(val)}">`}
+  </div>`;
+}
+
+function saveFields(keys) {
+  keys.forEach(k => {
+    const e = $('f_' + k);
+    if (e) s[k] = e.value;
+  });
+  persist();
+  renderAdmin();
+}
+
+function renderPopupMediaList(){
+  const urls=String(s.popupImages||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
+  if(!urls.length) return '<small style="color:var(--muted)">ยังไม่มีรูปภาพในรายการนี้</small>';
+  return `<b>รูปภาพในรายการนี้</b>${urls.map((url,i)=>`
+    <div class="media-item">
+      <div class="media-item-info" style="display:flex;align-items:center;gap:10px;">
+        <img class="media-thumb" src="${esc(url)}" alt="รูป ${i+1}">
+        <div><div>รูปภาพที่ ${i+1}</div><div class="media-url">${esc(url)}</div></div>
+      </div>
+      ${mediaDeleteButton(url,'f_popupImages','append')}
+    </div>`).join('')}`;
+}
+
+function renderAdmin() {
+  const names = [
+    ['overview', 'ภาพรวม'],
+    ['maintenance', 'หน้า 503'],
+    ['branding', 'เว็บไซต์และธีม'],
+    ['homepage', 'หน้าแรก'],
+    ['menus', 'จัดการเมนู'],
+    ['popup', 'ป๊อปอัป'],
+    ['tutorial', 'วิธีการใช้งานครั้งแรก']
+  ];
+  
+  $('adminTabs').innerHTML = `<button class="${adminMenuOpen ? 'active' : ''}" onclick="adminMenuOpen=!adminMenuOpen;renderAdmin()">
+    <span class="material-symbols-outlined">tune</span> ${adminMenuOpen ? 'ซ่อนตัวเลือก' : 'เปิดตัวเลือกการตั้งค่า'}
+  </button>` + (adminMenuOpen ? `<div class="admin-menu-list">${names.map(([id, label]) => `<button class="${tab === id ? 'active' : ''}" onclick="tab='${id}';adminMenuOpen=false;renderAdmin()">${label}</button>`).join('')}</div>` : '');
+
+  let html = '';
+  if (tab === null) html = '<div class="notice">เลือกรายการเมนูด้านบนเพื่อเริ่มต้นปรับแต่งระบบ</div>';
+  
+  if (tab === 'overview') {
+    html = `<div class="cards">
+      <div class="card">
+        <h2>สถานะเว็บไซต์</h2>
+        <p>${s.maintenance ? '🔴 ปิดปรับปรุง' : '🟢 เปิดใช้งานปกติ'}</p>
+        <button class="btn ghost" onclick="tab='maintenance';renderAdmin()">ตั้งค่าหน้า 503</button>
+      </div>
+      <div class="card">
+        <h2>เมนูที่สร้าง</h2>
+        <p>${s.menus.length} รายการ</p>
+        <button class="btn ghost" onclick="tab='menus';renderAdmin()">จัดการเมนู</button>
+      </div>
+      <div class="card">
+        <h2>ประกาศป๊อปอัป</h2>
+        <p>${s.popupEnabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}</p>
+        <button class="btn ghost" onclick="tab='popup';renderAdmin()">ตั้งค่าประกาศ</button>
+      </div>
+    </div>`;
+  }
+  
+  if (tab === 'maintenance') {
+    html = `<div class="card">
+      <h2>โหมดปิดปรับปรุง 503</h2>
+      <label style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+        <input type="checkbox" id="maintSwitch" ${s.maintenance ? 'checked' : ''}> เปิดหน้า 503 สำหรับผู้ใช้ทั่วไป
+      </label>
+      ${field('หัวข้อ', 'maintenanceTitle')}
+      ${field('รายละเอียด', 'maintenanceText', 'textarea')}
+      ${field('โค้ด HTML / CSS Custom (เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น)', 'maintenanceHtml', 'textarea')}
+      <div class="row">
+        <button class="btn" onclick="s.maintenance=$('maintSwitch').checked;saveFields(['maintenanceTitle','maintenanceText','maintenanceHtml'])">บันทึก</button>
+        <button class="btn ghost" onclick="preview503()">แสดงตัวอย่าง</button>
+      </div>
+      <div id="maintPreview"></div>
+    </div>`;
+  }
+
+  if (tab === 'branding') {
+    html = `<div class="card">
+      <h2>ชื่อเว็บไซต์และโลโก้</h2>
+      ${field('ชื่อเว็บไซต์', 'siteName')}
+      ${field('ลิงก์รูปภาพโลโก้', 'logo')}
+      ${imageUploader('logoUpload','f_logo')}
+      <h2>ธีมและระบบสี</h2>
+      <div class="cols">
+        ${field('สีหลัก', 'primary', 'color')}
+        ${field('ธีม', 'theme', 'select', 'light:สว่าง (Light)|dark:มืด (Dark)')}
+        ${field('น้ำหนักตัวอักษร', 'fontWeight', 'select', '300:บาง|400:ปกติ|500:ปานกลาง|600:หนา|700:หนามาก')}
+      </div>
+      ${field('ข้อความวิ่งบนแถบด้านบน', 'ticker', 'textarea')}
+      <h2>ปุ่มแอดมิน</h2>
+      <div class="cols">
+        ${field('ชื่อปุ่มด้านข้าง', 'adminSideLabel')}
+        ${field('ชื่อไอคอน Material Symbol', 'adminIcon')}
+        ${field('รูปแบบไอคอน', 'adminIconFill', 'select', '0:เส้นขอบ|1:เติมเต็ม')}
+        ${field('น้ำหนักไอคอน', 'adminIconWeight', 'select', '300:บาง|400:ปกติ|600:หนา')}
+      </div>
+      <label style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+        <input type="checkbox" id="adminIconOnly" ${s.adminIconOnly ? 'checked' : ''}> แสดงเฉพาะไอคอน ไม่แสดงข้อความ
+      </label>
+      <button class="btn" onclick="s.adminIconOnly=$('adminIconOnly').checked;saveFields(['siteName','logo','primary','theme','fontWeight','ticker','adminSideLabel','adminIcon','adminIconFill','adminIconWeight'])">บันทึกทั้งหมด</button>
+    </div>`;
+  }
+
+  if (tab === 'homepage') {
+    html = `<div class="card">
+      <h2>ปรับแต่งหน้าแรก</h2>
+      ${field('ข้อความต้อนรับ', 'homeTitle')}
+      ${field('รายละเอียด', 'homeDescription', 'textarea')}
+      <div class="cols">
+        ${field('การจัดตำแหน่ง', 'homeAlign', 'select', 'left:ซ้าย|center:กลาง|right:ขวา')}
+        ${field('น้ำหนักหัวข้อ', 'homeWeight', 'select', '400:ปกติ|600:หนา|700:หนามาก')}
+      </div>
+      <button class="btn" onclick="saveFields(['homeTitle','homeDescription','homeAlign','homeWeight'])">บันทึกการเปลี่ยนแปลง</button>
+    </div>`;
+  }
+
+  if (tab === 'menuEdit' && menuEditIndex !== null) {
+    const m = s.menus[menuEditIndex];
+    html = `<div class="card"><div class="row between" style="margin-bottom:16px;"><h2 style="margin:0">แก้ไขเมนู: ${esc(m?.title||'เมนู')}</h2><button class="btn ghost" onclick="menuEditIndex=null;tab='menus';renderAdmin()">← กลับรายการเมนู</button></div><div id="menuEditor"></div></div>`;
+  }
+
+  if (tab === 'menus') {
+    html = `<div class="card">
+      <div class="row between" style="margin-bottom: 16px;">
+        <h2 style="margin:0;">จัดการเมนู</h2>
+        <button class="btn" onclick="addMenu()">+ เพิ่มเมนู</button>
+      </div>
+      ${s.menus.map((m, i) => `
+        <div class="menuitem">
+          <div class="row between">
+            <b>${menuIconMarkup(m.icon)} ${esc(m.title)}</b>
+            <div class="row">
+              <button class="btn ghost" onclick="moveMenu(${i},-1)">↑</button>
+              <button class="btn ghost" onclick="moveMenu(${i},1)">↓</button>
+              <button class="btn ghost" onclick="editMenu(${i})">แก้ไข</button>
+              <button class="btn red" onclick="removeMenu(${i})">ลบ</button>
+            </div>
+          </div>
+          <small style="color:var(--muted);">${esc(m.category)} • ${esc(m.type)}</small>
+        </div>
+      `).join('')}
+    </div><div id="menuEditor"></div>`;
+  }
+
+  if (tab === 'popup') {
+    html = `<div class="card">
+      <h2>ประกาศป๊อปอัป</h2>
+      <label style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+        <input type="checkbox" id="popupSwitch" ${s.popupEnabled ? 'checked' : ''}> เปิดแสดงประกาศเมื่อเข้าเว็บไซต์
+      </label>
+      ${field('หัวข้อประกาศ', 'popupTitle')}
+      ${field('รายละเอียดประกาศ', 'popupText', 'textarea')}
+      ${field('ลิงก์รูปภาพ (หนึ่งลิงก์ต่อบรรทัด)', 'popupImages', 'textarea')}
+      ${imageUploader('popupUpload','f_popupImages','append')}
+      <div class="media-current" id="popupMediaList">
+        ${renderPopupMediaList()}
+      </div>
+      <div class="row">
+        <button class="btn" onclick="s.popupEnabled=$('popupSwitch').checked;saveFields(['popupTitle','popupText','popupImages'])">บันทึกประกาศ</button>
+        <button class="btn ghost" onclick="previewPopup()">แสดงตัวอย่าง</button>
+      </div>
+    </div>`;
+  }
+
+  if (tab === 'tutorial') {
+    html = `<div class="admin-form-card">
+      <h3>วิธีการใช้งานครั้งแรก</h3>
+      <p class="form-help">ผู้ใช้ที่เข้าชมเว็บไซต์ครั้งแรกจะถูกล็อกหน้านี้และต้องรับชมวิดีโอจนจบก่อนเข้าเว็บไซต์ เมื่อดูจบแล้วระบบจะจำสถานะไว้ในเครื่องนั้นและจะไม่แสดงซ้ำ</p>
+
+      <label style="display:flex;gap:8px;align-items:center;margin-bottom:18px;">
+        <input type="checkbox" id="tutorialEnabledSwitch" ${s.tutorialEnabled ? 'checked' : ''}>
+        เปิดใช้งานหน้าวิธีการใช้งานครั้งแรก
+      </label>
+
+      ${field('หัวข้อ', 'tutorialTitle')}
+      ${field('คำอธิบาย', 'tutorialDescription', 'textarea')}
+      ${field('ลิงก์วิดีโอแนะนำการใช้งาน', 'tutorialVideo')}
+      ${field('เวลาที่ต้องรับชมขั้นต่ำ (นาที)', 'tutorialDurationMinutes', 'number')}
+      ${tutorialVideoUploader()}
+      ${field('ลิงก์รูปภาพประกอบ / ภาพปก', 'tutorialImage')}
+      ${tutorialImageUploader()}
+
+      <div class="row">
+        <button class="btn" onclick="s.tutorialEnabled=$('tutorialEnabledSwitch').checked;saveFields(['tutorialTitle','tutorialDescription','tutorialVideo','tutorialDurationMinutes','tutorialImage'])">บันทึกการตั้งค่า</button>
+        <button class="btn ghost" onclick="previewFirstVisitTutorial()">ดูตัวอย่าง</button>
+      </div>
+
+      <div class="tutorial-admin-preview">
+        <b>สถานะสื่อปัจจุบัน</b>
+        <div style="margin-top:10px;color:var(--muted);overflow-wrap:anywhere;">
+          ${s.tutorialVideo ? 'มีวิดีโอแล้ว' : 'ยังไม่ได้กำหนดวิดีโอ'}
+          ${s.tutorialImage ? ' • มีรูปภาพแล้ว' : ' • ยังไม่มีรูปภาพ'}
+        </div>
+      </div>
+    </div>`;
+  }
+
+  $('adminBody').innerHTML = html;
+}
+
+function addMenu() {
+  s.menus.push({ id: 'menu' + Date.now(), title: 'เมนูใหม่', icon: '', category: 'ทั่วไป', type: 'builder', content: '<h2>หัวข้อใหม่</h2><p>เนื้อหาตัวอย่าง</p>', url: '', requiresLogin: false, visible: true });
+  persist();
+  renderAdmin();
+  editMenu(s.menus.length - 1);
+}
+
+function moveMenu(i, d) {
+  let j = i + d;
+  if (j < 0 || j >= s.menus.length) return;
+  [s.menus[i], s.menus[j]] = [s.menus[j], s.menus[i]];
+  persist();
+  renderAdmin();
+}
+
+function removeMenu(i) {
+  if (confirm('ยืนยันการลบเมนูนี้?')) {
+    s.menus.splice(i, 1);
+    persist();
+    renderAdmin();
+  }
+}
+
+function readBuilderSections(content){
+  const doc=new DOMParser().parseFromString(content||'','text/html');
+  const root=doc.querySelector('[data-np-builder="2"]');
+  if(root){const sections=[...root.querySelectorAll('[data-np-section]')].map(el=>({
+    heading:el.querySelector('[data-part="heading"]')?.textContent||'',
+    description:el.querySelector('[data-part="description"]')?.textContent||'',
+    detail:el.querySelector('[data-part="detail"]')?.textContent||'',
+    image:el.querySelector('[data-part="image"]')?.getAttribute('src')||'',
+    link:el.querySelector('[data-part="link"]')?.getAttribute('href')||'',
+    linkLabel:el.querySelector('[data-part="link"]')?.textContent||'',
+    imageLink:el.querySelector('[data-part="imageLink"]')?.getAttribute('href')||''
+  }));return sections.length?sections:[emptySection()];}
+  const old=doc.querySelector('[data-np-builder="1"]');
+  if(old)return [{heading:old.querySelector('[data-part="heading"]')?.textContent||'',description:old.querySelector('[data-part="description"]')?.textContent||'',detail:old.querySelector('[data-part="detail"]')?.textContent||'',image:old.querySelector('[data-part="image"]')?.getAttribute('src')||'',link:'',linkLabel:'',imageLink:''}];
+  return [{heading:doc.querySelector('h1,h2,h3')?.textContent||'',description:doc.querySelector('p')?.textContent||'',detail:'',image:doc.querySelector('img')?.getAttribute('src')||'',link:'',linkLabel:'',imageLink:''}];
+}
+function emptySection(){return {heading:'',description:'',detail:'',image:'',link:'',linkLabel:'',imageLink:''};}
+let editorSections=[];
+function captureSections(){
+  editorSections=[...document.querySelectorAll('#sectionEditors [data-editor-section]')].map(el=>({
+    heading:el.querySelector('[data-field="heading"]').value,description:el.querySelector('[data-field="description"]').value,
+    detail:el.querySelector('[data-field="detail"]').value,image:el.querySelector('[data-field="image"]').value,
+    link:el.querySelector('[data-field="link"]').value,linkLabel:el.querySelector('[data-field="linkLabel"]').value,imageLink:el.querySelector('[data-field="imageLink"]').value}));
+}
+function renderSectionEditors(){
+ const host=$('sectionEditors');if(!host)return;
+ host.innerHTML=editorSections.map((v,i)=>`<div class="content-editor" data-editor-section>
+ <div class="row between"><b>เนื้อหาที่ ${i+1}</b><div class="row"><button type="button" class="btn ghost" onclick="moveSection(${i},-1)">↑</button><button type="button" class="btn ghost" onclick="moveSection(${i},1)">↓</button><button type="button" class="btn red" onclick="removeSection(${i})">ลบ</button></div></div>
+ <div class="field"><label>หัวข้อ</label><input data-field="heading" value="${esc(v.heading)}" placeholder="หัวข้อเนื้อหา"></div>
+ <div class="field"><label>คำอธิบายสั้น</label><textarea data-field="description" rows="2">${esc(v.description)}</textarea></div>
+ <div class="field"><label>รายละเอียด</label><textarea data-field="detail" rows="5">${esc(v.detail)}</textarea></div>
+ <div class="field"><label>ลิงก์รูปภาพ</label><input id="sectionImage${i}" data-field="image" value="${esc(v.image)}" placeholder="https://..."></div>
+ ${imageUploader('sectionUpload'+i,'sectionImage'+i,'single')}
+ <div class="field"><label>ลิงก์เมื่อกดรูปภาพ (ไม่บังคับ)</label><input data-field="imageLink" value="${esc(v.imageLink||'')}" placeholder="https://... หรือ #menu0"></div>
+ <div class="field"><label>ลิงก์เว็บไซต์ (ไม่บังคับ)</label><input data-field="link" value="${esc(v.link)}" placeholder="https://... หรือ #menu0"></div>
+ <div class="field"><label>ข้อความปุ่มลิงก์</label><input data-field="linkLabel" value="${esc(v.linkLabel)}" placeholder="อ่านเพิ่มเติม"></div>
+ </div>`).join('');
+}
+function addSection(){captureSections();editorSections.push(emptySection());renderSectionEditors();notify('เพิ่มช่องเนื้อหาใหม่แล้ว');}
+function removeSection(i){captureSections();editorSections.splice(i,1);if(!editorSections.length)editorSections=[emptySection()];renderSectionEditors();}
+function moveSection(i,d){captureSections();const j=i+d;if(j<0||j>=editorSections.length)return;[editorSections[i],editorSections[j]]=[editorSections[j],editorSections[i]];renderSectionEditors();}
+function menuTypeChanged() {
+  const type = $('mType').value;
+  $('builderFields').classList.toggle('hidden', type !== 'builder');
+  $('htmlFields').classList.toggle('hidden', type !== 'html');
+  $('externalFields').classList.toggle('hidden', type !== 'external');
+}
+function editMenu(i) { menuEditIndex=i; tab='menuEdit'; adminMenuOpen=false; renderAdmin(); renderMenuEditor(i); }
+function renderMenuEditor(i) {
+  const m = s.menus[i]; editorSections = readBuilderSections(m.content);
+  $('menuEditor').innerHTML = `<div class="admin-form-card" style="margin-top:20px;">
+    <h2>แก้ไขเมนู: ${esc(m.title)}</h2>
+    <div class="cols">
+      <div class="field"><label>ชื่อเมนู (ในแถบเมนู)</label><input id="mTitle" value="${esc(m.title)}"></div>
+      <div class="field"><label>วางลิงก์หรือโค้ดไอคอน (ไม่บังคับ)</label><textarea id="mIcon" rows="5" placeholder="วาง <link ... icon_names=contact_support> หรือ <span class=&quot;material-symbols-outlined&quot;>contact_support</span> พร้อม <style>" oninput="updateMenuIconPreview()">${esc(parseMaterialIcon(m.icon) ? m.icon : '')}</textarea><p class="form-help">ไม่มีไอคอนเริ่มต้นหรือรายการให้เลือก วางโค้ดที่ต้องการเท่านั้น หากไม่ใส่จะแสดงเฉพาะชื่อเมนู โค้ด &lt;style&gt; อย่างเดียวไม่สามารถระบุได้ว่าต้องแสดงไอคอนใด</p><div class="icon-preview"><span id="menuIconPreview"></span><span id="iconValidation"></span></div></div>
+      <div class="field"><label>หมวดหมู่</label><input id="mCategory" value="${esc(m.category)}"></div>
+      <div class="field"><label>รูปแบบการแสดงผล</label>
+        <select id="mType" onchange="menuTypeChanged()">
+          <option value="builder" ${m.type === 'builder' ? 'selected' : ''}>หน้าเนื้อหา (กรอกหัวข้อและรายละเอียด)</option>
+          <option value="html" ${m.type === 'html' ? 'selected' : ''}>หน้า HTML แบบเต็ม</option>
+          <option value="external" ${m.type === 'external' ? 'selected' : ''}>ลิงก์ภายนอกเท่านั้น</option>
+        </select>
+      </div>
+    </div>
+    <div id="builderFields"><div class="form-section-heading">ข้อมูลหน้าเนื้อหา</div>
+      <p class="form-help">เพิ่มหัวข้อ รายละเอียด รูปภาพ และลิงก์ได้หลายรายการ กดเพิ่มเนื้อหาใหม่ได้ไม่จำกัด</p>
+      <div id="sectionEditors"></div>
+      <button type="button" class="btn ghost" onclick="addSection()">+ เพิ่มเนื้อหาใหม่</button>
+      <p class="form-help">เมนู HTML เดิมยังอยู่ หากต้องการรักษาโค้ดเดิมให้เลือกหน้า HTML ก่อนบันทึก</p>
+    </div>
+    <div id="htmlFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">code</span>โค้ด HTML</div>
+      <div class="field"><label>โค้ด HTML ของหน้านี้</label><textarea id="mContent" rows="10">${esc(m.content)}</textarea></div>
+      ${imageUploader('menuHtmlUpload','mContent','html')}
+    </div>
+    <div id="externalFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">link</span>ลิงก์ภายนอก</div>
+      <div class="field"><label>ลิงก์เว็บไซต์ปลายทาง</label><input id="mUrl" type="text" value="${esc(m.url)}" placeholder="https://..."></div>
+    </div>
+    <div class="row"><button class="btn" onclick="saveMenu(${i})">บันทึกเมนู</button></div>
+  </div>`;
+  menuTypeChanged();
+  renderSectionEditors();
+  updateMenuIconPreview();
+}
+function saveMenu(i) {
+  const m = s.menus[i], type = $('mType').value;
+  let content = m.content;
+  if (type === 'builder') {
+    captureSections();
+    for(const v of editorSections){
+      if(v.image.trim()&&!/^https:\/\//i.test(v.image.trim()))return toast('ลิงก์รูปภาพต้องขึ้นต้นด้วย https://');
+      if(v.link.trim()&&!(/^(https?:\/\/|#)/i.test(v.link.trim())))return toast('ลิงก์เว็บไซต์ต้องขึ้นต้นด้วย https:// หรือใช้ #menuId');
+      if(v.imageLink.trim()&&!(/^(https?:\/\/|#)/i.test(v.imageLink.trim())))return toast('ลิงก์รูปภาพต้องเป็น https:// หรือ #menuId');
+    }
+    content='<article data-np-builder="2" style="line-height:1.7;overflow-wrap:anywhere">'+editorSections.map(v=>
+      '<section class="np-content-section" data-np-section="1">'+
+      (v.heading.trim()?`<h2 data-part="heading">${esc(v.heading.trim())}</h2>`:'')+
+      (v.description.trim()?`<p data-part="description">${esc(v.description.trim())}</p>`:'')+
+      (v.image.trim()?(v.imageLink.trim()?`<a data-part="imageLink" href="${esc(v.imageLink.trim())}" ${v.imageLink.trim().startsWith('#')?'':'target="_blank" rel="noopener noreferrer"'} style="display:block"><img data-part="image" src="${esc(v.image.trim())}" alt="รูปประกอบ" loading="lazy" style="cursor:pointer"></a>`:`<img data-part="image" src="${esc(v.image.trim())}" alt="รูปประกอบ" loading="lazy">`):'')+
+      (v.detail.trim()?`<div data-part="detail" style="white-space:pre-wrap">${esc(v.detail.trim())}</div>`:'')+
+      (v.link.trim()?`<p><a data-part="link" href="${esc(v.link.trim())}" target="_blank" rel="noopener noreferrer">${esc(v.linkLabel.trim()||'อ่านเพิ่มเติม')} ↗</a></p>`:'')+
+      '</section>').join('')+'</article>';
+  } else if (type === 'html') content = $('mContent').value;
+  const rawIcon = $('mIcon').value.trim();
+  if (rawIcon && !parseMaterialIcon(rawIcon)) return toast('โค้ดไอคอนไม่สมบูรณ์: ต้องมี icon_names หรือ <span> ระบุชื่อไอคอน');
+  Object.assign(m, {
+    title: $('mTitle').value.trim() || 'เมนูใหม่',
+    icon: rawIcon,
+    category: $('mCategory').value.trim() || 'ทั่วไป',
+    type, content,
+    url: type === 'external' ? $('mUrl').value.trim() : m.url
+  });
+  persist();
+  renderAdmin();
+  if(tab==='menuEdit') renderMenuEditor(i);
+}
+
+function closePopup() {
+  clearInterval(popupTimer);
+  $('popup').classList.add('hidden');
+}
+
+function previewPopup() {
+  s.popupTitle = $('f_popupTitle').value;
+  s.popupText = $('f_popupText').value;
+  s.popupImages = $('f_popupImages').value;
+  showPopup();
+}
+
+function showPopup() {
+  clearInterval(popupTimer);
+  $('popup').classList.remove('hidden');
+  $('popupTitle').textContent = s.popupTitle;
+  $('popupText').textContent = s.popupText;
+  
+  const images = s.popupImages.split('\n').map(x => x.trim()).filter(x => /^https?:\/\//i.test(x));
+  let index = 0;
+  const paint = () => {
+    $('popupImageBox').innerHTML = images.length ? `<img src="${esc(images[index % images.length])}" alt="Popup">` : '';
+  };
+  paint();
+  if (images.length > 1) {
+    popupTimer = setInterval(() => { index++; paint(); }, 3000);
+  }
+}
+
+
+/* ===== First-visit tutorial runtime ===== */
+const FIRST_VISIT_KEY = 'np404_first_visit_tutorial_completed_v1';
+let firstVisitVideoEnded = false;
+let firstVisitTimer = null;
+let firstVisitWatchSeconds = 0;
+let firstVisitLastTick = 0;
+let firstVisitPlaying = false;
+let firstVisitVideoEl = null;
+let firstVisitDriveLoaded = false;
+let firstVisitDriveStarted = false;
+let adminTutorialRapidClicks = 0;
+let adminTutorialRapidTimer = null;
+
+function firstVisitCompleted() {
+  try { return localStorage.getItem(FIRST_VISIT_KEY) === '1'; }
+  catch { return false; }
+}
+
+function lockFirstVisitUI(lock) {
+  document.documentElement.style.overflow = lock ? 'hidden' : '';
+  document.body.style.overflow = lock ? 'hidden' : '';
+}
+
+function setFirstVisitStatus(text){
+  const el=$('firstVisitStatus');
+  if(el) el.textContent=text;
+}
+
+function firstVisitGateSeconds(){
+  return Math.max(0,Number(s.tutorialDurationMinutes)||0)*60;
+}
+
+function updateFirstVisitGate(){
+  const minSeconds=firstVisitGateSeconds();
+  const percent=minSeconds>0 ? Math.min(100,(firstVisitWatchSeconds/minSeconds)*100) : 0;
+  $('firstVisitProgress').style.width=percent+'%';
+  if(minSeconds<=0){
+    $('firstVisitContinue').disabled=!firstVisitVideoEnded;
+    return;
+  }
+  const remaining=Math.max(0,minSeconds-firstVisitWatchSeconds);
+  const mm=Math.floor(remaining/60), ss=Math.floor(remaining%60);
+  if(remaining>0){
+    setFirstVisitStatus(`กรุณารับชมวิดีโอ • เหลือ ${mm}:${String(ss).padStart(2,'0')}`);
+    $('firstVisitContinue').disabled=true;
+  }else if(firstVisitVideoEnded){
+    $('firstVisitProgress').style.width='100%';
+    setFirstVisitStatus('รับชมครบตามเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
+    $('firstVisitContinue').disabled=false;
+  }
+}
+
+function stopFirstVisitTimer(){
+  clearInterval(firstVisitTimer);
+  firstVisitTimer=null;
+  firstVisitLastTick=0;
+}
+
+function startFirstVisitTimer(){
+  if(firstVisitTimer || !firstVisitPlaying) return;
+  firstVisitLastTick=Date.now();
+  firstVisitTimer=setInterval(()=>{
+    if(document.hidden || !firstVisitPlaying) return;
+    const now=Date.now();
+    const delta=Math.min(1,(now-firstVisitLastTick)/1000);
+    firstVisitLastTick=now;
+    if(delta>0) firstVisitWatchSeconds+=delta;
+    const minSeconds=firstVisitGateSeconds();
+    if(minSeconds>0 && firstVisitWatchSeconds>=minSeconds){
+      firstVisitWatchSeconds=minSeconds;
+      /* Google Drive iframe ไม่ส่ง ended event ออกมาข้าม origin จึงใช้เวลาขั้นต่ำ
+         ที่แอดมินกำหนดเป็นเงื่อนไขปลดล็อกสำหรับ Drive */
+      const driveMode = !!$('firstVisitMedia')?.querySelector('.first-visit-drive-frame');
+      if(driveMode) firstVisitVideoEnded=true;
+      if(firstVisitVideoEnded){
+        $('firstVisitContinue').disabled=false;
+        setFirstVisitStatus('รับชมครบตามเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
+      }
+      $('firstVisitProgress').style.width='100%';
+      stopFirstVisitTimer();
+      return;
+    }
+    updateFirstVisitGate();
+  },250);
+}
+
+function markFirstVisitPlaying(isPlaying){
+  firstVisitPlaying=!!isPlaying && !document.hidden;
+  if(firstVisitPlaying) startFirstVisitTimer();
+  else stopFirstVisitTimer();
+}
+
+function buildFirstVisitTutorial(){
+  const overlay=$('firstVisitTutorial');
+  if(!overlay)return;
+  $('firstVisitTitle').textContent=s.tutorialTitle||'วิธีการใช้งานเว็บไซต์';
+  $('firstVisitDescription').textContent=s.tutorialDescription||'กรุณารับชมวิดีโอแนะนำการใช้งานจนจบ เพื่อเริ่มใช้งานเว็บไซต์';
+  const media=$('firstVisitMedia');
+  media.replaceChildren();
+  firstVisitVideoEnded=false;
+  firstVisitWatchSeconds=0;
+  firstVisitLastTick=0;
+  firstVisitPlaying=false;
+  firstVisitDriveLoaded=false;
+  firstVisitDriveStarted=false;
+  stopFirstVisitTimer();
+  $('firstVisitContinue').disabled=true;
+  $('firstVisitProgress').style.width='0%';
+  adminTutorialRapidClicks=0;
+  clearTimeout(adminTutorialRapidTimer);
+
+  const videoUrl=String(s.tutorialVideo||'').trim();
+  const imageUrl=String(s.tutorialImage||'').trim();
+  const minMinutes=Math.max(0,Number(s.tutorialDurationMinutes)||0);
+  const minSeconds=minMinutes*60;
+  if(!videoUrl){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:40px 20px;text-align:center;color:var(--muted)';
+    empty.textContent='ยังไม่ได้ตั้งค่าวิดีโอแนะนำการใช้งาน';
+    media.appendChild(empty);
+    setFirstVisitStatus('รอแอดมินเพิ่มวิดีโอ');
+    return;
+  }
+
+  const src=getTutorialVideoSource(videoUrl);
+
+  if(src.type==='drive'){
+    /* Google Drive: เล่นอัตโนมัติ + ชั้นใสป้องกันการกด/ลากวิดีโอ */
+    const wrap=document.createElement('div');
+    wrap.className='first-visit-drive-wrap';
+    const frame=document.createElement('iframe');
+    const sep=src.url.includes('?')?'&':'?';
+    frame.src=src.url;
+    frame.className='first-visit-drive-frame';
+    frame.allow='autoplay; fullscreen';
+    frame.allowFullscreen=true;
+    frame.title='วิดีโอวิธีการใช้งานเว็บไซต์';
+    frame.setAttribute('scrolling','no');
+    wrap.appendChild(frame);
+
+    const shield=document.createElement('div');
+    shield.className='first-visit-drive-shield';
+    shield.setAttribute('aria-hidden','true');
+    shield.addEventListener('click',e=>e.preventDefault());
+    shield.addEventListener('pointerdown',e=>e.preventDefault());
+    shield.addEventListener('pointerup',e=>e.preventDefault());
+    shield.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+    shield.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+    wrap.appendChild(shield);
+    media.appendChild(wrap);
+
+    /* Google Drive ไม่ยอมให้ autoplay ข้าม origin → ผู้ใช้ต้องกดปุ่มเล่นเอง
+       พอกดแล้ว (iframe ได้ focus) ค่อยเปิดชั้นใสกันการกรอ/หยุด และเริ่มนับเวลา */
+    let driveStarted=false;
+    const startDrive=()=>{
+      if(driveStarted) return;
+      driveStarted=true;
+      firstVisitDriveStarted=true;
+      clearInterval(driveWatch);
+      shield.classList.add('on');
+      wrap.querySelector('.first-visit-drive-note')?.remove();
+      markFirstVisitPlaying(true);
+      setFirstVisitStatus(minSeconds>0?`กำลังเล่นวิดีโอ • เหลือ ${minMinutes}:00`:'กำลังเล่นวิดีโอ');
+    };
+    const driveWatch=setInterval(()=>{
+      if(!document.body.contains(frame)){ clearInterval(driveWatch); return; }
+      if(document.activeElement===frame) startDrive();
+    },300);
+    window.addEventListener('blur',()=>{ setTimeout(()=>{ if(document.activeElement===frame) startDrive(); },0); });
+    frame.addEventListener('load',()=>{
+      firstVisitDriveLoaded=true;
+      setFirstVisitStatus('กดปุ่ม ▶ ที่วิดีโอเพื่อเริ่มเล่น');
+    });
+    const note=document.createElement('div');
+    note.className='first-visit-drive-note';
+    note.textContent='กดปุ่ม ▶ เพื่อเริ่มเล่นวิดีโอ';
+    wrap.appendChild(note);
+    setFirstVisitStatus('กำลังโหลดวิดีโอ...');
+    firstVisitVideoEl=null;
+    return;
+  }
+
+  const video=document.createElement('video');
+  video.controls=false;
+  video.playsInline=true;
+  video.autoplay=true;
+  video.muted=true;
+  video.preload='auto';
+  video.src=src.url+(src.url.includes('#')?'':'#t=0.1');
+  video.setAttribute('controlsList','nodownload noplaybackrate nofullscreen');
+  video.disablePictureInPicture=true;
+  video.disableRemotePlayback=true;
+  video.style.pointerEvents='none';
+  if(imageUrl)video.poster=imageUrl;
+  video.addEventListener('loadedmetadata',()=>{
+    const d=Number(video.duration);
+    setFirstVisitStatus(`วิดีโอความยาว ${formatTutorialTime(d)} • เล่นอัตโนมัติ`);
+  });
+  video.addEventListener('play',()=>{
+    markFirstVisitPlaying(true);
+    updateFirstVisitGate();
+  });
+  video.addEventListener('pause',()=>markFirstVisitPlaying(false));
+  video.addEventListener('waiting',()=>{
+    markFirstVisitPlaying(false);
+    setFirstVisitStatus('กำลังโหลดวิดีโอ...');
+  });
+  video.addEventListener('playing',()=>{
+    markFirstVisitPlaying(true);
+    updateFirstVisitGate();
+  });
+  video.addEventListener('timeupdate',()=>{
+    const duration=Number(video.duration),current=Number(video.currentTime);
+    if(Number.isFinite(duration)&&duration>0 && minSeconds<=0){
+      $('firstVisitProgress').style.width=Math.min(100,(current/duration)*100)+'%';
+    }
+  });
+  video.addEventListener('ended',()=>{
+    firstVisitVideoEnded=true;
+    markFirstVisitPlaying(false);
+    if(minSeconds<=0){
+      $('firstVisitProgress').style.width='100%';
+      setFirstVisitStatus('รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้');
+      $('firstVisitContinue').disabled=false;
+    }else if(firstVisitWatchSeconds>=minSeconds){
+      $('firstVisitProgress').style.width='100%';
+      setFirstVisitStatus('รับชมครบและครบเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
+      $('firstVisitContinue').disabled=false;
+    }else{
+      updateFirstVisitGate();
+    }
+  });
+  video.addEventListener('error',()=>{
+    markFirstVisitPlaying(false);
+    setFirstVisitStatus('ไม่สามารถโหลดวิดีโอได้ กรุณาตรวจสอบลิงก์วิดีโอ');
+  });
+  media.appendChild(video);
+  firstVisitVideoEl=video;
+  setFirstVisitStatus('กำลังโหลดวิดีโอ...');
+  video.play().catch(()=>{
+    setFirstVisitStatus('แตะที่วิดีโอเพื่อเริ่มเล่น');
+    video.style.pointerEvents='auto';
+    video.addEventListener('click',()=>{ video.play().then(()=>{video.style.pointerEvents='none';}).catch(()=>{}); },{once:true});
+  });
+}
+
+function formatTutorialTime(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return 'ไม่ทราบความยาว';
+  const total = Math.round(seconds);
+  const m = Math.floor(total / 60);
+  const s2 = total % 60;
+  return `${m}:${String(s2).padStart(2,'0')} นาที`;
+}
+
+function showFirstVisitTutorial() {
+  if (!s.tutorialEnabled || firstVisitCompleted() || !s.tutorialVideo) return;
+  buildFirstVisitTutorial();
+  $('firstVisitTutorial').classList.add('active');
+  lockFirstVisitUI(true);
+}
+
+function finishFirstVisitTutorial(){
+  if(admin && !firstVisitVideoEnded){ adminTutorialBypassClick(); return; }
+  const minSeconds=firstVisitGateSeconds();
+  if(!firstVisitVideoEnded || (minSeconds>0 && firstVisitWatchSeconds<minSeconds)){
+    return toast(minSeconds>0 ? `กรุณารับชมวิดีโอให้ครบ ${s.tutorialDurationMinutes} นาที ก่อนเข้าเว็บไซต์` : 'กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
+  }
+  completeFirstVisitTutorial();
+}
+
+function completeFirstVisitTutorial() {
+  try { localStorage.setItem(FIRST_VISIT_KEY, '1'); } catch {}
+  clearTimeout(adminTutorialRapidTimer);
+  stopFirstVisitTimer();
+  adminTutorialRapidClicks = 0;
+  $('firstVisitTutorial').classList.remove('active');
+  lockFirstVisitUI(false);
+  if (firstVisitVideoEl) {
+    firstVisitVideoEl.pause();
+    firstVisitVideoEl = null;
+  }
+  firstVisitPlaying=false;
+}
+
+function adminTutorialBypassClick() {
+  if (!admin) return;
+  adminTutorialRapidClicks++;
+  clearTimeout(adminTutorialRapidTimer);
+  if (adminTutorialRapidClicks >= 5) {
+    completeFirstVisitTutorial();
+    return;
+  }
+  adminTutorialRapidTimer = setTimeout(() => {
+    adminTutorialRapidClicks = 0;
+  }, 1500);
+}
+
+function resetFirstVisitTutorial() {
+  try { localStorage.removeItem(FIRST_VISIT_KEY); } catch {}
+  toast('รีเซ็ตสถานะการดูครั้งแรกแล้ว — เมื่อเปิดเว็บไซต์ใหม่จะแสดงอีกครั้ง');
+}
+
+function previewFirstVisitTutorial() {
+  buildFirstVisitTutorial();
+  $('firstVisitTutorial').classList.add('active');
+  lockFirstVisitUI(true);
+}
+
+/* หยุดนับทันทีเมื่อออกจากหน้า/สลับแอป และเริ่มต่อเมื่อกลับมา */
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    stopFirstVisitTimer();
+  }else{
+    if(firstVisitVideoEl && !firstVisitVideoEl.paused && !firstVisitVideoEl.ended){
+      markFirstVisitPlaying(true);
+    }else if(firstVisitDriveStarted && $('firstVisitTutorial')?.classList.contains('active')){
+      markFirstVisitPlaying(true);
+    }
+  }
+});
+
+window.addEventListener('pagehide',()=>stopFirstVisitTimer());
+
+// Startup Execution
+(async () => {
+  if (CLOUD) {
+    $('loginTitle').textContent = 'เข้าสู่ระบบแอดมิน';
+    $('loginHint').classList.add('hidden');
+    $('emailField').classList.remove('hidden');
+    $('loginHint').classList.remove('hidden');
+    $('loginHint').textContent = 'ใช้อีเมลและรหัสผ่านของบัญชีที่สร้างใน Supabase Authentication และได้รับสิทธิ์ใน np404_admins';
+    try {
+      admin = await checkAdmin();
+      await cloudLoad();
+    } catch (e) {
+      console.error(e);
+      toast('ตรวจสอบ Supabase ไม่สำเร็จ: ' + (e.message || e));
+    }
+  }
+  refresh();
+  go('home');
+  // Show the locked tutorial only for first-time visitors.
+  setTimeout(showFirstVisitTutorial, 350);
+  if (CLOUD) {
+    sb.channel('np404-live').on('postgres_changes', {event:'*',schema:'public',table:'np404_settings'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); notify('มีการอัปเดตข้อมูลเว็บไซต์'); } })
+      .on('postgres_changes', {event:'*',schema:'public',table:'np404_menus'}, async () => { if (!admin) { await cloudLoad().catch(console.error); refresh(); notify('รายการเมนูมีการเปลี่ยนแปลง'); } }).subscribe();
+  }
+  if (s.popupEnabled && !s.maintenance) setTimeout(showPopup, 600);
+})();
+</script>
+</body>
+</html>
