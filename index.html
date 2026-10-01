@@ -433,7 +433,7 @@ code { font-family: ui-monospace, monospace; }
   margin-top:18px;
 }
 .first-visit-actions .btn { min-width:190px; }
-.first-visit-actions .btn:disabled { opacity:.55; }
+.first-visit-actions .btn[data-locked="1"] { opacity:.5; cursor:not-allowed; transform:none !important; filter:none !important; }
 
 .tutorial-admin-preview {
   margin-top:16px;
@@ -577,7 +577,7 @@ code { font-family: ui-monospace, monospace; }
     <div class="first-visit-progress" aria-hidden="true"><div id="firstVisitProgress"></div></div>
     <div id="firstVisitStatus" class="first-visit-status">กำลังโหลดวิดีโอ...</div>
     <div class="first-visit-actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-      <button id="firstVisitContinue" class="btn" type="button" onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
+      <button id="firstVisitContinue" class="btn" type="button" data-locked="1" onclick="finishFirstVisitTutorial()">ดูจบแล้ว • เข้าเว็บไซต์</button>
     </div>
   </div>
 </div>
@@ -1778,18 +1778,18 @@ function updateFirstVisitGate(){
   const percent=minSeconds>0 ? Math.min(100,(firstVisitWatchSeconds/minSeconds)*100) : 0;
   $('firstVisitProgress').style.width=percent+'%';
   if(minSeconds<=0){
-    $('firstVisitContinue').disabled=!firstVisitVideoEnded;
+    setContinueLocked(!firstVisitVideoEnded);
     return;
   }
   const remaining=Math.max(0,minSeconds-firstVisitWatchSeconds);
   const mm=Math.floor(remaining/60), ss=Math.floor(remaining%60);
   if(remaining>0){
     setFirstVisitStatus(`กรุณารับชมวิดีโอ • เหลือ ${mm}:${String(ss).padStart(2,'0')}`);
-    $('firstVisitContinue').disabled=true;
+    setContinueLocked(true);
   }else if(firstVisitVideoEnded){
     $('firstVisitProgress').style.width='100%';
     setFirstVisitStatus('รับชมครบตามเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
-    $('firstVisitContinue').disabled=false;
+    setContinueLocked(false);
   }
 }
 
@@ -1816,7 +1816,7 @@ function startFirstVisitTimer(){
       const driveMode = !!$('firstVisitMedia')?.querySelector('.first-visit-drive-frame');
       if(driveMode) firstVisitVideoEnded=true;
       if(firstVisitVideoEnded){
-        $('firstVisitContinue').disabled=false;
+        setContinueLocked(false);
         setFirstVisitStatus('รับชมครบตามเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
       }
       $('firstVisitProgress').style.width='100%';
@@ -1847,7 +1847,7 @@ function buildFirstVisitTutorial(){
   firstVisitDriveLoaded=false;
   firstVisitDriveStarted=false;
   stopFirstVisitTimer();
-  $('firstVisitContinue').disabled=true;
+  setContinueLocked(true);
   $('firstVisitProgress').style.width='0%';
   adminTutorialRapidClicks=0;
   clearTimeout(adminTutorialRapidTimer);
@@ -1971,11 +1971,11 @@ function buildFirstVisitTutorial(){
     if(minSeconds<=0){
       $('firstVisitProgress').style.width='100%';
       setFirstVisitStatus('รับชมครบแล้ว สามารถเข้าเว็บไซต์ได้');
-      $('firstVisitContinue').disabled=false;
+      setContinueLocked(false);
     }else if(firstVisitWatchSeconds>=minSeconds){
       $('firstVisitProgress').style.width='100%';
       setFirstVisitStatus('รับชมครบและครบเวลาที่กำหนดแล้ว สามารถเข้าเว็บไซต์ได้');
-      $('firstVisitContinue').disabled=false;
+      setContinueLocked(false);
     }else{
       updateFirstVisitGate();
     }
@@ -2036,10 +2036,17 @@ function showFirstVisitTutorial() {
   lockFirstVisitUI(true);
 }
 
+function setContinueLocked(v){
+  const b=$('firstVisitContinue');
+  if(b) b.dataset.locked=v?'1':'0';
+}
+
 function finishFirstVisitTutorial(){
-  if(admin && !firstVisitVideoEnded){ adminTutorialBypassClick(); return; }
   const minSeconds=firstVisitGateSeconds();
-  if(!firstVisitVideoEnded || (minSeconds>0 && firstVisitWatchSeconds<minSeconds)){
+  const blocked=$('firstVisitContinue')?.dataset.locked==='1' || !firstVisitVideoEnded || (minSeconds>0 && firstVisitWatchSeconds<minSeconds);
+  if(blocked){
+    /* แอดมิน: กดปุ่มรัว ๆ 9 ครั้งเพื่อข้ามทันที — ไม่มีข้อความหรือสัญญาณใด ๆ */
+    if(admin){ adminTutorialBypassClick(); return; }
     return toast(minSeconds>0 ? `กรุณารับชมวิดีโอให้ครบ ${s.tutorialDurationMinutes} นาที ก่อนเข้าเว็บไซต์` : 'กรุณารับชมวิดีโอจนจบก่อนเข้าเว็บไซต์');
   }
   completeFirstVisitTutorial();
@@ -2063,13 +2070,13 @@ function adminTutorialBypassClick() {
   if (!admin) return;
   adminTutorialRapidClicks++;
   clearTimeout(adminTutorialRapidTimer);
-  if (adminTutorialRapidClicks >= 5) {
+  if (adminTutorialRapidClicks >= 9) {
     completeFirstVisitTutorial();
     return;
   }
   adminTutorialRapidTimer = setTimeout(() => {
     adminTutorialRapidClicks = 0;
-  }, 1500);
+  }, 2000);
 }
 
 function resetFirstVisitTutorial() {
