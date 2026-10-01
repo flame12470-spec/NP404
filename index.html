@@ -1928,7 +1928,7 @@ function buildFirstVisitTutorial(){
   video.controls=false;
   video.playsInline=true;
   video.autoplay=true;
-  video.muted=true;
+  video.muted=false;
   video.preload='auto';
   video.style.aspectRatio='16/9';
   video.src=src.url+(src.url.includes('#')?'':'#t=0.1');
@@ -1987,10 +1987,37 @@ function buildFirstVisitTutorial(){
   media.appendChild(video);
   firstVisitVideoEl=video;
   setFirstVisitStatus('กำลังโหลดวิดีโอ...');
+  /* ปุ่มเปิด/ปิดเสียง — ค่าเริ่มต้นคือ "เปิด" */
+  media.style.position='relative';
+  const sndBtn=document.createElement('button');
+  sndBtn.type='button';
+  sndBtn.className='fv-sound';
+  sndBtn.style.cssText='position:absolute;right:10px;bottom:10px;z-index:8;display:flex;align-items:center;gap:6px;padding:9px 14px;border:0;border-radius:999px;background:rgba(0,0,0,.72);color:#fff;font-family:inherit;font-weight:600;font-size:.9rem;box-shadow:0 4px 16px rgba(0,0,0,.4);cursor:pointer';
+  const renderSnd=()=>{ sndBtn.textContent=video.muted?'🔇 เสียง: ปิด (แตะเพื่อเปิด)':'🔊 เสียง: เปิด'; };
+  sndBtn.addEventListener('click',e=>{ e.stopPropagation(); video.muted=!video.muted; if(!video.muted) video.volume=1; renderSnd(); video.play().catch(()=>{}); });
+  video.addEventListener('volumechange',renderSnd);
+  media.appendChild(sndBtn);
+
+  /* เริ่มต้นเปิดเสียง: ถ้าเบราว์เซอร์บล็อกการเล่นแบบมีเสียง จะเล่นแบบเงียบก่อน
+     แล้วเปิดเสียงให้ทันทีที่ผู้ใช้แตะหน้าจอครั้งแรก (ยกเว้นเขากดปิดเสียงเอง) */
+  video.muted=false;
+  renderSnd();
   video.play().catch(()=>{
-    setFirstVisitStatus('แตะที่วิดีโอเพื่อเริ่มเล่น');
-    video.style.pointerEvents='auto';
-    video.addEventListener('click',()=>{ video.play().then(()=>{video.style.pointerEvents='none';}).catch(()=>{}); },{once:true});
+    video.muted=true;
+    renderSnd();
+    let userChoseMute=false;
+    sndBtn.addEventListener('click',()=>{ userChoseMute=true; },{once:true});
+    const unmuteOnTap=(ev)=>{
+      if(sndBtn.contains(ev.target)) return;
+      if(userChoseMute||!video.muted) return;
+      video.muted=false; video.volume=1; renderSnd();
+    };
+    document.addEventListener('pointerdown',unmuteOnTap,{capture:true});
+    video.play().catch(()=>{
+      setFirstVisitStatus('แตะที่วิดีโอเพื่อเริ่มเล่น');
+      video.style.pointerEvents='auto';
+      video.addEventListener('click',()=>{ video.muted=false; video.play().then(()=>{video.style.pointerEvents='none';}).catch(()=>{}); },{once:true});
+    });
   });
 }
 
