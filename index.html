@@ -486,6 +486,140 @@ code { font-family: ui-monospace, monospace; }
   .upload-progress-meta{font-size:.76rem}
   .media-item{align-items:flex-start}
 }
+
+
+/* ===== NP-404 refreshed visual theme: inspired by the sports-payment reference UI ===== */
+:root {
+  --primary: #2b50ff;
+  --primary-hover: #2145ed;
+  --primary-light: #eef2ff;
+  --primary-soft: #e9edff;
+  --bg: #f3f5fa;
+  --surface: #ffffff;
+  --surface-alt: #e9edf6;
+  --text: #0c1324;
+  --muted: #69758c;
+  --border: #e5e9f2;
+  --side-bg: #ffffff;
+  --side-text: #69758c;
+  --shadow-sm: 0 1px 2px rgba(12,19,36,.05);
+  --shadow-md: 0 12px 32px -10px rgba(12,19,36,.14);
+  --shadow-lg: 0 24px 60px -16px rgba(12,19,36,.22);
+  --radius-sm: 14px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+}
+body.dark {
+  --bg: #0c1222;
+  --surface: #151d30;
+  --surface-alt: #202a40;
+  --text: #f3f6ff;
+  --muted: #a5b0c7;
+  --border: #2a3650;
+  --side-bg: #111a2c;
+  --side-text: #a5b0c7;
+  --primary-light: rgba(74,105,255,.16);
+  --primary-soft: rgba(74,105,255,.22);
+}
+html { font-size: 15px; }
+body { background: var(--bg); letter-spacing: -.005em; }
+
+/* Floating pill-style header */
+.top {
+  height: auto; min-height: 60px; margin: 12px 16px 0; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 999px; background: color-mix(in srgb, var(--surface) 88%, transparent);
+  box-shadow: var(--shadow-md); gap: 12px;
+}
+.left-header { gap: 10px; }
+.brand { gap: 10px; font-size: 1.08rem; }
+.brand img { width: 38px; height: 38px; border-radius: 13px; box-shadow: none; border: 1px solid var(--border); }
+.hamburger { width: 38px; height: 38px; border-radius: 12px; background: var(--primary-light); color: var(--primary); }
+.hamburger:hover { background: var(--primary); color: #fff; }
+.ticker-wrap { max-width: 430px; border-radius: 999px; background: var(--bg); padding: 7px 16px; }
+.notify-toggle { border-radius: 13px !important; }
+
+/* Sidebar keeps every existing menu, but uses a light, clean navigation style */
+.shell { min-height: calc(100vh - 82px); }
+.side {
+  margin: 18px 0 18px 16px; width: 246px; border: 1px solid var(--border); border-radius: 24px;
+  background: var(--surface); padding: 18px 12px; box-shadow: var(--shadow-sm);
+}
+.side.closed { width: 0; padding: 18px 0; margin-left: 0; border-width: 0; }
+.side .nav-group-label { color: var(--muted); letter-spacing: .04em; font-size: .74rem; margin: 22px 12px 8px; text-transform: uppercase; }
+.side button { color: var(--side-text); border-radius: 13px; padding: 11px 13px; margin-bottom: 4px; }
+.side button:hover { background: var(--primary-light); color: var(--primary); }
+.side button.active { background: var(--primary-light); color: var(--primary); font-weight: 700; }
+.side button.active::before { left: -12px; top: 10px; bottom: 10px; width: 3px; border-radius: 0 4px 4px 0; background: var(--primary); }
+.side button .material-symbols-outlined { font-size: 21px; }
+
+/* Main content and hero */
+.main { max-width: 1160px; padding: 26px 28px 56px; }
+.hero {
+  padding: 34px; border-radius: 28px; border: 0; color: #fff; background: var(--primary);
+  box-shadow: 0 26px 50px -24px color-mix(in srgb, var(--primary) 72%, transparent); margin-bottom: 22px;
+}
+.hero::before, .hero::after { border: 0; }
+.hero::before { width: 520px; height: 520px; right: -165px; top: -185px; background: repeating-radial-gradient(circle, transparent 0 25px, rgba(255,255,255,.10) 25px 27px); }
+.hero::after { width: 360px; height: 360px; right: -110px; top: -120px; border: 1px solid rgba(255,255,255,.12); }
+.hero h1, .hero h2 { color: #fff; }
+.hero p { color: #dbe3ff; }
+.hero-badge { background: rgba(255,255,255,.18); color: #fff; box-shadow: none; }
+#homeTitle { max-width: 24ch; }
+#homeDescription { max-width: 56ch; }
+
+/* Rounded cards and buttons */
+.cards { grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 14px; margin-top: 20px; }
+.card { border-radius: 22px; padding: 22px; box-shadow: var(--shadow-sm); }
+.cards .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.card .icon { border-radius: 15px; background: var(--primary-light); color: var(--primary); }
+.btn { border-radius: 13px; padding: 11px 20px; box-shadow: 0 7px 18px -12px color-mix(in srgb, var(--primary) 75%, transparent); }
+.btn.ghost { box-shadow: none; }
+.field label { font-size: .9rem; }
+input[type="text"], input[type="password"], input[type="color"], select, textarea {
+  border-radius: 14px; padding: 12px 14px; border-color: var(--border);
+}
+input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus {
+  box-shadow: 0 0 0 4px var(--primary-light);
+}
+.tabs { gap: 7px; margin-bottom: 18px; }
+.tabs > button { border-radius: 999px; padding: 9px 16px; background: var(--surface); }
+.tabs > button.active { background: var(--text); color: var(--surface); border-color: var(--text); }
+.notice { border-radius: 16px; }
+.preview, .menuitem { border-radius: 20px; }
+.dialog { border-radius: 26px; }
+
+/* Tables, notification panel and dynamic embedded pages */
+#adminBody table { border-collapse: separate; border-spacing: 0; width: 100%; }
+#adminBody th, #adminBody td { border-bottom: 1px solid var(--border); padding: 12px 14px; }
+#adminBody th { background: var(--surface-alt); color: var(--muted); font-weight: 600; }
+.notification-panel { border: 1px solid var(--border); border-radius: 22px; box-shadow: var(--shadow-lg); }
+
+@media (max-width: 820px) {
+  .top { margin: 10px 10px 0; padding: 7px 9px; border-radius: 22px; }
+  .side { margin: 0; top: 82px; bottom: 10px; left: 10px; width: 264px; border-radius: 22px; }
+  .side.closed { margin-left: 0; width: 264px; border-width: 1px; }
+  .main { padding: 20px 14px 38px; }
+  .hero { padding: 26px 22px; border-radius: 24px; }
+  .ticker-wrap { display: none; }
+}
+@media (max-width: 480px) {
+  .brand { font-size: 1rem; }
+  .brand img { width: 34px; height: 34px; }
+  .hamburger { width: 36px; height: 36px; }
+  .main { padding-inline: 11px; }
+  .hero { padding: 23px 19px; }
+  .card { padding: 19px; }
+  .dialog { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+
+.embedded-site-wrap{display:flex;flex-direction:column;min-height:calc(100vh - 100px);background:var(--surface);border:1px solid var(--border);border-radius:22px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.embedded-site-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 18px;background:var(--surface);border-bottom:1px solid var(--border)}
+.embedded-site-head strong,.embedded-site-head small{display:block}.embedded-site-head small{margin-top:3px;color:var(--muted);font-size:.8rem}.embedded-site-frame{display:block;flex:1;width:100%;height:calc(100vh - 170px);min-height:520px;border:0;border-radius:0;background:#fff}
+@media(max-width:600px){.embedded-site-wrap{min-height:calc(100vh - 80px);border-radius:16px}.embedded-site-head{padding:11px 12px;align-items:flex-start}.embedded-site-frame{height:calc(100vh - 145px);min-height:420px}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded&family=Material+Symbols+Sharp" rel="stylesheet">
 </head>
@@ -1283,9 +1417,17 @@ function go(page) {
       else toast('กรุณากำหนดลิงก์ที่ถูกต้อง');
       return;
     }
-    
+
     $('dynamic').classList.remove('hidden');
-    if (m.type === 'html') {
+    if (m.type === 'embed') {
+      if (!m.url || !/^https?:\/\//i.test(m.url)) {
+        $('dynamic').innerHTML = `<div class="card"><h2>${esc(m.title)}</h2><p>กรุณาให้แอดมินกำหนด URL ของเว็บไซต์ก่อน</p></div>`;
+        return;
+      }
+      document.querySelector('.main').classList.add('fullpage');
+      $('dynamic').innerHTML = `<div class="embedded-site-wrap"><div class="embedded-site-head"><div><strong>${esc(m.title)}</strong><small>เว็บไซต์ภายใน NP-404</small></div><a class="btn ghost" href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">เปิดแท็บใหม่ ↗</a></div><iframe id="embeddedSiteFrame" class="fullframe embedded-site-frame" title="${esc(m.title)}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe></div>`;
+      $('embeddedSiteFrame').src = m.url;
+    } else if (m.type === 'html') {
       document.querySelector('.main').classList.add('fullpage');
       $('dynamic').innerHTML = `<iframe id="customFrame" class="fullframe" title="${esc(m.title)}" sandbox="allow-scripts allow-forms allow-popups"></iframe>`;
       $('customFrame').srcdoc = responsiveHtml(m.content);
@@ -1640,7 +1782,19 @@ function menuTypeChanged() {
   const type = $('mType').value;
   $('builderFields').classList.toggle('hidden', type !== 'builder');
   $('htmlFields').classList.toggle('hidden', type !== 'html');
-  $('externalFields').classList.toggle('hidden', type !== 'external');
+  $('externalFields').classList.toggle('hidden', type !== 'external' && type !== 'embed');
+  const externalHeading = $('externalFields')?.querySelector('.form-section-heading');
+  const externalLabel = $('externalFields')?.querySelector('label');
+  const externalInput = $('mUrl');
+  if (externalHeading) externalHeading.innerHTML = type === 'embed' ? '<span class="material-symbols-outlined">web</span>เว็บไซต์ที่แสดงภายในเว็บ' : '<span class="material-symbols-outlined">link</span>ลิงก์ภายนอก';
+  if (externalLabel) externalLabel.textContent = type === 'embed' ? 'URL เว็บไซต์ที่ต้องการฝังในหน้าเว็บ' : 'ลิงก์เว็บไซต์ปลายทาง';
+  if (externalInput) externalInput.placeholder = type === 'embed' ? 'https://example.com' : 'https://...';
+  let embedHelp = $('embedHelp');
+  if (type === 'embed' && !embedHelp) {
+    embedHelp = document.createElement('p'); embedHelp.id = 'embedHelp'; embedHelp.className = 'form-help';
+    embedHelp.textContent = 'เว็บไซต์จะเปิดแสดงอยู่ในหน้า NP-404 โดยตรง แต่บางเว็บไซต์ปิดกั้นการฝัง iframe จึงอาจต้องใช้แบบลิงก์ภายนอกแทน';
+    $('externalFields').appendChild(embedHelp);
+  } else if (embedHelp) embedHelp.classList.toggle('hidden', type !== 'embed');
 }
 function editMenu(i) { menuEditIndex=i; tab='menuEdit'; adminMenuOpen=false; renderAdmin(); renderMenuEditor(i); }
 function renderMenuEditor(i) {
@@ -1655,7 +1809,8 @@ function renderMenuEditor(i) {
         <select id="mType" onchange="menuTypeChanged()">
           <option value="builder" ${m.type === 'builder' ? 'selected' : ''}>หน้าเนื้อหา (กรอกหัวข้อและรายละเอียด)</option>
           <option value="html" ${m.type === 'html' ? 'selected' : ''}>หน้า HTML แบบเต็ม</option>
-          <option value="external" ${m.type === 'external' ? 'selected' : ''}>ลิงก์ภายนอกเท่านั้น</option>
+          <option value="external" ${m.type === 'external' ? 'selected' : ''}>เปิดลิงก์ภายนอก (แท็บใหม่)</option>
+          <option value="embed" ${m.type === 'embed' ? 'selected' : ''}>แสดงเว็บไซต์ภายในหน้าเว็บ (ฝังเว็บไซต์)</option>
         </select>
       </div>
     </div>
@@ -1670,7 +1825,7 @@ function renderMenuEditor(i) {
       ${imageUploader('menuHtmlUpload','mContent','html')}
     </div>
     <div id="externalFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">link</span>ลิงก์ภายนอก</div>
-      <div class="field"><label>ลิงก์เว็บไซต์ปลายทาง</label><input id="mUrl" type="text" value="${esc(m.url)}" placeholder="https://..."></div>
+      <div class="field"><label>ลิงก์เว็บไซต์ปลายทาง</label><input id="mUrl" type="url" value="${esc(m.url)}" placeholder="https://..."></div>
     </div>
     <div class="row"><button class="btn" onclick="saveMenu(${i})">บันทึกเมนู</button></div>
   </div>`;
@@ -1697,6 +1852,10 @@ function saveMenu(i) {
       (v.link.trim()?`<p><a data-part="link" href="${esc(v.link.trim())}" target="_blank" rel="noopener noreferrer">${esc(v.linkLabel.trim()||'อ่านเพิ่มเติม')} ↗</a></p>`:'')+
       '</section>').join('')+'</article>';
   } else if (type === 'html') content = $('mContent').value;
+  if (type === 'external' || type === 'embed') {
+    const targetUrl = $('mUrl').value.trim();
+    if (!/^https?:\/\//i.test(targetUrl)) return toast('กรุณากรอก URL ที่ขึ้นต้นด้วย https:// หรือ http://');
+  }
   const rawIcon = $('mIcon').value.trim();
   if (rawIcon && !parseMaterialIcon(rawIcon)) return toast('โค้ดไอคอนไม่สมบูรณ์: ต้องมี icon_names หรือ <span> ระบุชื่อไอคอน');
   Object.assign(m, {
@@ -1704,7 +1863,7 @@ function saveMenu(i) {
     icon: rawIcon,
     category: $('mCategory').value.trim() || 'ทั่วไป',
     type, content,
-    url: type === 'external' ? $('mUrl').value.trim() : m.url
+    url: (type === 'external' || type === 'embed') ? $('mUrl').value.trim() : m.url
   });
   persist();
   renderAdmin();
