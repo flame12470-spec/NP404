@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NP-404 | Executive Dashboard</title>
+<title>NP-404</title>
 <meta name="theme-color" content="#141824">
 <!-- Web Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1531,6 +1531,8 @@ function go(page) {
       }
       document.querySelector('.main').classList.add('fullpage');
       $('dynamic').innerHTML = `<div class="embedded-site-wrap"><div class="embedded-site-head"><div><strong>${esc(m.title)}</strong><small>เว็บไซต์ภายใน NP-404</small></div><a class="btn ghost" href="${esc(m.url)}" target="_blank" rel="noopener noreferrer">เปิดแท็บใหม่ ↗</a></div><iframe id="embeddedSiteFrame" class="fullframe embedded-site-frame" title="${esc(m.title)}" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe></div>`;
+      const embedH = normalizeEmbedHeight(m.content);
+      if (embedH) { const fr = $('embeddedSiteFrame'); fr.style.height = embedH; fr.style.minHeight = '0'; fr.style.flex = 'none'; }
       $('embeddedSiteFrame').src = m.url;
     } else if (m.type === 'html') {
       document.querySelector('.main').classList.add('fullpage');
@@ -1883,6 +1885,22 @@ function renderSectionEditors(){
 function addSection(){captureSections();editorSections.push(emptySection());renderSectionEditors();notify('เพิ่มช่องเนื้อหาใหม่แล้ว');}
 function removeSection(i){captureSections();editorSections.splice(i,1);if(!editorSections.length)editorSections=[emptySection()];renderSectionEditors();}
 function moveSection(i,d){captureSections();const j=i+d;if(j<0||j>=editorSections.length)return;[editorSections[i],editorSections[j]]=[editorSections[j],editorSections[i]];renderSectionEditors();}
+/* รับได้ทั้ง URL ปกติ และโค้ด <iframe ...> ที่ copy มาทั้งก้อน */
+function extractEmbedSource(raw) {
+  raw = String(raw || '').trim();
+  if (/<iframe/i.test(raw)) {
+    const src = raw.match(/\ssrc\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
+    const h = raw.match(/\sheight\s*=\s*["']?(\d+)/i);
+    const url = src ? String(src[1] ?? src[2] ?? src[3] ?? '').replace(/&amp;/g, '&').trim() : '';
+    return { url: url.startsWith('//') ? 'https:' + url : url, height: h ? h[1] + 'px' : '' };
+  }
+  return { url: raw, height: '' };
+}
+function normalizeEmbedHeight(v) {
+  v = String(v || '').trim().toLowerCase();
+  if (/^\d{2,4}$/.test(v)) return v + 'px';
+  return /^\d{2,4}(px|vh)$/.test(v) ? v : '';
+}
 function menuTypeChanged() {
   const type = $('mType').value;
   $('builderFields').classList.toggle('hidden', type !== 'builder');
@@ -1892,14 +1910,15 @@ function menuTypeChanged() {
   const externalLabel = $('externalFields')?.querySelector('label');
   const externalInput = $('mUrl');
   if (externalHeading) externalHeading.innerHTML = type === 'embed' ? '<span class="material-symbols-outlined">web</span>เว็บไซต์ที่แสดงภายในเว็บ' : '<span class="material-symbols-outlined">link</span>ลิงก์ภายนอก';
-  if (externalLabel) externalLabel.textContent = type === 'embed' ? 'URL เว็บไซต์ที่ต้องการฝังในหน้าเว็บ' : 'ลิงก์เว็บไซต์ปลายทาง';
-  if (externalInput) externalInput.placeholder = type === 'embed' ? 'https://example.com' : 'https://...';
+  if (externalLabel) externalLabel.textContent = type === 'embed' ? 'URL เว็บไซต์ หรือวางโค้ด <iframe> ที่ต้องการฝังในหน้าเว็บ' : 'ลิงก์เว็บไซต์ปลายทาง';
+  if (externalInput) externalInput.placeholder = type === 'embed' ? 'https://example.com หรือ <iframe src="https://example.com"></iframe>' : 'https://...';
   let embedHelp = $('embedHelp');
   if (type === 'embed' && !embedHelp) {
     embedHelp = document.createElement('p'); embedHelp.id = 'embedHelp'; embedHelp.className = 'form-help';
     embedHelp.textContent = 'เว็บไซต์จะเปิดแสดงอยู่ในหน้า NP-404 โดยตรง แต่บางเว็บไซต์ปิดกั้นการฝัง iframe จึงอาจต้องใช้แบบลิงก์ภายนอกแทน';
     $('externalFields').appendChild(embedHelp);
   } else if (embedHelp) embedHelp.classList.toggle('hidden', type !== 'embed');
+  $('embedHeightField')?.classList.toggle('hidden', type !== 'embed');
 }
 function editMenu(i) { menuEditIndex=i; tab='menuEdit'; adminMenuOpen=false; renderAdmin(); renderMenuEditor(i); }
 function renderMenuEditor(i) {
@@ -1930,7 +1949,8 @@ function renderMenuEditor(i) {
       ${imageUploader('menuHtmlUpload','mContent','html')}
     </div>
     <div id="externalFields" class="hidden"><div class="form-section-heading"><span class="material-symbols-outlined">link</span>ลิงก์ภายนอก</div>
-      <div class="field"><label>ลิงก์เว็บไซต์ปลายทาง</label><input id="mUrl" type="url" value="${esc(m.url)}" placeholder="https://..."></div>
+      <div class="field"><label>ลิงก์เว็บไซต์ปลายทาง</label><input id="mUrl" type="text" value="${esc(m.url)}" placeholder="https://..."></div>
+      <div class="field hidden" id="embedHeightField"><label>ความสูงของเว็บที่ฝัง (ไม่บังคับ)</label><input id="mEmbedHeight" type="text" value="${esc(m.type === 'embed' ? normalizeEmbedHeight(m.content) : '')}" placeholder="เช่น 600 หรือ 80vh (เว้นว่าง = เต็มหน้าจอ)"></div>
     </div>
     <div class="row"><button class="btn" onclick="saveMenu(${i})">บันทึกเมนู</button></div>
   </div>`;
@@ -1957,9 +1977,16 @@ async function saveMenu(i) {
       (v.link.trim()?`<p><a data-part="link" href="${esc(v.link.trim())}" target="_blank" rel="noopener noreferrer">${esc(v.linkLabel.trim()||'อ่านเพิ่มเติม')} ↗</a></p>`:'')+
       '</section>').join('')+'</article>';
   } else if (type === 'html') content = $('mContent').value;
+  let finalUrl = m.url;
   if (type === 'external' || type === 'embed') {
-    const targetUrl = $('mUrl').value.trim();
-    if (!/^https?:\/\//i.test(targetUrl)) return toast('กรุณากรอก URL ที่ขึ้นต้นด้วย https:// หรือ http://');
+    const parsed = extractEmbedSource($('mUrl').value);
+    if (!/^https?:\/\//i.test(parsed.url)) return toast('กรุณากรอก URL ที่ขึ้นต้นด้วย https:// หรือ http:// (หรือวางโค้ด <iframe> ที่มี src)');
+    finalUrl = parsed.url;
+    if (type === 'embed') {
+      const typed = $('mEmbedHeight').value.trim();
+      if (typed && !normalizeEmbedHeight(typed)) return toast('ความสูงต้องเป็นตัวเลข เช่น 600 หรือ 80vh');
+      content = normalizeEmbedHeight(typed) || parsed.height || '';
+    }
   }
   const rawIcon = $('mIcon').value.trim();
   if (rawIcon && !parseMaterialIcon(rawIcon)) return toast('โค้ดไอคอนไม่สมบูรณ์: ต้องมี icon_names หรือ <span> ระบุชื่อไอคอน');
@@ -1968,7 +1995,7 @@ async function saveMenu(i) {
     icon: rawIcon,
     category: $('mCategory').value.trim() || 'ทั่วไป',
     type, content,
-    url: (type === 'external' || type === 'embed') ? $('mUrl').value.trim() : m.url
+    url: finalUrl
   });
   const saved = await persist();
   if (!saved) return;
