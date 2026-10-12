@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NP-404</title>
+<title>NP-404 | Executive Dashboard</title>
 <meta name="theme-color" content="#141824">
 <!-- Web Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1231,11 +1231,31 @@ function tutorialImageUploader(){
 }
 
 /* ===== Supabase data layer ===== */
-const rowToMenu = r => ({ id: r.id, title: r.title, icon: r.icon, category: r.category, type: r.type,
-  content: r.content, url: r.url, requiresLogin: r.requires_login, visible: r.visible });
-const menuToRow = (m, i) => ({ id: m.id, position: i, title: m.title, icon: m.icon, category: m.category, type: m.type,
-  content: m.content, url: m.url, requires_login: !!m.requiresLogin, visible: m.visible !== false,
-  updated_at: new Date().toISOString() });
+/* ===== Menu type compatibility =====
+   ฐานข้อมูลเดิมอนุญาต type แค่ builder / code / link
+   แต่ตัวแก้ไขหน้าเว็บใช้ builder / html / external / embed
+   จึงแปลงค่าเฉพาะตอนอ่าน-เขียน โดยไม่ต้องลบ CHECK constraint
+   ใช้ marker ใน content เพื่อจำว่า link เป็นแบบฝังเว็บไซต์ (embed)
+*/
+const EMBED_MODE_MARKER = '<!-- np404-menu-mode:embed -->';
+const cleanMenuContent = value => String(value ?? '').replace(/^\s*<!-- np404-menu-mode:embed -->\s*/i, '');
+const rowToMenu = r => {
+  const rawContent = String(r.content ?? '');
+  const isEmbed = r.type === 'link' && /^\s*<!-- np404-menu-mode:embed -->/i.test(rawContent);
+  const uiType = r.type === 'code' ? 'html' : r.type === 'link' ? (isEmbed ? 'embed' : 'external') : r.type;
+  return { id: r.id, title: r.title, icon: r.icon, category: r.category, type: uiType,
+    content: isEmbed ? cleanMenuContent(rawContent) : rawContent, url: r.url,
+    requiresLogin: r.requires_login, visible: r.visible };
+};
+const menuToRow = (m, i) => {
+  const dbType = m.type === 'html' ? 'code' : (m.type === 'external' || m.type === 'embed') ? 'link' : m.type;
+  const content = m.type === 'embed'
+    ? EMBED_MODE_MARKER + cleanMenuContent(m.content)
+    : cleanMenuContent(m.content);
+  return { id: m.id, position: i, title: m.title, icon: m.icon, category: m.category, type: dbType,
+    content, url: m.url, requires_login: !!m.requiresLogin, visible: m.visible !== false,
+    updated_at: new Date().toISOString() };
+};
 
 async function checkAdmin() {
   const { data: { session }, error: sessionError } = await sb.auth.getSession();
