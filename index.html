@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NP-404</title>
+<title>NP-404 | Executive Dashboard</title>
 <meta name="theme-color" content="#141824">
 <!-- Web Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1239,17 +1239,30 @@ function tutorialImageUploader(){
 */
 const EMBED_MODE_MARKER = '<!-- np404-menu-mode:embed -->';
 const cleanMenuContent = value => String(value ?? '').replace(/^\s*<!-- np404-menu-mode:embed -->\s*/i, '');
+/* ลองหลายชุดค่า type จนกว่าฐานข้อมูลจะยอมรับ (กัน CHECK constraint np404_menus_type_check ไม่ตรงกัน) */
+const DB_TYPE_PROFILES = [
+  { builder: 'builder', html: 'code', external: 'link', embed: 'link' },
+  { builder: 'builder', html: 'html', external: 'external', embed: 'embed' },
+  { builder: 'builder', html: 'html', external: 'link', embed: 'link' },
+  { builder: 'builder', html: 'code', external: 'external', embed: 'external' },
+  { builder: 'builder', html: 'builder', external: 'link', embed: 'link' }
+];
+let dbTypeProfileIndex = 0;
 const rowToMenu = r => {
   const rawContent = String(r.content ?? '');
-  const isEmbed = r.type === 'link' && /^\s*<!-- np404-menu-mode:embed -->/i.test(rawContent);
-  const uiType = r.type === 'code' ? 'html' : r.type === 'link' ? (isEmbed ? 'embed' : 'external') : r.type;
+  const hasEmbedMarker = /^\s*<!-- np404-menu-mode:embed -->/i.test(rawContent);
+  let uiType = 'builder';
+  if (r.type === 'code' || r.type === 'html') uiType = 'html';
+  else if (r.type === 'embed') uiType = 'embed';
+  else if (r.type === 'link' || r.type === 'external') uiType = hasEmbedMarker ? 'embed' : 'external';
   return { id: r.id, title: r.title, icon: r.icon, category: r.category, type: uiType,
-    content: isEmbed ? cleanMenuContent(rawContent) : rawContent, url: r.url,
+    content: hasEmbedMarker ? cleanMenuContent(rawContent) : rawContent, url: r.url,
     requiresLogin: r.requires_login, visible: r.visible };
 };
-const menuToRow = (m, i) => {
-  const dbType = m.type === 'html' ? 'code' : (m.type === 'external' || m.type === 'embed') ? 'link' : m.type;
-  const content = m.type === 'embed'
+const menuToRow = (m, i, profile = DB_TYPE_PROFILES[dbTypeProfileIndex]) => {
+  const uiType = ['builder', 'html', 'external', 'embed'].includes(m.type) ? m.type : 'builder';
+  const dbType = profile[uiType];
+  const content = uiType === 'embed'
     ? EMBED_MODE_MARKER + cleanMenuContent(m.content)
     : cleanMenuContent(m.content);
   return { id: m.id, position: i, title: m.title, icon: m.icon, category: m.category, type: dbType,
@@ -1284,8 +1297,16 @@ async function cloudSave(snapshot) {
   const a = await sb.from('np404_settings').upsert({ id: 1, data: settings, updated_at: new Date().toISOString() });
   if (a.error) throw a.error;
   if (menus.length) {
-    const b = await sb.from('np404_menus').upsert(menus.map(menuToRow));
-    if (b.error) throw b.error;
+    let lastError = null, ok = false;
+    for (let k = 0; k < DB_TYPE_PROFILES.length; k++) {
+      const idx = (dbTypeProfileIndex + k) % DB_TYPE_PROFILES.length;
+      const b = await sb.from('np404_menus').upsert(menus.map((m, i) => menuToRow(m, i, DB_TYPE_PROFILES[idx])));
+      if (!b.error) { dbTypeProfileIndex = idx; ok = true; break; }
+      lastError = b.error;
+      const isTypeCheck = b.error.code === '23514' || /type_check|check constraint/i.test(b.error.message || '');
+      if (!isTypeCheck) throw b.error;
+    }
+    if (!ok) throw lastError;
   }
   const del = sb.from('np404_menus').delete();
   const c = await (menus.length ? del.not('id', 'in', `(${menus.map(m => m.id).join(',')})`) : del.neq('id', ''));
