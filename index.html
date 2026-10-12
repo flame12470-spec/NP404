@@ -938,14 +938,16 @@ function updateMenuIconPreview() {
 
 let saveQueue = Promise.resolve();
 function persist() {
-  if (!CLOUD) { toast('ไม่พบการเชื่อมต่อ Supabase: ไม่สามารถบันทึกข้อมูลจริง'); return; }
-  if (!admin) { toast('ต้องเข้าสู่ระบบแอดมินก่อนบันทึก'); return; }
+  if (!CLOUD) { toast('ไม่พบการเชื่อมต่อ Supabase: ไม่สามารถบันทึกข้อมูลจริง'); return Promise.resolve(false); }
+  if (!admin) { toast('ต้องเข้าสู่ระบบแอดมินก่อนบันทึก'); return Promise.resolve(false); }
   const snapshot = structuredClone(s);
   saveQueue = saveQueue.catch(() => {}).then(async () => {
     await cloudSave(snapshot);
     refresh();
     toast('บันทึกลง Supabase สำเร็จ');
-  }).catch(e => { console.error(e); toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); });
+    return true;
+  }).catch(e => { console.error(e); toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); return false; });
+  return saveQueue;
 }
 
 /* ===== Robust Supabase Storage uploader =====
@@ -1895,7 +1897,7 @@ function renderMenuEditor(i) {
   renderSectionEditors();
   updateMenuIconPreview();
 }
-function saveMenu(i) {
+async function saveMenu(i) {
   const m = s.menus[i], type = $('mType').value;
   let content = m.content;
   if (type === 'builder') {
@@ -1927,9 +1929,14 @@ function saveMenu(i) {
     type, content,
     url: (type === 'external' || type === 'embed') ? $('mUrl').value.trim() : m.url
   });
-  persist();
+  const saved = await persist();
+  if (!saved) return;
+  // หลังบันทึกสำเร็จ ให้กลับไปหน้ารายการจัดการเมนูโดยอัตโนมัติ
+  menuEditIndex = null;
+  tab = 'menus';
+  adminMenuOpen = false;
   renderAdmin();
-  if(tab==='menuEdit') renderMenuEditor(i);
+  toast('บันทึกเมนูเรียบร้อย กลับไปหน้าจัดการเมนูแล้ว');
 }
 
 function closePopup() {
