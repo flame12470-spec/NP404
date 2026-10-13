@@ -1375,9 +1375,9 @@ function refresh() {
   renderMaintenance();
   
   $('publicNav').innerHTML = '<button onclick="go(\'home\')"><span class="material-symbols-outlined">home</span> หน้าแรก</button>' +
-    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}${m.requiresLogin ? ' 🔒' : ''}${s.maintenance && s.maintenanceScope === 'pages' && maintClosed(m.id) ? ' 🛠' : ''}</button>`).join('');
+    s.menus.filter(m => m.visible && menuSeen(m)).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}${s.maintenance && s.maintenanceScope === 'pages' && maintClosed(m.id) ? ' 🛠' : ''}</button>`).join('');
     
-  $('homeCards').innerHTML = s.menus.filter(m => m.visible).map(m => `
+  $('homeCards').innerHTML = s.menus.filter(m => m.visible && menuSeen(m)).map(m => `
     <div class="card">
       ${menuIconMarkup(m.icon) ? `<div class="icon">${menuIconMarkup(m.icon)}</div>` : ''}
       <h2>${esc(m.title)}</h2>
@@ -1520,6 +1520,7 @@ function go(page) {
   } else {
     const m = s.menus.find(x => x.id === page);
     if (!m) return go('home');
+    if (!admin && !menuSeen(m)) { if (!MEM.user) memLoginOpen(); else toast('คุณไม่มีสิทธิ์เข้าถึงเมนูนี้'); return go('home'); }
     if (m.requiresLogin && !admin && !MEM.user) {
       memLoginOpen();
       return;
@@ -1950,7 +1951,11 @@ function renderMenuEditor(i) {
       <div class="field"><label>วางลิงก์หรือโค้ดไอคอน (ไม่บังคับ)</label><textarea id="mIcon" rows="5" placeholder="วาง <link ... icon_names=contact_support> หรือ <span class=&quot;material-symbols-outlined&quot;>contact_support</span> พร้อม <style>" oninput="updateMenuIconPreview()">${esc(parseMaterialIcon(m.icon) ? m.icon : '')}</textarea><p class="form-help">ไม่มีไอคอนเริ่มต้นหรือรายการให้เลือก วางโค้ดที่ต้องการเท่านั้น หากไม่ใส่จะแสดงเฉพาะชื่อเมนู โค้ด &lt;style&gt; อย่างเดียวไม่สามารถระบุได้ว่าต้องแสดงไอคอนใด</p><div class="icon-preview"><span id="menuIconPreview"></span><span id="iconValidation"></span></div></div>
       <div class="field"><label>หมวดหมู่</label><input id="mCategory" value="${esc(m.category)}"></div>
       <div class="field"><label>การเข้าใช้งานเมนูนี้</label>
-        <select id="mLoginReq"><option value="0" ${m.requiresLogin ? '' : 'selected'}>ไม่ต้องล็อกอิน (ทุกคนเปิดได้)</option><option value="1" ${m.requiresLogin ? 'selected' : ''}>ต้องเข้าสู่ระบบสมาชิกก่อนใช้งาน 🔒</option></select></div>
+        <select id="mLoginReq"><option value="0" ${m.requiresLogin ? '' : 'selected'}>ไม่ต้องล็อกอิน (ทุกคนเปิดได้)</option><option value="1" ${m.requiresLogin ? 'selected' : ''}>ต้องเข้าสู่ระบบก่อนกดเข้าใช้งาน (ชื่อเมนูยังแสดงปกติ)</option></select></div>
+      <div class="field"><label>ใครมองเห็นเมนูนี้ได้</label>
+        <select id="mAudience" onchange="audToggle()">${[['all','ทุกคน'],['roles','เฉพาะตำแหน่งที่เลือก'],['members','เฉพาะสมาชิกที่เลือก'],['admin','เฉพาะแอดมิน (ซ่อนจากทุกคน)']].map(([v, l]) => `<option value="${v}" ${((s.menuAudience || {})[m.id]?.mode || 'all') === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <div id="mAudRoles" class="hidden" style="margin-top:8px"></div>
+        <div id="mAudMembers" class="hidden" style="margin-top:8px;max-height:220px;overflow:auto"></div></div>
       <div class="field"><label>รูปแบบการแสดงผล</label>
         <select id="mType" onchange="menuTypeChanged()">
           <option value="builder" ${m.type === 'builder' ? 'selected' : ''}>หน้าเนื้อหา (กรอกหัวข้อและรายละเอียด)</option>
@@ -1979,6 +1984,7 @@ function renderMenuEditor(i) {
   menuTypeChanged();
   renderSectionEditors();
   updateMenuIconPreview();
+  audInit(m);
 }
 async function saveMenu(i) {
   const m = s.menus[i], type = $('mType').value;
@@ -2010,6 +2016,12 @@ async function saveMenu(i) {
       content = normalizeEmbedHeight(typed) || parsed.height || '';
     }
   }
+  const audMode = $('mAudience').value;
+  const aud = { mode: audMode, roles: [...document.querySelectorAll('.audRole:checked')].map(c => c.value), members: [...document.querySelectorAll('.audMem:checked')].map(c => c.value) };
+  if (audMode === 'roles' && !aud.roles.length) return toast('กรุณาเลือกตำแหน่งอย่างน้อย 1 ตำแหน่ง');
+  if (audMode === 'members' && !aud.members.length) return toast('กรุณาเลือกสมาชิกอย่างน้อย 1 คน');
+  s.menuAudience = { ...(s.menuAudience || {}) };
+  if (audMode === 'all') delete s.menuAudience[m.id]; else s.menuAudience[m.id] = aud;
   const rawIcon = $('mIcon').value.trim();
   if (rawIcon && !parseMaterialIcon(rawIcon)) return toast('โค้ดไอคอนไม่สมบูรณ์: ต้องมี icon_names หรือ <span> ระบุชื่อไอคอน');
   Object.assign(m, {
@@ -2494,13 +2506,13 @@ async function memLogin() {
   try {
     const r = await memRpc('np404_member_login', { p_id: v });
     MEM.token = r.token; MEM.user = r.member; localStorage.setItem('np404_mt', r.token);
-    $('mCard').value = ''; $('mLogin').classList.add('hidden'); memBtnUpdate(); go('member'); toast('เข้าสู่ระบบสมาชิกสำเร็จ');
+    $('mCard').value = ''; $('mLogin').classList.add('hidden'); memBtnUpdate(); refresh(); go('member'); toast('เข้าสู่ระบบสมาชิกสำเร็จ');
   } catch (e) { $('mLoginErr').textContent = e.message || 'เข้าสู่ระบบไม่สำเร็จ'; }
   $('mLoginBtn').disabled = false;
 }
 async function memLogout() {
   try { await memRpc('np404_member_logout', { p_token: MEM.token }); } catch (e) {}
-  MEM.user = null; MEM.token = null; localStorage.removeItem('np404_mt'); memBtnUpdate(); go('home'); toast('ออกจากระบบสมาชิกแล้ว');
+  MEM.user = null; MEM.token = null; localStorage.removeItem('np404_mt'); memBtnUpdate(); refresh(); go('home'); toast('ออกจากระบบสมาชิกแล้ว');
 }
 function memExtraRow(k, v, p) {
   const lock = p.edit_extra ? '' : 'disabled';
@@ -2541,6 +2553,7 @@ async function memShowList() {
 /* ---------- แอดมิน: จัดการสมาชิก ---------- */
 let MA = { rows: [], roles: [] };
 async function memAdminRender() {
+  AUD = null;
   const box = $('adminBody'); box.innerHTML = '<div class="notice">กำลังโหลด...</div>';
   try { MA.roles = await memRpc('np404_admin_roles'); MA.rows = await memRpc('np404_admin_members'); }
   catch (e) { box.innerHTML = `<div class="notice">โหลดไม่สำเร็จ: ${esc(e.message || e)}<br>ตรวจสอบว่ารัน np404_members.sql แล้ว</div>`; return; }
@@ -2633,7 +2646,7 @@ async function statsReset() {
     if (typeof CLOUD === 'undefined' || !CLOUD) return;
     if (MEM.token) { try { MEM.user = await memRpc('np404_member_me', { p_token: MEM.token }); } catch (e) {} if (!MEM.user) { MEM.token = null; localStorage.removeItem('np404_mt'); } }
     try { Object.assign(MEM.cfg, await memRpc('np404_member_cfg_get')); } catch (e) {}
-    memApplyCfg(); memBtnUpdate();
+    memApplyCfg(); memBtnUpdate(); try { refresh(); } catch (e) {}
     if (!sessionStorage.getItem('np404_v')) {
       let vid = localStorage.getItem('np404_vid'); if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem('np404_vid', vid); }
       sessionStorage.setItem('np404_v', '1');
@@ -2674,6 +2687,36 @@ async function toggleMaintenance() {
     timer = setTimeout(() => { n = 0; }, 2000);
   });
 })();
+
+/* ---------- กำหนดว่าใครเห็นเมนูได้ ---------- */
+function menuSeen(m) {
+  if (admin) return true;
+  const a = (s.menuAudience || {})[m.id];
+  if (!a || a.mode === 'all') return true;
+  if (a.mode === 'admin') return false;
+  if (!MEM.user) return false;
+  if (a.mode === 'roles') return (a.roles || []).includes(MEM.user.role_id);
+  if (a.mode === 'members') return (a.members || []).includes(MEM.user.id);
+  return true;
+}
+let AUD = null;
+function audToggle() {
+  const v = $('mAudience')?.value;
+  $('mAudRoles')?.classList.toggle('hidden', v !== 'roles');
+  $('mAudMembers')?.classList.toggle('hidden', v !== 'members');
+}
+async function audInit(m) {
+  const a = (s.menuAudience || {})[m.id] || {};
+  try {
+    if (!AUD) AUD = { roles: await memRpc('np404_admin_roles'), members: await memRpc('np404_admin_members') };
+    $('mAudRoles').innerHTML = AUD.roles.map(r => `<label style="display:flex;gap:8px;font-weight:500;margin:4px 0"><input type="checkbox" class="audRole" value="${esc(r.id)}" ${(a.roles || []).includes(r.id) ? 'checked' : ''}> ${esc(r.name)}</label>`).join('');
+    $('mAudMembers').innerHTML = AUD.members.map(x => `<label style="display:flex;gap:8px;font-weight:500;margin:4px 0"><input type="checkbox" class="audMem" value="${esc(x.id)}" ${(a.members || []).includes(x.id) ? 'checked' : ''}> ${esc(x.member_no ? x.member_no + '. ' : '')}${esc(x.name)}</label>`).join('') || '<small style="color:var(--muted)">ยังไม่มีสมาชิก</small>';
+  } catch (e) {
+    const msg = '<small style="color:#ef4444">โหลดรายชื่อไม่สำเร็จ (ต้องรัน np404_members.sql ก่อน)</small>';
+    $('mAudRoles').innerHTML = msg; $('mAudMembers').innerHTML = msg;
+  }
+  audToggle();
+}
 </script>
 
 </body>
