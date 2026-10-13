@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NP-404</title>
+<title>NP-404 | Executive Dashboard</title>
 <meta name="theme-color" content="#141824">
 <!-- Web Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1954,7 +1954,7 @@ function renderMenuEditor(i) {
       <div class="field"><label>การเข้าใช้งานเมนูนี้</label>
         <select id="mLoginReq"><option value="0" ${m.requiresLogin ? '' : 'selected'}>ไม่ต้องล็อกอิน (ทุกคนเปิดได้)</option><option value="1" ${m.requiresLogin ? 'selected' : ''}>ต้องเข้าสู่ระบบก่อนกดเข้าใช้งาน (ชื่อเมนูยังแสดงปกติ)</option></select></div>
       <div class="field"><label>ใครมองเห็นเมนูนี้ได้</label>
-        <select id="mAudience" onchange="audToggle()">${[['all','ทุกคน'],['roles','เฉพาะตำแหน่งที่เลือก'],['members','เฉพาะสมาชิกที่เลือก'],['admin','เฉพาะแอดมิน (ซ่อนจากทุกคน)']].map(([v, l]) => `<option value="${v}" ${((s.menuAudience || {})[m.id]?.mode || 'all') === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+        <select id="mAudience" onchange="audToggle()">${[['all','ทุกคน (ไม่ต้องล็อกอิน)'],['login','สมาชิกที่ล็อกอินแล้วทุกคน (นักเรียนทั่วไป)'],['roles','เฉพาะตำแหน่งที่เลือก'],['members','เฉพาะสมาชิกที่เลือก'],['admin','เฉพาะแอดมิน (ซ่อนจากทุกคน)']].map(([v, l]) => `<option value="${v}" ${((s.menuAudience || {})[m.id]?.mode || 'all') === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
         <div id="mAudRoles" class="hidden" style="margin-top:8px"></div>
         <div id="mAudMembers" class="hidden" style="margin-top:8px;max-height:220px;overflow:auto"></div></div>
       <div class="field"><label>รูปแบบการแสดงผล</label>
@@ -2703,7 +2703,7 @@ function menuSeen(m) {
 }
 function menuNeedsLogin(m) {
   const a = (s.menuAudience || {})[m.id];
-  return !!m.requiresLogin || !!(a && (a.mode === 'roles' || a.mode === 'members'));
+  return !!m.requiresLogin || !!(a && (a.mode === 'login' || a.mode === 'roles' || a.mode === 'members'));
 }
 let AUD = null;
 function audToggle() {
