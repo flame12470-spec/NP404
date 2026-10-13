@@ -1240,31 +1240,34 @@ function tutorialImageUploader(){
    ใช้ marker ใน content เพื่อจำว่า link เป็นแบบฝังเว็บไซต์ (embed)
 */
 const EMBED_MODE_MARKER = '<!-- np404-menu-mode:embed -->';
-const cleanMenuContent = value => String(value ?? '').replace(/^\s*<!-- np404-menu-mode:embed -->\s*/i, '');
+const cleanMenuContent = value => String(value ?? '').replace(/^\s*<!-- np404-type:\w+ -->/i, '').replace(/^\s*<!-- np404-menu-mode:embed -->\s*/i, '');
 /* ลองหลายชุดค่า type จนกว่าฐานข้อมูลจะยอมรับ (กัน CHECK constraint np404_menus_type_check ไม่ตรงกัน) */
 const DB_TYPE_PROFILES = [
   { builder: 'builder', html: 'code', external: 'link', embed: 'link' },
   { builder: 'builder', html: 'html', external: 'external', embed: 'embed' },
   { builder: 'builder', html: 'html', external: 'link', embed: 'link' },
   { builder: 'builder', html: 'code', external: 'external', embed: 'external' },
-  { builder: 'builder', html: 'builder', external: 'link', embed: 'link' }
+  { builder: 'builder', html: 'builder', external: 'link', embed: 'link' },
+  { packed: true }  /* ทุกเมนูเก็บเป็น type 'builder' แล้วฝังชนิดจริงไว้ใน content (ไม่ขึ้นกับ constraint) */
 ];
 let dbTypeProfileIndex = 0;
 const rowToMenu = r => {
   const rawContent = String(r.content ?? '');
+  const packedType = (rawContent.match(/^\s*<!-- np404-type:(\w+) -->/i) || [])[1];
   const hasEmbedMarker = /^\s*<!-- np404-menu-mode:embed -->/i.test(rawContent);
   let uiType = 'builder';
-  if (r.type === 'code' || r.type === 'html') uiType = 'html';
+  if (packedType && ['builder','html','external','embed'].includes(packedType)) uiType = packedType;
+  else if (r.type === 'code' || r.type === 'html') uiType = 'html';
   else if (r.type === 'embed') uiType = 'embed';
   else if (r.type === 'link' || r.type === 'external') uiType = hasEmbedMarker ? 'embed' : 'external';
   return { id: r.id, title: r.title, icon: r.icon, category: r.category, type: uiType,
-    content: hasEmbedMarker ? cleanMenuContent(rawContent) : rawContent, url: r.url,
+    content: (hasEmbedMarker || packedType) ? cleanMenuContent(rawContent) : rawContent, url: r.url,
     requiresLogin: r.requires_login, visible: r.visible };
 };
 const menuToRow = (m, i, profile = DB_TYPE_PROFILES[dbTypeProfileIndex]) => {
   const uiType = ['builder', 'html', 'external', 'embed'].includes(m.type) ? m.type : 'builder';
-  const dbType = profile[uiType];
-  const content = uiType === 'embed'
+  const dbType = profile.packed ? 'builder' : profile[uiType];
+  const content = profile.packed ? '<!-- np404-type:' + uiType + ' -->' + cleanMenuContent(m.content) : uiType === 'embed'
     ? EMBED_MODE_MARKER + cleanMenuContent(m.content)
     : cleanMenuContent(m.content);
   return { id: m.id, position: i, title: m.title, icon: m.icon, category: m.category, type: dbType,
@@ -2439,27 +2442,41 @@ window.addEventListener('pagehide',()=>stopFirstVisitTimer());
 </script>
 <!-- ===== ระบบสมาชิก (ล็อกอินด้วยเลขบัตร) ===== -->
 <div id="mLogin" class="modal hidden"><div class="dialog">
-  <h2>เข้าสู่ระบบสมาชิก</h2><p>กรอกเลขบัตรประจำตัว 13 หลักที่แอดมินลงทะเบียนไว้</p>
-  <div class="field"><label for="mCard">เลขบัตรประจำตัว</label>
-    <input id="mCard" inputmode="numeric" maxlength="17" autocomplete="off" placeholder="x-xxxx-xxxxx-xx-x" onkeydown="if(event.key==='Enter')memLogin()"></div>
+  <h2>เข้าสู่ระบบสมาชิก</h2><p id="mCardHint">กรอกรหัสที่แอดมินลงทะเบียนไว้</p>
+  <div class="field"><label for="mCard" id="mCardLabel">เลขบัตรประจำตัว</label>
+    <input id="mCard" inputmode="numeric" maxlength="26" autocomplete="off" placeholder="" onkeydown="if(event.key==='Enter')memLogin()"></div>
   <div id="mLoginErr" style="color:#ef4444;font-size:.85rem;margin-bottom:14px"></div>
   <div class="row"><button class="btn" id="mLoginBtn" onclick="memLogin()">เข้าสู่ระบบ</button>
   <button class="btn ghost" onclick="$('mLogin').classList.add('hidden')">ยกเลิก</button></div>
 </div></div>
 <script>
-const MEM = { user: null, token: localStorage.getItem('np404_mt') || null };
+const MEM = { cfg: { id_mode: 'digits', id_min: 13, id_max: 13, id_label: 'เลขบัตรประจำตัว', id_hint: '', thai_check: true }, user: null, token: localStorage.getItem('np404_mt') || null };
 const PERMS = [['edit_name','แก้ชื่อตัวเอง'],['edit_no','แก้เลขที่ตัวเอง'],['add_extra','เพิ่มข้อมูลเพิ่มเติม'],['edit_extra','แก้/ลบข้อมูลเพิ่มเติม'],['view_members','ดูรายชื่อสมาชิก']];
 const memRpc = async (n, a) => { const { data, error } = await sb.rpc(n, a || {}); if (error) throw error; return data; };
 const validThaiId = v => { v = String(v).replace(/\D/g,''); if (v.length !== 13) return false; let s = 0; for (let i = 0; i < 12; i++) s += +v[i] * (13 - i); return (11 - s % 11) % 10 === +v[12]; };
 const permBoxes = (p, cls) => PERMS.map(([k,l]) => `<label style="display:inline-flex;gap:6px;margin:4px 14px 4px 0;font-weight:500"><input type="checkbox" class="${cls}" data-k="${k}" ${p && p[k] ? 'checked' : ''}> ${l}</label>`).join('');
 const readPerms = root => Object.fromEntries([...root.querySelectorAll('input[data-k]')].map(c => [c.dataset.k, c.checked]));
 
+function memCfgCheck(v) {
+  const c = MEM.cfg; v = String(v).trim().toLowerCase().replace(/[\s-]/g, '');
+  if (c.id_mode === 'digits' && !/^\d+$/.test(v)) return c.id_label + ' ต้องเป็นตัวเลขเท่านั้น';
+  if (v.length < c.id_min || v.length > c.id_max) return c.id_label + (c.id_min === c.id_max ? ` ต้องมี ${c.id_min} ตัว` : ` ต้องมี ${c.id_min}-${c.id_max} ตัว`);
+  if (c.id_mode === 'digits' && c.thai_check && v.length === 13 && !validThaiId(v)) return c.id_label + ' ไม่ถูกต้อง';
+  return '';
+}
+function memApplyCfg() {
+  const c = MEM.cfg, len = c.id_min === c.id_max ? `${c.id_min} ตัว` : `${c.id_min}-${c.id_max} ตัว`;
+  $('mCardLabel').textContent = c.id_label;
+  $('mCardHint').textContent = c.id_hint || `กรอก${c.id_label} (${c.id_mode === 'digits' ? 'ตัวเลข ' : ''}${len}) ที่แอดมินลงทะเบียนไว้`;
+  $('mCard').setAttribute('inputmode', c.id_mode === 'digits' ? 'numeric' : 'text');
+  $('mCard').maxLength = c.id_max * 2;
+}
 function memBtnUpdate() { const b = $('memBtnLabel'); if (b) b.textContent = MEM.user ? 'ข้อมูลของฉัน (' + MEM.user.name + ')' : 'เข้าสู่ระบบสมาชิก'; }
 function memEntry() { MEM.user ? go('member') : memLoginOpen(); }
 function memLoginOpen() { $('mLoginErr').textContent = ''; $('mLogin').classList.remove('hidden'); setTimeout(() => $('mCard').focus(), 50); }
 async function memLogin() {
   const v = $('mCard').value;
-  if (!validThaiId(v)) { $('mLoginErr').textContent = 'เลขบัตรไม่ถูกต้อง (ต้องมี 13 หลักและผ่านการตรวจสอบ)'; return; }
+  const bad = memCfgCheck(v); if (bad) { $('mLoginErr').textContent = bad; return; }
   $('mLoginBtn').disabled = true;
   try {
     const r = await memRpc('np404_member_login', { p_id: v });
@@ -2515,9 +2532,21 @@ async function memAdminRender() {
   try { MA.roles = await memRpc('np404_admin_roles'); MA.rows = await memRpc('np404_admin_members'); }
   catch (e) { box.innerHTML = `<div class="notice">โหลดไม่สำเร็จ: ${esc(e.message || e)}<br>ตรวจสอบว่ารัน np404_members.sql แล้ว</div>`; return; }
   const ro = sel => MA.roles.map(r => `<option value="${r.id}" ${r.id === sel ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
-  box.innerHTML = `<div class="card"><h2>เพิ่มสมาชิกหลายรายการ</h2>
-    <p><small style="color:var(--muted)">1 บรรทัด = 1 คน รูปแบบ: ชื่อ, เลขที่, เลขบัตร 13 หลัก (คั่นด้วย , หรือแท็บ — วางจาก Excel ได้)</small></p>
-    <div class="field"><textarea id="maBulk" rows="5" placeholder="สมชาย ใจดี, 1, 1234567890123"></textarea></div>
+  try { Object.assign(MEM.cfg, await memRpc('np404_member_cfg_get')); } catch (e) {}
+  const c = MEM.cfg;
+  box.innerHTML = `<div class="card"><h2>ตั้งค่ารหัสล็อกอินสมาชิก</h2>
+    <div class="row" style="gap:10px;flex-wrap:wrap">
+      <div class="field"><label>ชนิดรหัส</label><select id="cfMode"><option value="digits" ${c.id_mode === 'digits' ? 'selected' : ''}>ตัวเลขล้วน</option><option value="text" ${c.id_mode === 'text' ? 'selected' : ''}>ตัวอักษร/ตัวเลขผสม</option></select></div>
+      <div class="field"><label>ยาวอย่างน้อย (ตัว)</label><input id="cfMin" type="number" min="1" max="64" value="${c.id_min}"></div>
+      <div class="field"><label>ยาวไม่เกิน (ตัว)</label><input id="cfMax" type="number" min="1" max="64" value="${c.id_max}"></div></div>
+    <div class="field"><label>ชื่อเรียกรหัส (แสดงในหน้าล็อกอิน)</label><input id="cfLabel" value="${esc(c.id_label)}" placeholder="เช่น เลขบัตรประจำตัว / รหัสนักเรียน"></div>
+    <div class="field"><label>ข้อความอธิบาย (ไม่บังคับ)</label><input id="cfHint" value="${esc(c.id_hint)}" placeholder="เช่น กรอกรหัสนักเรียน 6 หลัก"></div>
+    <label style="display:flex;gap:6px;margin-bottom:12px"><input type="checkbox" id="cfThai" ${c.thai_check ? 'checked' : ''}> ตรวจความถูกต้องแบบบัตรประชาชนไทย (ใช้เมื่อเป็นตัวเลข 13 ตัว)</label>
+    <button class="btn" onclick="maSaveCfg()">บันทึกการตั้งค่า</button>
+    <p><small style="color:var(--muted)">หมายเหตุ: ถ้าเปลี่ยนรูปแบบหลังจากมีสมาชิกแล้ว สมาชิกเดิมยังล็อกอินด้วยรหัสเดิมได้ (ระบบตรวจรูปแบบตอนเพิ่ม/แก้ไขเท่านั้น)</small></p></div>
+    <div class="card" style="margin-top:14px"><h2>เพิ่มสมาชิกหลายรายการ</h2>
+    <p><small style="color:var(--muted)">1 บรรทัด = 1 คน รูปแบบ: ชื่อ, เลขที่, รหัสเข้าใช้งาน (คั่นด้วย , หรือแท็บ — วางจาก Excel ได้)</small></p>
+    <div class="field"><textarea id="maBulk" rows="5" placeholder="สมชาย ใจดี, 1, รหัสเข้าใช้งาน"></textarea></div>
     <div class="row"><select id="maBulkRole">${ro('member')}</select><button class="btn" onclick="maBulkAdd()">เพิ่มทั้งหมด</button></div></div>
     <div class="card" style="margin-top:14px"><h2>สมาชิก (${MA.rows.length})</h2>
     ${MA.rows.map((r, i) => `<div class="card" data-i="${i}" style="margin-bottom:10px">
@@ -2533,6 +2562,12 @@ async function memAdminRender() {
     <div class="card" style="margin-top:14px"><h2>สิทธิ์ตามตำแหน่ง</h2>
     ${MA.roles.map(r => `<div style="margin-bottom:10px"><strong>${esc(r.name)}</strong><div data-role="${r.id}">${permBoxes(r.perms, 'rp')}</div></div>`).join('')}
     <button class="btn ghost" onclick="maSaveRoles()">บันทึกสิทธิ์ตามตำแหน่ง</button></div>`;
+}
+async function maSaveCfg() {
+  try {
+    await memRpc('np404_admin_set_cfg', { p: { id_mode: $('cfMode').value, id_min: +$('cfMin').value, id_max: +$('cfMax').value, id_label: $('cfLabel').value, id_hint: $('cfHint').value, thai_check: $('cfThai').checked } });
+    Object.assign(MEM.cfg, await memRpc('np404_member_cfg_get')); memApplyCfg(); toast('บันทึกการตั้งค่าเรียบร้อย');
+  } catch (e) { toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); }
 }
 function maReport(r) { toast(`บันทึกแล้ว ${r.ok} รายการ` + (r.failed.length ? ` / ไม่สำเร็จ ${r.failed.length}: ` + r.failed.map(f => `${f.name} (${f.error})`).join(', ') : '')); }
 async function maBulkAdd() {
@@ -2584,7 +2619,8 @@ async function statsReset() {
   try {
     if (typeof CLOUD === 'undefined' || !CLOUD) return;
     if (MEM.token) { try { MEM.user = await memRpc('np404_member_me', { p_token: MEM.token }); } catch (e) {} if (!MEM.user) { MEM.token = null; localStorage.removeItem('np404_mt'); } }
-    memBtnUpdate();
+    try { Object.assign(MEM.cfg, await memRpc('np404_member_cfg_get')); } catch (e) {}
+    memApplyCfg(); memBtnUpdate();
     if (!sessionStorage.getItem('np404_v')) {
       let vid = localStorage.getItem('np404_vid'); if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem('np404_vid', vid); }
       sessionStorage.setItem('np404_v', '1');
