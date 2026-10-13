@@ -1375,7 +1375,7 @@ function refresh() {
   renderMaintenance();
   
   $('publicNav').innerHTML = '<button onclick="go(\'home\')"><span class="material-symbols-outlined">home</span> หน้าแรก</button>' +
-    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}${m.requiresLogin ? ' 🔒' : ''}</button>`).join('');
+    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}${m.requiresLogin ? ' 🔒' : ''}${s.maintenance && s.maintenanceScope === 'pages' && maintClosed(m.id) ? ' 🛠' : ''}</button>`).join('');
     
   $('homeCards').innerHTML = s.menus.filter(m => m.visible).map(m => `
     <div class="card">
@@ -1496,7 +1496,7 @@ function go(page) {
     return;
   }
   
-  if (s.maintenance && !admin && page !== 'admin') page = 'maintenance';
+  if (s.maintenance && !admin && page !== 'admin' && maintClosed(page)) page = 'maintenance';
   
   $('home').classList.add('hidden');
   $('admin').classList.add('hidden');
@@ -1694,13 +1694,20 @@ function renderAdmin() {
     html = `<div class="card">
       <h2>โหมดปิดปรับปรุง 503</h2>
       <label style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
-        <input type="checkbox" id="maintSwitch" ${s.maintenance ? 'checked' : ''}> เปิดหน้า 503 สำหรับผู้ใช้ทั่วไป
+        <input type="checkbox" id="maintSwitch" ${s.maintenance ? 'checked' : ''}> เปิดโหมดปิดปรับปรุง (แสดงหน้า 503 ให้ผู้ใช้ทั่วไป)
       </label>
+      <div class="field"><label>ขอบเขตการปิดปรับปรุง</label>
+        <select id="maintScope" onchange="$('maintPages').classList.toggle('hidden', this.value !== 'pages')">
+          <option value="all" ${s.maintenanceScope !== 'pages' ? 'selected' : ''}>ปิดทั้งเว็บไซต์</option>
+          <option value="pages" ${s.maintenanceScope === 'pages' ? 'selected' : ''}>ปิดเฉพาะหน้าที่เลือก</option>
+        </select></div>
+      <div id="maintPages" class="field ${s.maintenanceScope === 'pages' ? '' : 'hidden'}"><label>เลือกหน้าที่ต้องการปิด (หน้าอื่นยังใช้งานได้ตามปกติ)</label>
+        ${[{ id: 'home', title: 'หน้าแรก' }, ...s.menus].map(m => `<label style="display:flex;gap:8px;align-items:center;font-weight:500;margin:6px 0"><input type="checkbox" class="maintPg" value="${esc(m.id)}" ${(s.maintenancePages || []).includes(m.id) ? 'checked' : ''}> ${esc(m.title)}</label>`).join('')}</div>
       ${field('หัวข้อ', 'maintenanceTitle')}
       ${field('รายละเอียด', 'maintenanceText', 'textarea')}
       ${field('โค้ด HTML / CSS Custom (เว้นว่างไว้เพื่อใช้ค่าเริ่มต้น)', 'maintenanceHtml', 'textarea')}
       <div class="row">
-        <button class="btn" onclick="s.maintenance=$('maintSwitch').checked;saveFields(['maintenanceTitle','maintenanceText','maintenanceHtml'])">บันทึก</button>
+        <button class="btn" onclick="s.maintenance=$('maintSwitch').checked;maintCollect();saveFields(['maintenanceTitle','maintenanceText','maintenanceHtml'])">บันทึก</button>
         <button class="btn ghost" onclick="preview503()">แสดงตัวอย่าง</button>
       </div>
       <div id="maintPreview"></div>
@@ -2635,10 +2642,19 @@ async function statsReset() {
   } catch (e) { console.warn(e); }
 })();
 
+function maintClosed(page) {
+  if (s.maintenanceScope !== 'pages') return true;
+  return (s.maintenancePages || []).includes(page);
+}
+function maintCollect() {
+  s.maintenanceScope = $('maintScope')?.value === 'pages' ? 'pages' : 'all';
+  s.maintenancePages = [...document.querySelectorAll('.maintPg:checked')].map(c => c.value);
+}
 async function toggleMaintenance() {
   if (!admin) return;
   const opening = !s.maintenance;
-  if (opening && !confirm('ปิดเว็บชั่วคราว? ผู้ใช้ทั่วไปจะเห็นหน้าปิดปรับปรุง (แอดมินยังใช้งานได้ตามปกติ)')) return;
+  if (opening && s.maintenanceScope === 'pages' && !(s.maintenancePages || []).length) return toast('กรุณาเลือกหน้าที่ต้องการปิดในหน้าตั้งค่า 503 ก่อน');
+  if (opening && !confirm(s.maintenanceScope === 'pages' ? 'ปิดปรับปรุงเฉพาะหน้าที่เลือกไว้? (แอดมินยังใช้งานได้ตามปกติ)' : 'ปิดเว็บชั่วคราว? ผู้ใช้ทั่วไปจะเห็นหน้าปิดปรับปรุง (แอดมินยังใช้งานได้ตามปกติ)')) return;
   s.maintenance = opening;
   const ok = await persist();
   if (ok === false) s.maintenance = !opening;
