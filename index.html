@@ -711,8 +711,8 @@ input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:f
     <div id="publicNav"></div>
     <div class="nav-group-label">สมาชิก</div>
     <button onclick="memEntry()"><span class="material-symbols-outlined">badge</span> <span id="memBtnLabel">เข้าสู่ระบบสมาชิก</span></button>
-    <div class="nav-group-label">ระบบจัดการ</div>
-    <button onclick="go('admin')">
+    <div class="nav-group-label hidden" id="sysLabel">ระบบจัดการ</div>
+    <button class="hidden" tabindex="-1" aria-hidden="true" style="display:none">
       <span id="adminSideIcon" class="material-symbols-outlined">admin_panel_settings</span>
       <span id="adminSideLabel">แผงควบคุม</span>
     </button>
@@ -1375,7 +1375,7 @@ function refresh() {
   renderMaintenance();
   
   $('publicNav').innerHTML = '<button onclick="go(\'home\')"><span class="material-symbols-outlined">home</span> หน้าแรก</button>' +
-    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}</button>`).join('');
+    s.menus.filter(m => m.visible).map(m => `<button onclick="go('${esc(m.id)}')">${menuIconMarkup(m.icon)} ${esc(m.title)}${m.requiresLogin ? ' 🔒' : ''}</button>`).join('');
     
   $('homeCards').innerHTML = s.menus.filter(m => m.visible).map(m => `
     <div class="card">
@@ -1387,6 +1387,7 @@ function refresh() {
   `).join('');
   
   $('logoutBtn').classList.toggle('hidden', !admin);
+  $('sysLabel')?.classList.toggle('hidden', !admin);
 }
 
 /* Compact embedded HTML on phones without changing the saved Supabase content. */
@@ -1664,6 +1665,7 @@ function renderAdmin() {
     <span class="material-symbols-outlined">tune</span> ${adminMenuOpen ? 'ซ่อนตัวเลือก' : 'เปิดตัวเลือกการตั้งค่า'}
   </button>` + (adminMenuOpen ? `<div class="admin-menu-list">${names.map(([id, label]) => `<button class="${tab === id ? 'active' : ''}" onclick="tab='${id}';adminMenuOpen=false;renderAdmin()">${label}</button>`).join('')}</div>` : '');
 
+  $('adminTabs').insertAdjacentHTML('beforeend', `<button onclick="toggleMaintenance()" style="${s.maintenance ? 'background:#ef4444;color:#fff' : ''}"><span class="material-symbols-outlined">${s.maintenance ? 'lock' : 'lock_open'}</span> ${s.maintenance ? 'เว็บปิดปรับปรุงอยู่ — กดเพื่อเปิดเว็บ' : 'ปิดเว็บชั่วคราว (ปรับปรุง)'}</button>`);
   let html = '';
   if (tab === null) html = '<div class="notice">เลือกรายการเมนูด้านบนเพื่อเริ่มต้นปรับแต่งระบบ</div>';
   
@@ -1672,6 +1674,7 @@ function renderAdmin() {
       <div class="card">
         <h2>สถานะเว็บไซต์</h2>
         <p>${s.maintenance ? '🔴 ปิดปรับปรุง' : '🟢 เปิดใช้งานปกติ'}</p>
+        <button class="btn" onclick="toggleMaintenance()">${s.maintenance ? 'เปิดเว็บใช้งานปกติ' : 'ปิดเว็บชั่วคราว'}</button>
         <button class="btn ghost" onclick="tab='maintenance';renderAdmin()">ตั้งค่าหน้า 503</button>
       </div>
       <div class="card">
@@ -1939,6 +1942,8 @@ function renderMenuEditor(i) {
       <div class="field"><label>ชื่อเมนู (ในแถบเมนู)</label><input id="mTitle" value="${esc(m.title)}"></div>
       <div class="field"><label>วางลิงก์หรือโค้ดไอคอน (ไม่บังคับ)</label><textarea id="mIcon" rows="5" placeholder="วาง <link ... icon_names=contact_support> หรือ <span class=&quot;material-symbols-outlined&quot;>contact_support</span> พร้อม <style>" oninput="updateMenuIconPreview()">${esc(parseMaterialIcon(m.icon) ? m.icon : '')}</textarea><p class="form-help">ไม่มีไอคอนเริ่มต้นหรือรายการให้เลือก วางโค้ดที่ต้องการเท่านั้น หากไม่ใส่จะแสดงเฉพาะชื่อเมนู โค้ด &lt;style&gt; อย่างเดียวไม่สามารถระบุได้ว่าต้องแสดงไอคอนใด</p><div class="icon-preview"><span id="menuIconPreview"></span><span id="iconValidation"></span></div></div>
       <div class="field"><label>หมวดหมู่</label><input id="mCategory" value="${esc(m.category)}"></div>
+      <div class="field"><label>การเข้าใช้งานเมนูนี้</label>
+        <select id="mLoginReq"><option value="0" ${m.requiresLogin ? '' : 'selected'}>ไม่ต้องล็อกอิน (ทุกคนเปิดได้)</option><option value="1" ${m.requiresLogin ? 'selected' : ''}>ต้องเข้าสู่ระบบสมาชิกก่อนใช้งาน 🔒</option></select></div>
       <div class="field"><label>รูปแบบการแสดงผล</label>
         <select id="mType" onchange="menuTypeChanged()">
           <option value="builder" ${m.type === 'builder' ? 'selected' : ''}>หน้าเนื้อหา (กรอกหัวข้อและรายละเอียด)</option>
@@ -2005,6 +2010,7 @@ async function saveMenu(i) {
     icon: rawIcon,
     category: $('mCategory').value.trim() || 'ทั่วไป',
     type, content,
+    requiresLogin: $('mLoginReq').value === '1',
     url: finalUrl
   });
   const saved = await persist();
@@ -2627,6 +2633,30 @@ async function statsReset() {
       memRpc('np404_log_visit', { p_visitor: vid, p_token: MEM.token }).catch(() => {});
     }
   } catch (e) { console.warn(e); }
+})();
+
+async function toggleMaintenance() {
+  if (!admin) return;
+  const opening = !s.maintenance;
+  if (opening && !confirm('ปิดเว็บชั่วคราว? ผู้ใช้ทั่วไปจะเห็นหน้าปิดปรับปรุง (แอดมินยังใช้งานได้ตามปกติ)')) return;
+  s.maintenance = opening;
+  const ok = await persist();
+  if (ok === false) s.maintenance = !opening;
+  refresh(); renderAdmin();
+}
+/* กดโลโก้ 5 ครั้งรัว ๆ (ภายใน 2 วินาทีต่อครั้ง) เพื่อเปิดหน้าเข้าสู่ระบบแอดมิน */
+(function () {
+  let n = 0, timer;
+  $('topLogo').addEventListener('click', () => {
+    n++; clearTimeout(timer);
+    if (n >= 5) {
+      n = 0;
+      if (admin) go('admin');
+      else { $('loginError').textContent = ''; $('login').classList.remove('hidden'); setTimeout(() => ($('email')?.offsetParent ? $('email') : $('password'))?.focus(), 60); }
+      return;
+    }
+    timer = setTimeout(() => { n = 0; }, 2000);
+  });
 })();
 </script>
 
