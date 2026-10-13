@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NP-404</title>
+<title>NP-404 | Executive Dashboard</title>
 <meta name="theme-color" content="#141824">
 <!-- Web Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -709,6 +709,8 @@ input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:f
   <aside id="side" class="side">
     <div class="nav-group-label">เมนูหลัก</div>
     <div id="publicNav"></div>
+    <div class="nav-group-label">สมาชิก</div>
+    <button onclick="memEntry()"><span class="material-symbols-outlined">badge</span> <span id="memBtnLabel">เข้าสู่ระบบสมาชิก</span></button>
     <div class="nav-group-label">ระบบจัดการ</div>
     <button onclick="go('admin')">
       <span id="adminSideIcon" class="material-symbols-outlined">admin_panel_settings</span>
@@ -1484,6 +1486,7 @@ function preview503() {
   }
 }
 function go(page) {
+  if (page === 'member') return memberPage();
   if (page === 'admin' && !admin) {
     $('login').classList.remove('hidden');
     return;
@@ -1513,8 +1516,8 @@ function go(page) {
   } else {
     const m = s.menus.find(x => x.id === page);
     if (!m) return go('home');
-    if (m.requiresLogin && !admin) {
-      $('login').classList.remove('hidden');
+    if (m.requiresLogin && !admin && !MEM.user) {
+      memLoginOpen();
       return;
     }
     if (m.type === 'external') {
@@ -1648,6 +1651,8 @@ function renderAdmin() {
     ['branding', 'เว็บไซต์และธีม'],
     ['homepage', 'หน้าแรก'],
     ['menus', 'จัดการเมนู'],
+    ['members', 'สมาชิกและสิทธิ์'],
+    ['stats', 'สถิติการใช้งาน'],
     ['popup', 'ป๊อปอัป'],
     ['tutorial', 'วิธีการใช้งานครั้งแรก']
   ];
@@ -1819,6 +1824,8 @@ function renderAdmin() {
   }
 
   $('adminBody').innerHTML = html;
+  if (tab === 'members') memAdminRender();
+  if (tab === 'stats') statsRender();
 }
 
 function addMenu() {
@@ -2430,5 +2437,162 @@ window.addEventListener('pagehide',()=>stopFirstVisitTimer());
   if (s.popupEnabled && !s.maintenance) setTimeout(showPopup, 600);
 })();
 </script>
+<!-- ===== ระบบสมาชิก (ล็อกอินด้วยเลขบัตร) ===== -->
+<div id="mLogin" class="modal hidden"><div class="dialog">
+  <h2>เข้าสู่ระบบสมาชิก</h2><p>กรอกเลขบัตรประจำตัว 13 หลักที่แอดมินลงทะเบียนไว้</p>
+  <div class="field"><label for="mCard">เลขบัตรประจำตัว</label>
+    <input id="mCard" inputmode="numeric" maxlength="17" autocomplete="off" placeholder="x-xxxx-xxxxx-xx-x" onkeydown="if(event.key==='Enter')memLogin()"></div>
+  <div id="mLoginErr" style="color:#ef4444;font-size:.85rem;margin-bottom:14px"></div>
+  <div class="row"><button class="btn" id="mLoginBtn" onclick="memLogin()">เข้าสู่ระบบ</button>
+  <button class="btn ghost" onclick="$('mLogin').classList.add('hidden')">ยกเลิก</button></div>
+</div></div>
+<script>
+const MEM = { user: null, token: localStorage.getItem('np404_mt') || null };
+const PERMS = [['edit_name','แก้ชื่อตัวเอง'],['edit_no','แก้เลขที่ตัวเอง'],['add_extra','เพิ่มข้อมูลเพิ่มเติม'],['edit_extra','แก้/ลบข้อมูลเพิ่มเติม'],['view_members','ดูรายชื่อสมาชิก']];
+const memRpc = async (n, a) => { const { data, error } = await sb.rpc(n, a || {}); if (error) throw error; return data; };
+const validThaiId = v => { v = String(v).replace(/\D/g,''); if (v.length !== 13) return false; let s = 0; for (let i = 0; i < 12; i++) s += +v[i] * (13 - i); return (11 - s % 11) % 10 === +v[12]; };
+const permBoxes = (p, cls) => PERMS.map(([k,l]) => `<label style="display:inline-flex;gap:6px;margin:4px 14px 4px 0;font-weight:500"><input type="checkbox" class="${cls}" data-k="${k}" ${p && p[k] ? 'checked' : ''}> ${l}</label>`).join('');
+const readPerms = root => Object.fromEntries([...root.querySelectorAll('input[data-k]')].map(c => [c.dataset.k, c.checked]));
+
+function memBtnUpdate() { const b = $('memBtnLabel'); if (b) b.textContent = MEM.user ? 'ข้อมูลของฉัน (' + MEM.user.name + ')' : 'เข้าสู่ระบบสมาชิก'; }
+function memEntry() { MEM.user ? go('member') : memLoginOpen(); }
+function memLoginOpen() { $('mLoginErr').textContent = ''; $('mLogin').classList.remove('hidden'); setTimeout(() => $('mCard').focus(), 50); }
+async function memLogin() {
+  const v = $('mCard').value;
+  if (!validThaiId(v)) { $('mLoginErr').textContent = 'เลขบัตรไม่ถูกต้อง (ต้องมี 13 หลักและผ่านการตรวจสอบ)'; return; }
+  $('mLoginBtn').disabled = true;
+  try {
+    const r = await memRpc('np404_member_login', { p_id: v });
+    MEM.token = r.token; MEM.user = r.member; localStorage.setItem('np404_mt', r.token);
+    $('mCard').value = ''; $('mLogin').classList.add('hidden'); memBtnUpdate(); go('member'); toast('เข้าสู่ระบบสมาชิกสำเร็จ');
+  } catch (e) { $('mLoginErr').textContent = e.message || 'เข้าสู่ระบบไม่สำเร็จ'; }
+  $('mLoginBtn').disabled = false;
+}
+async function memLogout() {
+  try { await memRpc('np404_member_logout', { p_token: MEM.token }); } catch (e) {}
+  MEM.user = null; MEM.token = null; localStorage.removeItem('np404_mt'); memBtnUpdate(); go('home'); toast('ออกจากระบบสมาชิกแล้ว');
+}
+function memExtraRow(k, v, p) {
+  const lock = p.edit_extra ? '' : 'disabled';
+  return `<div class="row mx" style="gap:8px;margin-bottom:8px"><input class="mxk" placeholder="หัวข้อ" value="${esc(k)}" ${lock}><input class="mxv" placeholder="รายละเอียด" value="${esc(v)}" ${lock}>${p.edit_extra ? '<button class="btn ghost" onclick="this.closest(\'.mx\').remove()">ลบ</button>' : ''}</div>`;
+}
+function memberPage() {
+  ['home','admin','maintenance'].forEach(i => $(i).classList.add('hidden'));
+  document.querySelector('.main').classList.remove('fullpage');
+  if (!MEM.user) { go('home'); memLoginOpen(); return; }
+  const u = MEM.user, p = u.perms || {};
+  $('dynamic').classList.remove('hidden');
+  $('dynamic').innerHTML = `<div class="card"><h2>ข้อมูลของฉัน</h2>
+    <p><small style="color:var(--muted)">ตำแหน่ง: ${esc(u.role_name || '')} · บัตร: ●●●●●●●●●${esc(u.id_last4)}</small></p>
+    <div class="field"><label>ชื่อ</label><input id="mpName" value="${esc(u.name)}" ${p.edit_name ? '' : 'disabled'}></div>
+    <div class="field"><label>เลขที่</label><input id="mpNo" value="${esc(u.member_no)}" ${p.edit_no ? '' : 'disabled'}></div>
+    <div class="field"><label>ข้อมูลเพิ่มเติม</label><div id="mpExtra">${(u.extra || []).map(x => memExtraRow(x.k, x.v, p)).join('')}</div>
+      ${p.add_extra ? `<button class="btn ghost" onclick="$('mpExtra').insertAdjacentHTML('beforeend', memExtraRow('','',MEM.user.perms||{}))">+ เพิ่มข้อมูล</button>` : '<small style="color:var(--muted)">คุณไม่มีสิทธิ์เพิ่มข้อมูล</small>'}</div>
+    <div class="row"><button class="btn" onclick="memSaveSelf()">บันทึก</button>
+      ${p.view_members ? '<button class="btn ghost" onclick="memShowList()">ดูรายชื่อสมาชิก</button>' : ''}
+      <button class="btn ghost" onclick="memLogout()" style="color:#ef4444">ออกจากระบบ</button></div>
+    <div id="mpList" style="margin-top:18px"></div></div>`;
+  window.scrollTo(0, 0);
+}
+async function memSaveSelf() {
+  const extra = [...document.querySelectorAll('#mpExtra .mx')].map(r => ({ k: r.querySelector('.mxk').value.trim(), v: r.querySelector('.mxv').value.trim() })).filter(x => x.k || x.v);
+  try {
+    MEM.user = await memRpc('np404_member_update_self', { p_token: MEM.token, p_name: $('mpName').value, p_no: $('mpNo').value, p_extra: extra });
+    memBtnUpdate(); toast('บันทึกข้อมูลเรียบร้อย'); memberPage();
+  } catch (e) { toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); }
+}
+async function memShowList() {
+  try {
+    const l = await memRpc('np404_member_list', { p_token: MEM.token });
+    $('mpList').innerHTML = `<table style="width:100%;border-collapse:collapse"><tr><th align="left">เลขที่</th><th align="left">ชื่อ</th><th align="left">ตำแหน่ง</th></tr>${l.map(x => `<tr><td>${esc(x.member_no)}</td><td>${esc(x.name)}</td><td>${esc(x.role_name)}</td></tr>`).join('')}</table>`;
+  } catch (e) { toast('โหลดไม่สำเร็จ: ' + (e.message || e)); }
+}
+
+/* ---------- แอดมิน: จัดการสมาชิก ---------- */
+let MA = { rows: [], roles: [] };
+async function memAdminRender() {
+  const box = $('adminBody'); box.innerHTML = '<div class="notice">กำลังโหลด...</div>';
+  try { MA.roles = await memRpc('np404_admin_roles'); MA.rows = await memRpc('np404_admin_members'); }
+  catch (e) { box.innerHTML = `<div class="notice">โหลดไม่สำเร็จ: ${esc(e.message || e)}<br>ตรวจสอบว่ารัน np404_members.sql แล้ว</div>`; return; }
+  const ro = sel => MA.roles.map(r => `<option value="${r.id}" ${r.id === sel ? 'selected' : ''}>${esc(r.name)}</option>`).join('');
+  box.innerHTML = `<div class="card"><h2>เพิ่มสมาชิกหลายรายการ</h2>
+    <p><small style="color:var(--muted)">1 บรรทัด = 1 คน รูปแบบ: ชื่อ, เลขที่, เลขบัตร 13 หลัก (คั่นด้วย , หรือแท็บ — วางจาก Excel ได้)</small></p>
+    <div class="field"><textarea id="maBulk" rows="5" placeholder="สมชาย ใจดี, 1, 1234567890123"></textarea></div>
+    <div class="row"><select id="maBulkRole">${ro('member')}</select><button class="btn" onclick="maBulkAdd()">เพิ่มทั้งหมด</button></div></div>
+    <div class="card" style="margin-top:14px"><h2>สมาชิก (${MA.rows.length})</h2>
+    ${MA.rows.map((r, i) => `<div class="card" data-i="${i}" style="margin-bottom:10px">
+      <div class="row" style="gap:8px;flex-wrap:wrap"><input class="f-name" value="${esc(r.name)}" placeholder="ชื่อ"><input class="f-no" value="${esc(r.member_no)}" placeholder="เลขที่" style="max-width:110px">
+      <input class="f-card" placeholder="●●●●●${esc(r.id_last4)} (กรอกใหม่เพื่อเปลี่ยน)" inputmode="numeric"></div>
+      <div class="row" style="gap:12px;margin:8px 0;flex-wrap:wrap"><select class="f-role">${ro(r.role_id)}</select>
+      <label style="display:inline-flex;gap:6px"><input type="checkbox" class="f-active" ${r.active ? 'checked' : ''}> เปิดใช้งาน</label>
+      <button class="btn ghost" style="color:#ef4444" onclick="maDelete(${i})">ลบ</button></div>
+      <details><summary>สิทธิ์เฉพาะคนนี้ ${r.perms ? '(กำหนดเอง)' : '(ตามตำแหน่ง)'}</summary>
+        <label style="display:flex;gap:6px;margin:8px 0"><input type="checkbox" class="f-own" ${r.perms ? 'checked' : ''}> กำหนดสิทธิ์เฉพาะคนนี้ (ไม่เลือก = ใช้ตามตำแหน่ง)</label>
+        <div class="f-perms">${permBoxes(r.perms || (MA.roles.find(x => x.id === r.role_id) || {}).perms, 'pp')}</div></details></div>`).join('')}
+    <button class="btn" onclick="maSaveAll()">บันทึกทั้งหมด</button></div>
+    <div class="card" style="margin-top:14px"><h2>สิทธิ์ตามตำแหน่ง</h2>
+    ${MA.roles.map(r => `<div style="margin-bottom:10px"><strong>${esc(r.name)}</strong><div data-role="${r.id}">${permBoxes(r.perms, 'rp')}</div></div>`).join('')}
+    <button class="btn ghost" onclick="maSaveRoles()">บันทึกสิทธิ์ตามตำแหน่ง</button></div>`;
+}
+function maReport(r) { toast(`บันทึกแล้ว ${r.ok} รายการ` + (r.failed.length ? ` / ไม่สำเร็จ ${r.failed.length}: ` + r.failed.map(f => `${f.name} (${f.error})`).join(', ') : '')); }
+async function maBulkAdd() {
+  const role = $('maBulkRole').value;
+  const rows = $('maBulk').value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const [name, member_no, id_card] = l.split(/[,\t]/).map(x => (x || '').trim()); return { name, member_no, id_card, role_id: role }; });
+  if (!rows.length) return toast('กรุณากรอกรายชื่ออย่างน้อย 1 บรรทัด');
+  try { maReport(await memRpc('np404_admin_upsert_members', { p_rows: rows })); memAdminRender(); } catch (e) { toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); }
+}
+async function maSaveAll() {
+  const rows = [...document.querySelectorAll('#adminBody [data-i]')].map(el => {
+    const r = MA.rows[+el.dataset.i], o = { id: r.id, name: el.querySelector('.f-name').value, member_no: el.querySelector('.f-no').value,
+      id_card: el.querySelector('.f-card').value, role_id: el.querySelector('.f-role').value, active: el.querySelector('.f-active').checked };
+    if (el.querySelector('.f-own').checked) o.perms = readPerms(el.querySelector('.f-perms'));
+    return o; });
+  try { maReport(await memRpc('np404_admin_upsert_members', { p_rows: rows })); memAdminRender(); } catch (e) { toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); }
+}
+async function maDelete(i) {
+  if (!confirm('ลบสมาชิก "' + MA.rows[i].name + '" ถาวรหรือไม่?')) return;
+  try { await memRpc('np404_admin_delete_member', { p_id: MA.rows[i].id }); memAdminRender(); } catch (e) { toast('ลบไม่สำเร็จ: ' + (e.message || e)); }
+}
+async function maSaveRoles() {
+  try { for (const el of document.querySelectorAll('#adminBody [data-role]')) await memRpc('np404_admin_set_role_perms', { p_id: el.dataset.role, p_perms: readPerms(el) }); toast('บันทึกสิทธิ์ตามตำแหน่งเรียบร้อย'); memAdminRender(); }
+  catch (e) { toast('บันทึกไม่สำเร็จ: ' + (e.message || e)); }
+}
+
+/* ---------- แอดมิน: สถิติการใช้งาน ---------- */
+async function statsRender() {
+  const box = $('adminBody'); box.innerHTML = '<div class="notice">กำลังโหลด...</div>';
+  try {
+    const d = await memRpc('np404_admin_stats'), n = x => Number(x || 0).toLocaleString('th-TH');
+    const card = (t, v) => `<div class="card"><small style="color:var(--muted)">${t}</small><h2>${n(v)}</h2></div>`;
+    box.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+      ${card('เข้าใช้งานทั้งหมด (ครั้ง)', d.total)}${card('เดือนนี้ (ครั้ง)', d.month)}${card('ปีนี้ (ครั้ง)', d.year)}
+      ${card('ผู้เข้าชมไม่ซ้ำ (คน)', d.visitors)}${card('สมาชิกที่เคยล็อกอิน (คน)', d.members_used)}${card('ล็อกอินสมาชิก (ครั้ง)', d.logins)}</div>
+      <div class="card" style="margin-top:14px"><h2>รายเดือน (ปีนี้)</h2><table style="width:100%;border-collapse:collapse"><tr><th align="left">เดือน</th><th align="left">ครั้ง</th><th align="left">คน</th></tr>
+      ${d.by_month.map(m => `<tr><td>${m.m}</td><td>${n(m.visits)}</td><td>${n(m.people)}</td></tr>`).join('') || '<tr><td colspan="3">ยังไม่มีข้อมูล</td></tr>'}</table></div>
+      <div class="card" style="margin-top:14px"><h2>สมาชิกที่ล็อกอินบ่อย</h2><table style="width:100%;border-collapse:collapse">
+      ${d.by_member.map(m => `<tr><td>${esc(m.name)}</td><td>${n(m.logins)} ครั้ง</td></tr>`).join('') || '<tr><td>ยังไม่มีข้อมูล</td></tr>'}</table></div>
+      <div class="row" style="margin-top:14px"><button class="btn ghost" onclick="statsReset()" style="color:#ef4444">รีเซ็ตสถิติทั้งหมด</button></div>`;
+  } catch (e) { box.innerHTML = `<div class="notice">โหลดไม่สำเร็จ: ${esc(e.message || e)}<br>ตรวจสอบว่ารัน np404_members.sql แล้ว</div>`; }
+}
+async function statsReset() {
+  if (!confirm('รีเซ็ตสถิติการใช้งานทั้งหมดเป็น 0 ? (ย้อนกลับไม่ได้)')) return;
+  try { await memRpc('np404_admin_reset_stats'); toast('รีเซ็ตสถิติเรียบร้อย'); statsRender(); } catch (e) { toast('รีเซ็ตไม่สำเร็จ: ' + (e.message || e)); }
+}
+
+/* ---------- เริ่มต้น: เช็กเซสชัน + นับการเข้าใช้งาน ---------- */
+(async () => {
+  try {
+    if (typeof CLOUD === 'undefined' || !CLOUD) return;
+    if (MEM.token) { try { MEM.user = await memRpc('np404_member_me', { p_token: MEM.token }); } catch (e) {} if (!MEM.user) { MEM.token = null; localStorage.removeItem('np404_mt'); } }
+    memBtnUpdate();
+    if (!sessionStorage.getItem('np404_v')) {
+      let vid = localStorage.getItem('np404_vid'); if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem('np404_vid', vid); }
+      sessionStorage.setItem('np404_v', '1');
+      memRpc('np404_log_visit', { p_visitor: vid, p_token: MEM.token }).catch(() => {});
+    }
+  } catch (e) { console.warn(e); }
+})();
+</script>
+
 </body>
 </html>
