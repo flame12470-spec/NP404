@@ -177,7 +177,7 @@ async function list(m,v){
  if(m==='announce'){if(!canEdit(m))data=data.filter(x=>!x.data.date||x.data.date<=today());data.sort((a,b)=>(b.data.pin==='ปัก')-(a.data.pin==='ปัก'))}
  if(m==='poll')VOTES=(await q('vote')).data||[];
  ROWS=data;const [t,ic,,w]=M[m],add=canEdit(m)||w==='u';
- v.innerHTML=`<h2>${ic} ${t}</h2><div class="bar"><input id="q" placeholder="ค้นหา..." value="${esc(Q)}" oninput="Q=this.value;paint(cur)">${add?`<button class="b" onclick="form('${m}')">+ เพิ่ม</button>`:''}</div>${m==='money'?sum(data):''}<div id="ls"></div>`;paint(m)}
+ v.innerHTML=`<h2>${ic} ${t}</h2><div class="bar"><input id="q" placeholder="ค้นหา..." value="${esc(Q)}" oninput="Q=this.value;paint(cur)">${add?`<button class="b" onclick="openForm('${m}')">+ เพิ่ม</button>`:''}</div>${m==='money'?sum(data):''}<div id="ls"></div>`;paint(m)}
 function sum(d){let i=0,o=0;d.forEach(x=>x.data.type==='รายจ่าย'?o+=+x.data.amount||0:i+=+x.data.amount||0);
  return `<div class="grid"><div class="card">รายรับ<b class="n" style="color:var(--gr)">${i.toLocaleString()}</b></div><div class="card">รายจ่าย<b class="n" style="color:var(--rd)">${o.toLocaleString()}</b></div><div class="card">คงเหลือ<b class="n">${(i-o).toLocaleString()}</b></div></div>`}
 function paint(m){const s=Q.toLowerCase(),r=ROWS.filter(x=>!s||JSON.stringify(x.data).toLowerCase().includes(s));
@@ -189,7 +189,7 @@ function card(m,r){const F=M[m][2],d=r.data,ed=canEdit(m);
  if(m==='chat')h=`<div class="card"><p>${esc(d.msg)}</p><p class="mu">${new Date(r.created_at).toLocaleString('th-TH')}</p>`;
  if(m==='poll'){const o=(d.opts||'').split(',').map(s=>s.trim()).filter(Boolean),vs=VOTES.filter(x=>x.data.poll===r.id),mine=vs.some(x=>x.created_by===ME.id);
   h+=`<div class="acts">${o.map(c=>`<button class="b g s" ${d.status==='ปิด'||mine?'disabled':''} onclick="vote('${r.id}','${esc(c).replace(/'/g,'')}')">${esc(c)} · ${vs.filter(x=>x.data.choice===c).length}</button>`).join('')}</div>`}
- if(ed)h+=`<div class="acts"><button class="b g s" onclick="form('${m}','${r.id}')">แก้ไข</button><button class="b r s" onclick="del('${r.id}')">ลบ</button></div>`;
+ if(ed)h+=`<div class="acts"><button class="b g s" onclick="openForm('${m}','${r.id}')">แก้ไข</button><button class="b r s" onclick="del('${r.id}')">ลบ</button></div>`;
  return h+'</div>'}
 async function vote(poll,choice){if(isG())return authChoice();const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
 
@@ -198,7 +198,7 @@ function inp(k,t='',v=''){v=esc(v);
  if(t==='ta')return `<textarea id="f_${k}">${v}</textarea>`;
  if(t.startsWith('sel:'))return `<select id="f_${k}">${t.slice(4).split(',').map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
  return `<input id="f_${k}" type="${{date:'date',num:'number',file:'file'}[t]||'text'}" ${t==='file'?'':`value="${v}"`}>`}
-function form(m,id){if(isG())return authChoice();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
+function openForm(m,id){if(isG())return authChoice();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
  modal(`<h2>${r?'แก้ไข':'เพิ่ม'} ${M[m][0]}</h2>`+F.map(([k,l,t])=>`<label>${l}</label>`+inp(k,t,d[k])).join('')+`<button class="b" onclick="save('${m}','${id||''}')">บันทึก</button>`)}
 async function save(m,id){const d={...(ROWS.find(x=>x.id===id)?.data||{})};
  for(const [k,,t] of M[m][2]){const e=$('#f_'+k);if(!e)continue;
