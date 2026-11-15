@@ -120,29 +120,29 @@ const M={
 };
 const MAIN='home schedule attendance money homework docs announce members activity calendar chat works'.split(' ');
 const MORE='leave issue poll borrow duty role news award forms contact'.split(' ');
-const AD=[['ภาพรวมระบบ','ov'],['จัดการนักเรียน','members'],['จัดการการเช็กชื่อ','attendance'],['จัดการเงินห้อง','money'],['จัดการตารางเรียน','schedule'],['จัดการการบ้าน','homework'],['จัดการประกาศ','announce'],['จัดการตารางเวร','duty'],['จัดการกิจกรรม','activity'],['จัดการคลังไฟล์','docs'],['จัดการแชต','chat'],['จัดการแบบสำรวจ','poll'],['จัดการคำร้อง (ลา)','leave'],['จัดการแจ้งปัญหา','issue'],['จัดการอุปกรณ์','borrow'],['จัดการสิทธิ์','perms'],['รายงานและส่งออก','reports'],['ประวัติการทำงาน','logs'],['ตั้งค่าระบบ','settings'],['ถังขยะ (กู้คืน)','trash']];
-const ADMIN_ONLY=['admin','ov','perms','reports','logs','trash'];
+const AD=[['ภาพรวมระบบ','ov'],['จัดการนักเรียน','members'],['จัดการการเช็กชื่อ','attendance'],['จัดการเงินห้อง','money'],['จัดการตารางเรียน','schedule'],['จัดการการบ้าน','homework'],['จัดการประกาศ','announce'],['จัดการตารางเวร','duty'],['จัดการกิจกรรม','activity'],['จัดการคลังไฟล์','docs'],['จัดการแชต','chat'],['จัดการแบบสำรวจ','poll'],['จัดการคำร้อง (ลา)','leave'],['จัดการแจ้งปัญหา','issue'],['จัดการอุปกรณ์','borrow'],['จัดการสิทธิ์','perms'],['รายงานและส่งออก','reports'],['ประวัติการทำงาน','logs'],['ล็อกเมนู (ต้องเข้าสู่ระบบ)','locks'],['ตั้งค่าระบบ','settings'],['ถังขยะ (กู้คืน)','trash']];
+const ADMIN_ONLY=['admin','locks','ov','perms','reports','logs','trash'];
 
-let ME,cur='home',Q='',ROWS=[],VOTES=[],ch;
+let LOCK=[],ME,cur='home',Q='',ROWS=[],VOTES=[],ch;
+const isG=()=>ME?.role==='guest';
+const gate=v=>{v.innerHTML='<div class="card pin" style="text-align:center"><div style="font-size:48px">🔒</div><div class="t">เมนูนี้ต้องเข้าสู่ระบบก่อน</div><p class="mu" style="margin:6px 0 14px">สมัครหรือเข้าสู่ระบบด้วยอีเมลเพื่อใช้งาน</p><button class="b" onclick="loginSheet()">เข้าสู่ระบบ / สมัครสมาชิก</button></div>'};
 const isA=()=>ME&&['admin','super'].includes(ME.role), isS=()=>ME?.role==='super';
 const canEdit=m=>isS()||(ME?.role==='admin'&&(ME.perms||[]).includes(m));
 const title=k=>M[k]?M[k][0]:(AD.find(a=>a[1]===k)||[k])[0];
 
 // ====== เข้าสู่ระบบ ======
-function authUI(){
- $('#app').innerHTML=`<header class="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div><h1>เข้าสู่ระบบ</h1><p>ใช้อีเมลที่สมัครไว้</p><div class="mas">🏫</div></header><main id="main"><div class="card pin">
- <label style="margin-top:0">ชื่อ-สกุล (เฉพาะตอนสมัคร)</label><input id="an">
- <label>อีเมล</label><input id="ae" type="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input id="ap" type="password">
- <button class="b" style="width:100%;margin-top:16px;padding:16px" onclick="login()">เข้าสู่ระบบ</button><button class="b g" style="width:100%;margin-top:10px;padding:14px" onclick="signup()">สมัครสมาชิก</button></div></main>`}
-async function login(){const {error}=await db.auth.signInWithPassword({email:$('#ae').value.trim(),password:$('#ap').value});if(error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+error.message);boot()}
+function loginSheet(){modal(`<h2>เข้าสู่ระบบ / สมัครสมาชิก</h2><label>ชื่อ-สกุล (เฉพาะตอนสมัคร)</label><input id="an"><label>อีเมล</label><input id="ae" type="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input id="ap" type="password"><button class="b" onclick="login()">เข้าสู่ระบบ</button><button class="b g" style="margin-top:10px" onclick="signup()">สมัครสมาชิก</button>`)}
+async function login(){const {error}=await db.auth.signInWithPassword({email:$('#ae').value.trim(),password:$('#ap').value});if(error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+error.message);closeModal();boot()}
 async function signup(){const n=$('#an').value.trim();if(!n)return toast('กรอกชื่อ-สกุลก่อนสมัคร');
  const {data,error}=await db.auth.signUp({email:$('#ae').value.trim(),password:$('#ap').value,options:{data:{name:n}}});
- if(error)return toast(error.message);data.session?boot():toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ')}
+ if(error)return toast(error.message);data.session?(closeModal(),boot()):toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ')}
 async function logout(){await db.auth.signOut();ch&&db.removeChannel(ch);location.reload()}
-async function boot(){const {data:{session}}=await db.auth.getSession();if(!session)return authUI();
- const {data}=await db.from('profiles').select('*').eq('id',session.user.id).single();
- ME=data||{id:session.user.id,email:session.user.email,name:session.user.email,role:'student',perms:[]};
- $('#app').innerHTML=`<header class="hero" id="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div><span class="pill">${esc(ME.name||ME.email)}</span><h1 id="h1"></h1><p id="hp"></p><div class="mas" id="hm"></div></header><main id="main"></main><nav id="nav"></nav>`;
+async function boot(){const {data:{session}}=await db.auth.getSession();
+ if(session){const {data}=await db.from('profiles').select('*').eq('id',session.user.id).single();
+  ME=data||{id:session.user.id,email:session.user.email,name:session.user.email,role:'student',perms:[]}}
+ else ME={role:'guest',name:'ผู้เยี่ยมชม',perms:[]};
+ LOCK=((await db.from('locked_modules').select('module')).data||[]).map(x=>x.module);
+ $('#app').innerHTML=`<header class="hero" id="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div>${isG()?'<button class="pill" onclick="loginSheet()">เข้าสู่ระบบ</button>':`<span class="pill">${esc(ME.name||ME.email)}</span>`}<h1 id="h1"></h1><p id="hp"></p><div class="mas" id="hm"></div></header><main id="main"></main><nav id="nav"></nav>`;
  ch=db.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{
   const n=p.new||{};if(p.eventType==='INSERT'&&(n.module==='announce'||n.module==='homework'))toast('🔔 มี'+M[n.module][0]+'ใหม่');
   if(!n.module||n.module===cur)if(!$('#md').classList.contains('on'))show(cur,1)}).subscribe();
@@ -159,7 +159,7 @@ function nav(){
 async function show(m,silent){
  cur=m;if(!silent){Q='';scrollTo(0,0)}nav();
  const v=$('#main');if(!silent)v.innerHTML='<p class="mu">กำลังโหลด...</p>';
- try{if(ADMIN_ONLY.includes(m)&&!isA())throw Error('เฉพาะผู้ดูแล');await(SP[m]||list)(m,v)}
+ try{if(isG()&&(LOCK.includes(m)||ADMIN_ONLY.includes(m)))return gate(v);if(ADMIN_ONLY.includes(m)&&!isA())throw Error('เฉพาะผู้ดูแล');await(SP[m]||list)(m,v)}
  catch(e){v.innerHTML='<p class="err">'+esc(e.message||e)+'</p>'}}
 
 // ====== รายการทั่วไป (ใช้กับทุกเมนู) ======
@@ -183,14 +183,14 @@ function card(m,r){const F=M[m][2],d=r.data,ed=canEdit(m);
   h+=`<div class="acts">${o.map(c=>`<button class="b g s" ${d.status==='ปิด'||mine?'disabled':''} onclick="vote('${r.id}','${esc(c).replace(/'/g,'')}')">${esc(c)} · ${vs.filter(x=>x.data.choice===c).length}</button>`).join('')}</div>`}
  if(ed)h+=`<div class="acts"><button class="b g s" onclick="form('${m}','${r.id}')">แก้ไข</button><button class="b r s" onclick="del('${r.id}')">ลบ</button></div>`;
  return h+'</div>'}
-async function vote(poll,choice){const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
+async function vote(poll,choice){if(isG())return loginSheet();const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
 
 // ====== ฟอร์ม เพิ่ม/แก้ไข/ลบ ======
 function inp(k,t='',v=''){v=esc(v);
  if(t==='ta')return `<textarea id="f_${k}">${v}</textarea>`;
  if(t.startsWith('sel:'))return `<select id="f_${k}">${t.slice(4).split(',').map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
  return `<input id="f_${k}" type="${{date:'date',num:'number',file:'file'}[t]||'text'}" ${t==='file'?'':`value="${v}"`}>`}
-function form(m,id){const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
+function form(m,id){if(isG())return loginSheet();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
  modal(`<h2>${r?'แก้ไข':'เพิ่ม'} ${M[m][0]}</h2>`+F.map(([k,l,t])=>`<label>${l}</label>`+inp(k,t,d[k])).join('')+`<button class="b" onclick="save('${m}','${id||''}')">บันทึก</button>`)}
 async function save(m,id){const d={...(ROWS.find(x=>x.id===id)?.data||{})};
  for(const [k,,t] of M[m][2]){const e=$('#f_'+k);if(!e)continue;
@@ -205,9 +205,9 @@ async function del(id){if(!confirm('ย้ายรายการนี้ไ�
 
 // ====== หน้าพิเศษ ======
 const SP={};
-SP.menu=(m,v)=>{const t=k=>`<button class="tile" onclick="show('${k}')"><i>${M[k][1]}</i>${M[k][0]}</button>`;
- v.innerHTML=`<div class="card pin"><div class="t">${esc(ME.name||ME.email)}</div><span class="tag">${{student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'}[ME.role]}</span></div><div class="mh">เมนูหลัก</div><div class="grid">${MAIN.filter(k=>k!=='home').map(t).join('')}</div><div class="mh">ระบบเพิ่มเติม</div><div class="grid">${MORE.map(t).join('')}</div>${isA()?`<div class="mh">ผู้ดูแล</div><div class="grid"><button class="tile" onclick="show('admin')"><i>🛠️</i>ADMIN PANEL</button></div>`:''}<button class="b g" style="width:100%" onclick="logout()">ออกจากระบบ</button>`};
-SP.home=async(m,v)=>{const r=await Promise.all(['announce','homework','calendar'].map(k=>q(k).then(x=>x.data.slice(0,3))));
+SP.menu=(m,v)=>{const t=k=>`<button class="tile" onclick="show('${k}')"><i>${M[k][1]}</i>${M[k][0]}${LOCK.includes(k)?' 🔒':''}</button>`;
+ v.innerHTML=`<div class="card pin"><div class="t">${esc(ME.name||ME.email)}</div><span class="tag">${{guest:'ผู้เยี่ยมชม',student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'}[ME.role]}</span></div><div class="mh">เมนูหลัก</div><div class="grid">${MAIN.filter(k=>k!=='home').map(t).join('')}</div><div class="mh">ระบบเพิ่มเติม</div><div class="grid">${MORE.map(t).join('')}</div>${isA()?`<div class="mh">ผู้ดูแล</div><div class="grid"><button class="tile" onclick="show('admin')"><i>🛠️</i>ADMIN PANEL</button></div>`:''}${isG()?'<button class="b" style="width:100%" onclick="loginSheet()">เข้าสู่ระบบ / สมัครสมาชิก</button>':'<button class="b g" style="width:100%" onclick="logout()">ออกจากระบบ</button>'}`};
+SP.home=async(m,v)=>{const r=await Promise.all(['announce','homework','calendar'].map(k=>q(k).then(x=>(x.data||[]).slice(0,3))));
  const blk=(t,k,rs)=>`<div class="card"><div class="t">${t}</div>${rs.length?rs.map(x=>`<p onclick="show('${k}')" style="cursor:pointer">• ${esc(x.data[M[k][2][0][0]])}${x.data.due?` <span class="mu">ส่ง ${esc(x.data.due)}</span>`:''}${x.data.date&&k==='calendar'?` <span class="mu">${esc(x.data.date)}</span>`:''}</p>`).join(''):'<p class="mu">ยังไม่มีข้อมูล</p>'}</div>`;
  v.innerHTML=`<h2>สวัสดี ${esc(ME.name||'')} 👋</h2>`+blk('📢 ประกาศล่าสุด','announce',r[0])+blk('📚 การบ้านล่าสุด','homework',r[1])+blk('📆 ปฏิทินห้อง','calendar',r[2])};
 SP.admin=(m,v)=>{v.innerHTML='<h2>🛠️ ADMIN PANEL</h2><p class="mu">เฉพาะผู้ดูแล · เมนูจัดการระบบและฐานข้อมูล</p><div class="grid">'+AD.map(([t,k])=>`<button class="tile" onclick="show('${k}')">${esc(t)}</button>`).join('')+'</div><p class="mu">รองหัวหน้าห้องจะแก้ไขได้เฉพาะเมนูที่หัวหน้าห้องกำหนดสิทธิ์ให้</p>'};
@@ -217,6 +217,9 @@ SP.ov=async(m,v)=>{const {data}=await db.from('items').select('module,data').is(
  v.innerHTML=`<h2>📊 ภาพรวมระบบ</h2><div class="grid"><div class="card">ผู้ใช้งานระบบ<b class="n">${count}</b></div><div class="card">เงินห้องคงเหลือ<b class="n">${bal.toLocaleString()}</b></div>`+
  ['members','announce','homework','leave','issue','chat','docs'].map(k=>`<div class="card">${M[k][1]} ${M[k][0]}<b class="n">${c[k]||0}</b></div>`).join('')+'</div>'+
  (isS()?`<h2>กิจกรรมล่าสุด</h2>${await logHtml(8)}`:'')};
+SP.locks=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');
+ v.innerHTML='<p class="mu" style="margin:0 4px 12px">ติ๊ก = ต้องเข้าสู่ระบบก่อนจึงจะเปิดเมนูนั้นได้ · ไม่ติ๊ก = ใครก็ดูได้โดยไม่ต้องสมัคร (การเพิ่ม/แก้ไขข้อมูลต้องเข้าสู่ระบบเสมอ)</p>'+[...MAIN.slice(1),...MORE].map(k=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>${M[k][1]} ${M[k][0]}</span><input type="checkbox" style="width:26px;min-height:26px;padding:0;appearance:auto;-webkit-appearance:checkbox" ${LOCK.includes(k)?'checked':''} onchange="setLock('${k}',this.checked)"></div>`).join('')};
+async function setLock(k,on){const {error}=await(on?db.from('locked_modules').upsert({module:k}):db.from('locked_modules').delete().eq('module',k));if(error)return toast(error.message);LOCK=on?[...LOCK,k]:LOCK.filter(x=>x!==k);toast('บันทึกแล้ว')}
 SP.perms=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');const {data}=await db.from('profiles').select('*').order('name');
  v.innerHTML='<h2>🔐 จัดการสิทธิ์</h2><p class="mu">student = นักเรียน · admin = รองหัวหน้า · super = หัวหน้าห้อง<br>ช่อง perms ใส่รหัสเมนูที่ admin แก้ไขได้ คั่นด้วย , เช่น money,homework,announce</p>'+
  data.map(p=>`<div class="card"><b>${esc(p.name)}</b> <span class="mu">${esc(p.email)}</span><div class="bar" style="margin-top:8px"><select id="r_${p.id}" style="width:130px">${['student','admin','super'].map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select><input id="p_${p.id}" value="${esc((p.perms||[]).join(','))}" placeholder="perms"><button class="b s" onclick="setRole('${p.id}')">บันทึก</button></div></div>`).join('')};
