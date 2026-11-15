@@ -1,128 +1,249 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ห้องเรียนออนไลน์</title>
-<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e88e5">
+<title>เว็บห้อง ม.4/4</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--primary:#2563eb;--bg:#f8fafc;--card:#ffffff;--text:#1e293b;--muted:#64748b;--border:#e2e8f0;--danger:#ef4444}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
-nav{width:260px;background:#fff;border-right:1px solid var(--border);padding:24px;display:flex;flex-direction:column;gap:8px}
-nav h1{font-size:1.25rem;font-weight:700;color:var(--primary);margin-bottom:16px}
-nav button{display:flex;align-items:center;gap:10px;padding:12px;border:none;background:transparent;border-radius:8px;cursor:pointer;font-size:1rem;color:var(--muted);width:100%;text-align:left;transition:0.2s}
-nav button:hover,nav button.active{background:#eff6ff;color:var(--primary);font-weight:600}
-main{flex:1;padding:32px;max-width:960px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
-.card h2{font-size:1.2rem;margin-bottom:8px}
-.meta{font-size:0.875rem;color:var(--muted);margin-bottom:12px}
-.err{color:var(--danger);background:#fef2f2;border:1px solid #fecaca;padding:12px;border-radius:8px;margin-bottom:16px}
-.locked{opacity:0.6;pointer-events:none}
+:root{--ink:#1f2a44;--mu:#6b7794;--bg:#eaf3ff;--pa:#fff;--ln:#d3dbea;--bl:#1e88e5;--bl2:#5bb0f5;--yl:#f5b800;--gr:#1c6b3a;--rd:#b3261e;--or:#c8500e;--or2:#f47a20;--cr:#fffaee;--gn:#cdeed8;--ry:#ffe1e1;--yw:#fff0c2;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Prompt,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;overflow-x:hidden;line-height:1.6}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;touch-action:manipulation}
+input,select,textarea{width:100%;padding:13px 16px;border:2px solid var(--ln);border-radius:99px;background:#fff;font-size:16px;outline:none;min-height:50px;appearance:none;-webkit-appearance:none}
+textarea{border-radius:18px;min-height:96px;resize:none;line-height:1.7}
+select{background-image:linear-gradient(45deg,transparent 50%,#6b7794 50%),linear-gradient(135deg,#6b7794 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:38px}
+input:focus,select:focus,textarea:focus{border-color:var(--bl2)}
+label{display:block;font-size:14px;color:var(--mu);margin:12px 0 6px}
+/* hero */
+.hero{color:#fff;padding:calc(18px + var(--sat)) 20px 64px;border-radius:0 0 40px 40px;position:relative;min-height:170px;background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,var(--bl),var(--bl2));background-size:18px 18px,100% 100%}
+.hero.o{background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,#f47a20,#fbb15c);background-size:18px 18px,100% 100%}
+.hero.g{background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,#2e9e5b,#6fd19a);background-size:18px 18px,100% 100%}
+.lg{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:#69f0ae;box-shadow:0 0 8px #69f0ae}
+.pills{position:absolute;right:20px;top:calc(18px + var(--sat));display:flex;gap:8px}.pills .pill{position:static;max-width:none}
+.pill{position:absolute;right:20px;top:calc(18px + var(--sat));background:rgba(255,255,255,.28);padding:6px 14px;border-radius:99px;font-size:13px;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hero h1{font-size:26px;font-weight:600;margin-top:16px;line-height:1.25;max-width:68%}
+.hero p{opacity:.92;margin-top:6px;font-size:14px;max-width:68%}
+.mas{position:absolute;right:16px;bottom:28px;font-size:64px;line-height:1;filter:drop-shadow(0 6px 8px rgba(0,0,0,.18));animation:bob 3s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(2deg)}}
+#main{position:relative;max-width:760px;margin:-34px auto 0;padding:0 18px calc(110px + var(--sab))}
+#main>h2:first-child{display:none}
+h2{font-size:20px;margin:6px 0 12px}
+.mh{font-size:16px;font-weight:600;margin:18px 4px 10px}
+/* cards */
+.card{background:var(--cr);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 12px 26px rgba(60,70,140,.12);position:relative}
+.card.pin{margin-top:24px}
+.card.pin::before{content:"";position:absolute;left:50%;top:-12px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9a4d,var(--or));box-shadow:0 4px 6px rgba(0,0,0,.2)}
+.card p{font-size:14px}.card .t{font-size:16px;font-weight:600}
+.mu{color:var(--mu);font-size:13px}.err{color:var(--rd)}
+.n{display:block;font-size:26px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:8px;margin-bottom:14px}
+.bar input{border-color:#fff;box-shadow:0 8px 20px rgba(60,70,140,.12)}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:2px 10px;white-space:nowrap;background:#e7f1ff;color:var(--bl)}
+.tag.ok{background:var(--gn);color:var(--gr)}.tag.part{background:var(--yw);color:#8a5a00}.tag.no{background:var(--ry);color:var(--rd)}
+/* buttons */
+.b{padding:11px 20px;border-radius:99px;background:var(--or);color:#fff;font-weight:500;box-shadow:0 8px 16px rgba(200,80,14,.28);white-space:nowrap;transition:.15s}
+.b:active,.tile:active{transform:scale(.97)}
+.b:disabled{opacity:.45;box-shadow:none}
+.b.g{background:#fff;color:var(--or);border:2px solid #f0d8c4;box-shadow:none}
+.b.r{background:#fff;color:var(--rd);border:2px solid #f3c7c2;box-shadow:none}
+.b.s{padding:6px 14px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.tile{background:var(--cr);border-radius:20px;padding:14px;text-align:left;box-shadow:0 8px 18px rgba(60,70,140,.1);display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;transition:.15s}
+.tile i{font-style:normal;width:44px;height:44px;border-radius:14px;background:#fff1e6;display:grid;place-items:center;font-size:24px}
+/* bottom nav */
+#nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-radius:28px 28px 0 0;display:flex;justify-content:space-around;align-items:center;min-height:76px;padding:10px 4px calc(12px + var(--sab));box-shadow:0 -6px 20px rgba(0,0,0,.07);z-index:20}
+#nav button{flex:1;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px}
+#nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#nav button.on{color:var(--or)}
+#nav .plus{transform:translateY(-18px)}
+#nav .plus span{width:56px;height:56px;border-radius:50%;background:var(--or2);display:grid;place-items:center;box-shadow:0 0 0 5px #fff,0 8px 14px rgba(244,122,32,.4)}
+#nav .plus svg{stroke:#fff;width:28px;height:28px}
+/* sheet + toast */
+#md{position:fixed;inset:0;background:rgba(20,30,60,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.25s}
+#md.on{opacity:1;pointer-events:auto}
+#mb{background:var(--cr);width:100%;max-width:640px;max-height:90dvh;overflow:auto;border-radius:28px 28px 0 0;padding:12px 20px calc(24px + var(--sab));transform:translateY(105%);transition:transform .3s}
+#md.on #mb{transform:none}
+#mb::before{content:"";display:block;width:44px;height:5px;border-radius:9px;background:#d9cfb9;margin:0 auto 14px}
+#mb h2{font-size:21px;margin:0 0 6px}
+#mb .b{width:100%;margin-top:16px;padding:16px;font-size:17px}
+#tt{position:fixed;left:50%;bottom:calc(100px + var(--sab));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:99px;display:none;z-index:60;font-size:14px;max-width:90vw;text-align:center}
+@media print{#nav,.hero,.bar,.acts{display:none}#main{margin:0;max-width:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<nav id="nav">
-  <h1>📚 ห้องเรียนออนไลน์</h1>
-  <button onclick="show('home')" class="active" id="btn-home">หน้าหลัก</button>
-  <button onclick="show('announce')" id="btn-announce">ประกาศ</button>
-  <button onclick="show('homework')" id="btn-homework">การบ้าน</button>
-  <button onclick="show('calendar')" id="btn-calendar">ปฏิทิน</button>
-  <button onclick="show('scores')" id="btn-scores">คะแนน</button>
-</nav>
-
-<main id="view">กำลังโหลดข้อมูล...</main>
-
+<div id="app"></div>
+<div id="md" onclick="if(event.target===this)closeModal()"><div id="mb"></div></div>
+<div id="tt"></div>
 <script>
-// ====== ตั้งค่า Supabase API ======
-const SB_URL = 'https://iejmwihipfvtkbvjtude.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllam13aWhpcGZ2dGtidmp0dWRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzQ0MzksImV4cCI6MjEwNjI1MDQzOX0.jR6txR7ztk_iKiF6-oxjkilpVllajLN3koIPNA5uBUY';
-const db = supabase.createClient(SB_URL, SB_KEY);
+// ====== ตั้งค่า: ใส่ค่าจาก Supabase > Project Settings > API ======
+const SB_URL='https://iejmwihipfvtkbvjtude.supabase.co', SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllam13aWhpcGZ2dGtidmp0dWRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzQ0MzksImV4cCI6MjEwNjI1MDQzOX0.jR6txR7ztk_iKiF6-oxjkilpVllajLN3koIPNA5uBUY';
+const db=supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const st=v=>/^(อนุมัติ|แก้ไขแล้ว|คืนแล้ว|เปิด)$/.test(v)?'ok':v==='ไม่อนุมัติ'?'no':'part';
+const DAYS='จันทร์,อังคาร,พุธ,พฤหัสบดี,ศุกร์'.split(',');
+const toast=t=>{const e=$('#tt');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2600)};
+const modal=h=>{$('#mb').innerHTML=h;$('#md').classList.add('on')},closeModal=()=>$('#md').classList.remove('on');
 
-const v = document.getElementById('view');
-let LOCK = [];
-
-const esc = t => String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const em = e => {
-  const m = e?.message || '';
-  return /Load failed|Failed to fetch|NetworkError/i.test(m)
-    ? 'เชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจค่า SB_URL / SB_KEY หรือตรวจสอบสถานะ Supabase'
-    : m || e;
+// ====== เมนู: key:[ชื่อ, ไอคอน, ฟิลด์[ชื่อ,ป้าย,ชนิด,'a'=เฉพาะผู้ดูแล], 'u'=นักเรียนเพิ่มเองได้] ======
+const M={
+ home:['หน้าหลัก','🏠'],
+ schedule:['ตารางเรียน','🗓️',[['day','วัน','sel:'+DAYS],['time','เวลา'],['subject','รายวิชา'],['teacher','ครูผู้สอน'],['room','ห้องเรียน']]],
+ attendance:['เช็กชื่อ','✅',[['name','ชื่อนักเรียน'],['date','วันที่','date'],['status','สถานะ','sel:มา,ขาด,ลา,สาย']]],
+ money:['เงินห้อง','💰',[['title','รายการ'],['type','ประเภท','sel:รายรับ,รายจ่าย'],['amount','จำนวนเงิน (บาท)','num'],['date','วันที่','date'],['who','ผู้จ่าย/หมายเหตุ']]],
+ homework:['การบ้าน','📚',[['subject','รายวิชา'],['task','งานที่สั่ง'],['due','กำหนดส่ง','date'],['detail','รายละเอียด','ta']]],
+ docs:['คลังเอกสาร','🗂️',[['title','ชื่อเอกสาร'],['cat','หมวดหมู่'],['file','ไฟล์','file']]],
+ announce:['ประกาศห้อง','📢',[['title','หัวข้อ'],['body','รายละเอียด','ta'],['pin','ปักหมุด','sel:ไม่ปัก,ปัก'],['date','วันที่เผยแพร่','date']]],
+ members:['สมาชิกห้อง','👥',[['name','ชื่อ-สกุล'],['no','เลขที่'],['sid','รหัสนักเรียน'],['pos','ตำแหน่ง']]],
+ activity:['กิจกรรมห้อง','🎯',[['title','ชื่อกิจกรรม'],['date','วันที่','date'],['time','เวลา'],['place','สถานที่'],['people','ผู้เข้าร่วม']]],
+ calendar:['ปฏิทินห้อง','📆',[['title','เหตุการณ์'],['date','วันที่','date'],['note','หมายเหตุ']]],
+ chat:['แชตห้องเรียน','💬',[['msg','ข้อความ','ta']],'u'],
+ works:['ผลงานนักเรียน','🏆',[['title','ชื่อผลงาน'],['owner','เจ้าของผลงาน'],['detail','รายละเอียด','ta'],['file','รูป/ไฟล์','file']],'u'],
+ leave:['แจ้งลา / ขาดเรียน','📝',[['type','ประเภท','sel:ลา,ขาดเรียน'],['date','วันที่','date'],['reason','เหตุผล','ta'],['status','สถานะ','sel:รออนุมัติ,อนุมัติ,ไม่อนุมัติ','a']],'u'],
+ issue:['แจ้งปัญหาภายในห้อง','🚩',[['title','หัวข้อ'],['detail','รายละเอียด','ta'],['status','สถานะ','sel:รอตรวจสอบ,กำลังแก้ไข,แก้ไขแล้ว','a']],'u'],
+ poll:['แบบสำรวจและโหวต','🗳️',[['q','คำถาม'],['opts','ตัวเลือก (คั่นด้วย ,)'],['status','สถานะ','sel:เปิด,ปิด']]],
+ borrow:['ยืม-คืนอุปกรณ์','🧰',[['item','อุปกรณ์'],['who','ผู้ยืม'],['date','วันที่ยืม','date'],['status','สถานะ','sel:ยืมอยู่,คืนแล้ว']]],
+ duty:['ตารางเวรประจำวัน','🧹',[['day','วัน','sel:'+DAYS],['group','กลุ่มเวร'],['names','รายชื่อ']]],
+ role:['รายชื่อเวรและหน้าที่','📋',[['duty','หน้าที่'],['who','ผู้รับผิดชอบ'],['detail','รายละเอียด','ta']]],
+ news:['ข่าวสารจากโรงเรียน','🏫',[['title','หัวข้อ'],['body','รายละเอียด','ta'],['link','ลิงก์']]],
+ award:['คะแนนกิจกรรมและเกียรติบัตร','🎖️',[['name','ชื่อนักเรียน'],['act','กิจกรรม'],['score','คะแนน','num'],['file','เกียรติบัตร','file']]],
+ forms:['ดาวน์โหลดไฟล์และแบบฟอร์ม','⬇️',[['title','ชื่อไฟล์'],['file','ไฟล์','file']]],
+ contact:['ติดต่อหัวหน้าห้อง','☎️',[['name','ชื่อ'],['pos','ตำแหน่ง'],['ch','ช่องทางติดต่อ','ta']]],
+ settings:['ตั้งค่าระบบ','⚙️',[['key','หัวข้อ (เช่น ชื่อห้อง, ปีการศึกษา, ภาคเรียน)'],['val','ค่า']]]
 };
+const MAIN='home schedule attendance money homework docs announce members activity calendar chat works'.split(' ');
+const MORE='leave issue poll borrow duty role news award forms contact'.split(' ');
+const AD=[['ภาพรวมระบบ','ov'],['จัดการนักเรียน','members'],['จัดการการเช็กชื่อ','attendance'],['จัดการเงินห้อง','money'],['จัดการตารางเรียน','schedule'],['จัดการการบ้าน','homework'],['จัดการประกาศ','announce'],['จัดการตารางเวร','duty'],['จัดการกิจกรรม','activity'],['จัดการคลังไฟล์','docs'],['จัดการแชต','chat'],['จัดการแบบสำรวจ','poll'],['จัดการคำร้อง (ลา)','leave'],['จัดการแจ้งปัญหา','issue'],['จัดการอุปกรณ์','borrow'],['จัดการสิทธิ์','perms'],['รายงานและส่งออก','reports'],['ประวัติการทำงาน','logs'],['ล็อกเมนู (ต้องเข้าสู่ระบบ)','locks'],['ตั้งค่าระบบ','settings'],['ถังขยะ (กู้คืน)','trash']];
+const ADMIN_ONLY=['admin','locks','ov','perms','reports','logs','trash'];
 
-async function q(table) {
-  return await db.from('items').select('*').eq('type', table).order('created_at', { ascending: false });
-}
+let LOCK=[],ME,cur='home',Q='',ROWS=[],VOTES=[],ch;
+const isG=()=>ME?.role==='guest';
+const gate=v=>{v.innerHTML='<div class="card pin" style="text-align:center"><div style="font-size:48px">🔒</div><div class="t">เมนูนี้ต้องเข้าสู่ระบบก่อน</div><p class="mu" style="margin:6px 0 14px">สมัครหรือเข้าสู่ระบบด้วยอีเมลเพื่อใช้งาน</p><button class="b" onclick="authChoice()">เข้าสู่ระบบ / สมัครสมาชิก</button></div>'};
+const isA=()=>ME&&['admin','super'].includes(ME.role), isS=()=>ME?.role==='super';
+const canEdit=m=>isS()||(ME?.role==='admin'&&(ME.perms||[]).includes(m));
+const title=k=>M[k]?M[k][0]:(AD.find(a=>a[1]===k)||[k])[0];
 
-async function list(type, target) {
-  target.innerHTML = 'กำลังโหลด...';
-  const { data, error } = await q(type);
-  if (error) {
-    target.innerHTML = `<p class="err">${esc(em(error))}</p>`;
-    return;
-  }
-  if (!data || data.length === 0) {
-    target.innerHTML = '<div class="card"><p>ยังไม่มีข้อมูลในหมวดนี้</p></div>';
-    return;
-  }
-  target.innerHTML = data.map(item => `
-    <div class="card">
-      <h2>${esc(item.title)}</h2>
-      <div class="meta">${esc(item.created_at ? new Date(item.created_at).toLocaleDateString('th-TH') : '')}</div>
-      <p>${esc(item.content || item.description || '')}</p>
-    </div>
-  `).join('');
-}
+// ====== เข้าสู่ระบบ ======
+const em=e=>{const m=e?.message||'';return /Load failed|Failed to fetch|NetworkError/i.test(m)?'เชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจค่า SB_URL / SB_KEY ในไฟล์ classroom.html (ตอนนี้ตั้งไว้เป็น: '+SB_URL+')':/Invalid login/i.test(m)?'ชื่อ/อีเมล หรือรหัสผ่านไม่ถูกต้อง':m||e};
+function authChoice(){modal(`<h2>เข้าใช้งานระบบ</h2><p class="mu">เลือกสิ่งที่ต้องการทำ</p><div class="grid" style="margin-top:14px"><button class="tile" onclick="loginSheet()"><i>🔑</i>เข้าสู่ระบบ<span class="mu">มีบัญชีแล้ว</span></button><button class="tile" onclick="signupSheet()"><i>✨</i>สมัครสมาชิก<span class="mu">ใช้งานครั้งแรก</span></button></div>`)}
+function loginSheet(){modal(`<h2>เข้าสู่ระบบ</h2><label>ชื่อ-สกุล หรือ อีเมล</label><input id="ae" autocomplete="username" autocapitalize="none"><label>รหัสผ่าน</label><input id="ap" type="password" autocomplete="current-password"><button class="b" onclick="login()">เข้าสู่ระบบ</button><p class="mu" style="text-align:center;margin-top:14px"><a href="#" style="color:var(--or)" onclick="authChoice();return false">← กลับไปเลือกใหม่</a></p>`)}
+function signupSheet(){modal(`<h2>สมัครสมาชิก</h2><label>ชื่อ-สกุล (ใช้เข้าสู่ระบบได้ ห้ามซ้ำกับคนอื่น)</label><input id="an" autocomplete="name"><label>อีเมล</label><input id="ae" type="email" autocomplete="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input id="ap" type="password" autocomplete="new-password"><button class="b" onclick="signup()">สมัครสมาชิก</button><p class="mu" style="text-align:center;margin-top:14px"><a href="#" style="color:var(--or)" onclick="authChoice();return false">← กลับไปเลือกใหม่</a></p>`)}
+async function login(){let id=$('#ae').value.trim();const pw=$('#ap').value;if(!id||!pw)return toast('กรอกชื่อหรืออีเมล และรหัสผ่านก่อน');
+ if(!id.includes('@')){const {data,error}=await db.rpc('login_email',{u:id});if(error)return toast(em(error));if(!data)return toast('ไม่พบชื่อนี้ ลองใช้อีเมลแทน หรือสมัครสมาชิกก่อน');id=data}
+ const {error}=await db.auth.signInWithPassword({email:id,password:pw});if(error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+em(error));closeModal();boot()}
+async function signup(){const n=$('#an').value.trim(),e=$('#ae').value.trim();if(!n)return toast('กรอกชื่อ-สกุลก่อนสมัคร');if(!e)return toast('กรอกอีเมลก่อนสมัคร');
+ const t=await db.rpc('name_taken',{n});if(t.error)return toast(em(t.error));if(t.data)return toast('ชื่อนี้มีคนใช้แล้ว เพิ่มนามสกุลหรือเลขท้ายให้ต่างกัน');
+ const {data,error}=await db.auth.signUp({email:e,password:$('#ap').value,options:{data:{name:n}}});
+ if(error)return toast(em(error));data.session?(closeModal(),boot()):toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ')}
+async function logout(){await db.auth.signOut();ch&&db.removeChannel(ch);location.reload()}
+async function boot(){const {data:{session}}=await db.auth.getSession();
+ if(session){const {data}=await db.from('profiles').select('*').eq('id',session.user.id).single();
+  ME=data||{id:session.user.id,email:session.user.email,name:session.user.email,role:'student',perms:[]}}
+ else ME={role:'guest',name:'ผู้เยี่ยมชม',perms:[]};
+ LOCK=((await db.from('locked_modules').select('module')).data||[]).map(x=>x.module);
+ $('#app').innerHTML=`<header class="hero" id="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div>${isG()?'<button class="pill" onclick="authChoice()">เข้าสู่ระบบ / สมัคร</button>':`<span class="pill">${esc(ME.name||ME.email)}</span>`}<h1 id="h1"></h1><p id="hp"></p><div class="mas" id="hm"></div></header><main id="main"></main><nav id="nav"></nav>`;
+ ch=db.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{
+  const n=p.new||{};if(p.eventType==='INSERT'&&(n.module==='announce'||n.module==='homework'))toast('🔔 มี'+M[n.module][0]+'ใหม่');
+  if(!n.module||n.module===cur)if(!$('#md').classList.contains('on'))show(cur,1)}).subscribe();
+ if(!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(SB_URL))toast('SB_URL ไม่ถูกต้อง ต้องหน้าตาแบบ https://xxxx.supabase.co (ไม่มี / ท้าย)');
+ show('home')}
 
-const SP = {
-  home: async (m, target) => {
-    target.innerHTML = 'กำลังโหลดหน้าหลัก...';
-    try {
-      const results = await Promise.all(['announce', 'homework', 'calendar'].map(k => q(k).then(x => (x.data || []).slice(0, 3))));
-      const [announces, homeworks, calendars] = results;
-      target.innerHTML = `
-        <div class="card">
-          <h2>📢 ประกาศล่าสุด</h2>
-          ${announces.length ? announces.map(a => `<p>• ${esc(a.title)}</p>`).join('') : '<p class="meta">ไม่มีประกาศใหม่</p>'}
-        </div>
-        <div class="card">
-          <h2>📝 การบ้านที่ต้องส่ง</h2>
-          ${homeworks.length ? homeworks.map(h => `<p>• ${esc(h.title)}</p>`).join('') : '<p class="meta">ไม่มีการบ้านค้างส่ง</p>'}
-        </div>
-      `;
-    } catch(e) {
-      target.innerHTML = `<p class="err">${esc(em(e))}</p>`;
-    }
-  }
-};
+// ====== เมนูล่าง + หัวหน้าจอ ======
+const NAV=[['home','<path d="M3 11l9-8 9 8M5 10v10h14V10"/>','หน้าหลัก'],['homework','<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/>','การบ้าน'],['menu','<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>','เมนู'],['announce','<path d="M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/>','ประกาศ'],['chat','<path d="M4 5h16v11H9l-5 4z"/>','แชต']];
+const HP={home:'ประกาศ การบ้าน และปฏิทินล่าสุด',menu:'เลือกเมนูที่ต้องการใช้งาน',admin:'เมนูจัดการระบบและฐานข้อมูล',money:'รายรับ รายจ่าย และเงินคงเหลือ',announce:'ข่าวสารจากหัวหน้าห้อง'};
+function nav(){
+ $('#nav').innerHTML=NAV.map(([k,p,l])=>{const i=`<svg viewBox="0 0 24 24">${p}</svg>`;return `<button class="${k===cur?'on':''}${k==='menu'?' plus':''}" onclick="show('${k}')">${k==='menu'?`<span>${i}</span>`:i}${l}</button>`}).join('');
+ $('#h1').textContent=cur==='home'?'สวัสดี '+(ME.name||''):cur==='menu'?'เมนูทั้งหมด':cur==='admin'?'ADMIN PANEL':title(cur);
+ $('#hp').textContent=HP[cur]||'';$('#hm').textContent=cur==='menu'?'🧭':(M[cur]?.[1]||'🛠️');
+ $('#hero').className='hero'+(cur==='admin'?' o':['money','award'].includes(cur)?' g':'')}
+async function show(m,silent){
+ cur=m;if(!silent){Q='';scrollTo(0,0)}nav();
+ const v=$('#main');if(!silent)v.innerHTML='<p class="mu">กำลังโหลด...</p>';
+ try{if(isG()&&(LOCK.includes(m)||ADMIN_ONLY.includes(m)))return gate(v);if(ADMIN_ONLY.includes(m)&&!isA())throw Error('เฉพาะผู้ดูแล');await(SP[m]||list)(m,v)}
+ catch(e){v.innerHTML='<p class="err">'+esc(em(e))+'</p>'}}
 
-async function show(moduleName) {
-  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-  const btn = document.getElementById(`btn-${moduleName}`);
-  if (btn) btn.classList.add('active');
+// ====== รายการทั่วไป (ใช้กับทุกเมนู) ======
+const q=m=>db.from('items').select('*').eq('module',m).is('deleted_at',null).order('created_at',{ascending:false}).limit(500);
+async function list(m,v){
+ let {data,error}=await q(m);if(error)throw error;
+ if(m==='announce'){if(!canEdit(m))data=data.filter(x=>!x.data.date||x.data.date<=today());data.sort((a,b)=>(b.data.pin==='ปัก')-(a.data.pin==='ปัก'))}
+ if(m==='poll')VOTES=(await q('vote')).data||[];
+ ROWS=data;const [t,ic,,w]=M[m],add=canEdit(m)||w==='u';
+ v.innerHTML=`<h2>${ic} ${t}</h2><div class="bar"><input id="q" placeholder="ค้นหา..." value="${esc(Q)}" oninput="Q=this.value;paint(cur)">${add?`<button class="b" onclick="form('${m}')">+ เพิ่ม</button>`:''}</div>${m==='money'?sum(data):''}<div id="ls"></div>`;paint(m)}
+function sum(d){let i=0,o=0;d.forEach(x=>x.data.type==='รายจ่าย'?o+=+x.data.amount||0:i+=+x.data.amount||0);
+ return `<div class="grid"><div class="card">รายรับ<b class="n" style="color:var(--gr)">${i.toLocaleString()}</b></div><div class="card">รายจ่าย<b class="n" style="color:var(--rd)">${o.toLocaleString()}</b></div><div class="card">คงเหลือ<b class="n">${(i-o).toLocaleString()}</b></div></div>`}
+function paint(m){const s=Q.toLowerCase(),r=ROWS.filter(x=>!s||JSON.stringify(x.data).toLowerCase().includes(s));
+ $('#ls').innerHTML=r.length?r.map(x=>card(m,x)).join(''):'<p class="mu">ยังไม่มีข้อมูล'+(canEdit(m)||M[m][3]==='u'?' — กด “+ เพิ่ม” เพื่อเริ่มต้น':'')+'</p>'}
+function card(m,r){const F=M[m][2],d=r.data,ed=canEdit(m);
+ const f0=F[0][0];let h=`<div class="card ${d.pin==='ปัก'?'pin':''}"><div class="t">${esc(d[f0])}</div>`;
+ F.slice(1).forEach(([k,l,t])=>{let v=d[k];if(k==='status'&&!v)v='รออนุมัติ';if(!v||k==='pin')return;
+  h+=`<p><span class="mu">${l}:</span> ${t==='file'?`<a href="${esc(v)}" target="_blank" rel="noopener">เปิดไฟล์</a>`:k==='status'?`<span class="tag ${st(v)}">${esc(v)}</span>`:esc(v)}</p>`});
+ if(m==='chat')h=`<div class="card"><p>${esc(d.msg)}</p><p class="mu">${new Date(r.created_at).toLocaleString('th-TH')}</p>`;
+ if(m==='poll'){const o=(d.opts||'').split(',').map(s=>s.trim()).filter(Boolean),vs=VOTES.filter(x=>x.data.poll===r.id),mine=vs.some(x=>x.created_by===ME.id);
+  h+=`<div class="acts">${o.map(c=>`<button class="b g s" ${d.status==='ปิด'||mine?'disabled':''} onclick="vote('${r.id}','${esc(c).replace(/'/g,'')}')">${esc(c)} · ${vs.filter(x=>x.data.choice===c).length}</button>`).join('')}</div>`}
+ if(ed)h+=`<div class="acts"><button class="b g s" onclick="form('${m}','${r.id}')">แก้ไข</button><button class="b r s" onclick="del('${r.id}')">ลบ</button></div>`;
+ return h+'</div>'}
+async function vote(poll,choice){if(isG())return authChoice();const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
 
-  if (LOCK.includes(moduleName)) {
-    v.innerHTML = '<div class="card"><p class="err">โมดูลนี้ถูกล็อคอยู่ ไม่สามารถเข้าถึงได้</p></div>';
-    return;
-  }
+// ====== ฟอร์ม เพิ่ม/แก้ไข/ลบ ======
+function inp(k,t='',v=''){v=esc(v);
+ if(t==='ta')return `<textarea id="f_${k}">${v}</textarea>`;
+ if(t.startsWith('sel:'))return `<select id="f_${k}">${t.slice(4).split(',').map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
+ return `<input id="f_${k}" type="${{date:'date',num:'number',file:'file'}[t]||'text'}" ${t==='file'?'':`value="${v}"`}>`}
+function form(m,id){if(isG())return authChoice();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
+ modal(`<h2>${r?'แก้ไข':'เพิ่ม'} ${M[m][0]}</h2>`+F.map(([k,l,t])=>`<label>${l}</label>`+inp(k,t,d[k])).join('')+`<button class="b" onclick="save('${m}','${id||''}')">บันทึก</button>`)}
+async function save(m,id){const d={...(ROWS.find(x=>x.id===id)?.data||{})};
+ for(const [k,,t] of M[m][2]){const e=$('#f_'+k);if(!e)continue;
+  if(t==='file'){const f=e.files[0];if(f){const p=`${ME.id}/${Date.now()}-${f.name.replace(/[^\w.-]/g,'_')}`;
+   const u=await db.storage.from('files').upload(p,f);if(u.error)return toast('อัปโหลดไม่สำเร็จ: '+u.error.message);d[k]=db.storage.from('files').getPublicUrl(p).data.publicUrl}}
+  else d[k]=e.value.trim()}
+ if(!String(d[M[m][2][0][0]]||'').trim())return toast('กรอก “'+M[m][2][0][1]+'” ก่อนบันทึก');
+ const {error}=await(id?db.from('items').update({data:d}).eq('id',id):db.from('items').insert({module:m,data:d,created_by:ME.id}));
+ if(error)return toast(error.message);closeModal();toast('บันทึกแล้ว');show(m,1)}
+async function del(id){if(!confirm('ย้ายรายการนี้ไปถังขยะ? (กู้คืนได้ที่ ADMIN PANEL > ถังขยะ)'))return;
+ const {error}=await db.from('items').update({deleted_at:new Date().toISOString()}).eq('id',id);toast(error?error.message:'ย้ายไปถังขยะแล้ว');show(cur,1)}
 
-  try {
-    await (SP[moduleName] || list)(moduleName, v);
-  } catch(e) {
-    v.innerHTML = `<p class="err">${esc(em(e))}</p>`;
-  }
-}
-
-async function boot() {
-  try {
-    const { data: lockData } = await db.from('locked_modules').select('module');
-    LOCK = (lockData || []).map(x => x.module);
-  } catch(e) {
-    console.warn('Cannot load locked modules:', e);
-  }
-  show('home');
-}
+// ====== หน้าพิเศษ ======
+const SP={};
+SP.menu=(m,v)=>{const t=k=>`<button class="tile" onclick="show('${k}')"><i>${M[k][1]}</i>${M[k][0]}${LOCK.includes(k)?' 🔒':''}</button>`;
+ v.innerHTML=`<div class="card pin"><div class="t">${esc(ME.name||ME.email)}</div><span class="tag">${{guest:'ผู้เยี่ยมชม',student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'}[ME.role]}</span></div><div class="mh">เมนูหลัก</div><div class="grid">${MAIN.filter(k=>k!=='home').map(t).join('')}</div><div class="mh">ระบบเพิ่มเติม</div><div class="grid">${MORE.map(t).join('')}</div>${isA()?`<div class="mh">ผู้ดูแล</div><div class="grid"><button class="tile" onclick="show('admin')"><i>🛠️</i>ADMIN PANEL</button></div>`:''}${isG()?'<button class="b" style="width:100%" onclick="authChoice()">เข้าสู่ระบบ / สมัครสมาชิก</button>':'<button class="b g" style="width:100%" onclick="logout()">ออกจากระบบ</button>'}`};
+SP.home=async(m,v)=>{const r=await Promise.all(['announce','homework','calendar'].map(k=>q(k).then(x=>(x.data||[]).slice(0,3))));
+ const blk=(t,k,rs)=>`<div class="card"><div class="t">${t}</div>${rs.length?rs.map(x=>`<p onclick="show('${k}')" style="cursor:pointer">• ${esc(x.data[M[k][2][0][0]])}${x.data.due?` <span class="mu">ส่ง ${esc(x.data.due)}</span>`:''}${x.data.date&&k==='calendar'?` <span class="mu">${esc(x.data.date)}</span>`:''}</p>`).join(''):'<p class="mu">ยังไม่มีข้อมูล</p>'}</div>`;
+ v.innerHTML=`<h2>สวัสดี ${esc(ME.name||'')} 👋</h2>`+blk('📢 ประกาศล่าสุด','announce',r[0])+blk('📚 การบ้านล่าสุด','homework',r[1])+blk('📆 ปฏิทินห้อง','calendar',r[2])};
+SP.admin=(m,v)=>{v.innerHTML='<h2>🛠️ ADMIN PANEL</h2><p class="mu">เฉพาะผู้ดูแล · เมนูจัดการระบบและฐานข้อมูล</p><div class="grid">'+AD.map(([t,k])=>`<button class="tile" onclick="show('${k}')">${esc(t)}</button>`).join('')+'</div><p class="mu">รองหัวหน้าห้องจะแก้ไขได้เฉพาะเมนูที่หัวหน้าห้องกำหนดสิทธิ์ให้</p>'};
+SP.ov=async(m,v)=>{const {data}=await db.from('items').select('module,data').is('deleted_at',null).limit(5000);
+ const c={},bal=data.filter(x=>x.module==='money').reduce((s,x)=>s+(x.data.type==='รายจ่าย'?-1:1)*(+x.data.amount||0),0);data.forEach(x=>c[x.module]=(c[x.module]||0)+1);
+ const {count}=await db.from('profiles').select('*',{count:'exact',head:true});
+ v.innerHTML=`<h2>📊 ภาพรวมระบบ</h2><div class="grid"><div class="card">ผู้ใช้งานระบบ<b class="n">${count}</b></div><div class="card">เงินห้องคงเหลือ<b class="n">${bal.toLocaleString()}</b></div>`+
+ ['members','announce','homework','leave','issue','chat','docs'].map(k=>`<div class="card">${M[k][1]} ${M[k][0]}<b class="n">${c[k]||0}</b></div>`).join('')+'</div>'+
+ (isS()?`<h2>กิจกรรมล่าสุด</h2>${await logHtml(8)}`:'')};
+SP.locks=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');
+ v.innerHTML='<p class="mu" style="margin:0 4px 12px">ติ๊ก = ต้องเข้าสู่ระบบก่อนจึงจะเปิดเมนูนั้นได้ · ไม่ติ๊ก = ใครก็ดูได้โดยไม่ต้องสมัคร (การเพิ่ม/แก้ไขข้อมูลต้องเข้าสู่ระบบเสมอ)</p>'+[...MAIN.slice(1),...MORE].map(k=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>${M[k][1]} ${M[k][0]}</span><input type="checkbox" style="width:26px;min-height:26px;padding:0;appearance:auto;-webkit-appearance:checkbox" ${LOCK.includes(k)?'checked':''} onchange="setLock('${k}',this.checked)"></div>`).join('')};
+async function setLock(k,on){const {error}=await(on?db.from('locked_modules').upsert({module:k}):db.from('locked_modules').delete().eq('module',k));if(error)return toast(error.message);LOCK=on?[...LOCK,k]:LOCK.filter(x=>x!==k);toast('บันทึกแล้ว')}
+SP.perms=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');const {data}=await db.from('profiles').select('*').order('name');
+ v.innerHTML='<h2>🔐 จัดการสิทธิ์</h2><p class="mu">student = นักเรียน · admin = รองหัวหน้า · super = หัวหน้าห้อง<br>ช่อง perms ใส่รหัสเมนูที่ admin แก้ไขได้ คั่นด้วย , เช่น money,homework,announce</p>'+
+ data.map(p=>`<div class="card"><b>${esc(p.name)}</b> <span class="mu">${esc(p.email)}</span><div class="bar" style="margin-top:8px"><select id="r_${p.id}" style="width:130px">${['student','admin','super'].map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select><input id="p_${p.id}" value="${esc((p.perms||[]).join(','))}" placeholder="perms"><button class="b s" onclick="setRole('${p.id}')">บันทึก</button></div></div>`).join('')};
+async function setRole(id){const {error}=await db.from('profiles').update({role:$('#r_'+id).value,perms:$('#p_'+id).value.split(',').map(s=>s.trim()).filter(Boolean)}).eq('id',id);toast(error?error.message:'บันทึกสิทธิ์แล้ว')}
+async function logHtml(n){const {data,error}=await db.from('logs').select('*').order('at',{ascending:false}).limit(n);if(error)return '<p class="err">'+esc(error.message)+'</p>';
+ const {data:ps}=await db.from('profiles').select('id,name'),nm=Object.fromEntries((ps||[]).map(p=>[p.id,p.name]));
+ return data.map(l=>`<div class="card"><p><span class="tag">${l.action}</span> ${esc(title(l.module))} · ${esc(nm[l.who]||'ระบบ')}</p><p class="mu">${new Date(l.at).toLocaleString('th-TH')}</p></div>`).join('')||'<p class="mu">ยังไม่มีประวัติ</p>'}
+SP.logs=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');v.innerHTML='<h2>🕘 ประวัติการทำงาน</h2>'+await logHtml(100)};
+SP.trash=async(m,v)=>{const {data,error}=await db.from('items').select('*').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(100);if(error)throw error;
+ v.innerHTML='<h2>🗑️ ถังขยะ</h2>'+(data.map(x=>`<div class="card"><span class="tag">${esc(title(x.module))}</span><p>${esc(Object.values(x.data)[0]||'')}</p><div class="acts"><button class="b g s" onclick="restore('${x.id}')">กู้คืน</button></div></div>`).join('')||'<p class="mu">ถังขยะว่างเปล่า</p>')};
+async function restore(id){const {error}=await db.from('items').update({deleted_at:null}).eq('id',id);toast(error?error.message:'กู้คืนแล้ว');show('trash',1)}
+SP.reports=(m,v)=>{v.innerHTML='<h2>📤 รายงานและส่งออก</h2><p class="mu">CSV เปิดใน Excel ได้ · PDF ใช้ปุ่มพิมพ์แล้วเลือก “บันทึกเป็น PDF”</p><div class="grid">'+Object.keys(M).filter(k=>M[k][2]).map(k=>`<button class="tile" onclick="csv('${k}')">${M[k][1]} ${M[k][0]}</button>`).join('')+'</div><div class="bar"><button class="b" onclick="backup()">💾 สำรองข้อมูลทั้งหมด (JSON)</button><button class="b g" onclick="print()">🖨️ พิมพ์ / PDF</button></div>'};
+function dl(n,t,s){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:t}));a.download=n;a.click()}
+async function csv(k){const {data}=await q(k),F=M[k][2],c=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+ dl(k+'-'+today()+'.csv','text/csv;charset=utf-8','\ufeff'+[F.map(f=>c(f[1])),...data.map(r=>F.map(f=>c(r.data[f[0]])))].map(r=>r.join(',')).join('\r\n'))}
+async function backup(){const {data}=await db.from('items').select('*').limit(10000);dl('backup-'+today()+'.json','application/json',JSON.stringify(data))}
 
 boot();
 </script>
