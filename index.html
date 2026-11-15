@@ -24,6 +24,7 @@ label{display:block;font-size:14px;color:var(--mu);margin:12px 0 6px}
 .hero.g{background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,#2e9e5b,#6fd19a);background-size:18px 18px,100% 100%}
 .lg{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
 .dot{width:9px;height:9px;border-radius:50%;background:#69f0ae;box-shadow:0 0 8px #69f0ae}
+.pills{position:absolute;right:20px;top:calc(18px + var(--sat));display:flex;gap:8px}.pills .pill{position:static;max-width:none}
 .pill{position:absolute;right:20px;top:calc(18px + var(--sat));background:rgba(255,255,255,.28);padding:6px 14px;border-radius:99px;font-size:13px;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hero h1{font-size:26px;font-weight:600;margin-top:16px;line-height:1.25;max-width:68%}
 .hero p{opacity:.92;margin-top:6px;font-size:14px;max-width:68%}
@@ -125,27 +126,34 @@ const ADMIN_ONLY=['admin','locks','ov','perms','reports','logs','trash'];
 
 let LOCK=[],ME,cur='home',Q='',ROWS=[],VOTES=[],ch;
 const isG=()=>ME?.role==='guest';
-const gate=v=>{v.innerHTML='<div class="card pin" style="text-align:center"><div style="font-size:48px">🔒</div><div class="t">เมนูนี้ต้องเข้าสู่ระบบก่อน</div><p class="mu" style="margin:6px 0 14px">สมัครหรือเข้าสู่ระบบด้วยอีเมลเพื่อใช้งาน</p><button class="b" onclick="loginSheet()">เข้าสู่ระบบ / สมัครสมาชิก</button></div>'};
+const gate=v=>{v.innerHTML='<div class="card pin" style="text-align:center"><div style="font-size:48px">🔒</div><div class="t">เมนูนี้ต้องเข้าสู่ระบบก่อน</div><p class="mu" style="margin:6px 0 14px">สมัครหรือเข้าสู่ระบบด้วยอีเมลเพื่อใช้งาน</p><button class="b" onclick="authChoice()">เข้าสู่ระบบ / สมัครสมาชิก</button></div>'};
 const isA=()=>ME&&['admin','super'].includes(ME.role), isS=()=>ME?.role==='super';
 const canEdit=m=>isS()||(ME?.role==='admin'&&(ME.perms||[]).includes(m));
 const title=k=>M[k]?M[k][0]:(AD.find(a=>a[1]===k)||[k])[0];
 
 // ====== เข้าสู่ระบบ ======
-function loginSheet(){modal(`<h2>เข้าสู่ระบบ / สมัครสมาชิก</h2><label>ชื่อ-สกุล (เฉพาะตอนสมัคร)</label><input id="an"><label>อีเมล</label><input id="ae" type="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input id="ap" type="password"><button class="b" onclick="login()">เข้าสู่ระบบ</button><button class="b g" style="margin-top:10px" onclick="signup()">สมัครสมาชิก</button>`)}
-async function login(){const {error}=await db.auth.signInWithPassword({email:$('#ae').value.trim(),password:$('#ap').value});if(error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+error.message);closeModal();boot()}
-async function signup(){const n=$('#an').value.trim();if(!n)return toast('กรอกชื่อ-สกุลก่อนสมัคร');
- const {data,error}=await db.auth.signUp({email:$('#ae').value.trim(),password:$('#ap').value,options:{data:{name:n}}});
- if(error)return toast(error.message);data.session?(closeModal(),boot()):toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ')}
+const em=e=>{const m=e?.message||'';return /Load failed|Failed to fetch|NetworkError/i.test(m)?'เชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจค่า SB_URL / SB_KEY ในไฟล์ classroom.html':/Invalid login/i.test(m)?'ชื่อ/อีเมล หรือรหัสผ่านไม่ถูกต้อง':m||e};
+function authChoice(){modal(`<h2>เข้าใช้งานระบบ</h2><p class="mu">เลือกสิ่งที่ต้องการทำ</p><div class="grid" style="margin-top:14px"><button class="tile" onclick="loginSheet()"><i>🔑</i>เข้าสู่ระบบ<span class="mu">มีบัญชีแล้ว</span></button><button class="tile" onclick="signupSheet()"><i>✨</i>สมัครสมาชิก<span class="mu">ใช้งานครั้งแรก</span></button></div>`)}
+function loginSheet(){modal(`<h2>เข้าสู่ระบบ</h2><label>ชื่อ-สกุล หรือ อีเมล</label><input id="ae" autocomplete="username" autocapitalize="none"><label>รหัสผ่าน</label><input id="ap" type="password" autocomplete="current-password"><button class="b" onclick="login()">เข้าสู่ระบบ</button><p class="mu" style="text-align:center;margin-top:14px"><a href="#" style="color:var(--or)" onclick="authChoice();return false">← กลับไปเลือกใหม่</a></p>`)}
+function signupSheet(){modal(`<h2>สมัครสมาชิก</h2><label>ชื่อ-สกุล (ใช้เข้าสู่ระบบได้ ห้ามซ้ำกับคนอื่น)</label><input id="an" autocomplete="name"><label>อีเมล</label><input id="ae" type="email" autocomplete="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input id="ap" type="password" autocomplete="new-password"><button class="b" onclick="signup()">สมัครสมาชิก</button><p class="mu" style="text-align:center;margin-top:14px"><a href="#" style="color:var(--or)" onclick="authChoice();return false">← กลับไปเลือกใหม่</a></p>`)}
+async function login(){let id=$('#ae').value.trim();const pw=$('#ap').value;if(!id||!pw)return toast('กรอกชื่อหรืออีเมล และรหัสผ่านก่อน');
+ if(!id.includes('@')){const {data,error}=await db.rpc('login_email',{u:id});if(error)return toast(em(error));if(!data)return toast('ไม่พบชื่อนี้ ลองใช้อีเมลแทน หรือสมัครสมาชิกก่อน');id=data}
+ const {error}=await db.auth.signInWithPassword({email:id,password:pw});if(error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+em(error));closeModal();boot()}
+async function signup(){const n=$('#an').value.trim(),e=$('#ae').value.trim();if(!n)return toast('กรอกชื่อ-สกุลก่อนสมัคร');if(!e)return toast('กรอกอีเมลก่อนสมัคร');
+ const t=await db.rpc('name_taken',{n});if(t.error)return toast(em(t.error));if(t.data)return toast('ชื่อนี้มีคนใช้แล้ว เพิ่มนามสกุลหรือเลขท้ายให้ต่างกัน');
+ const {data,error}=await db.auth.signUp({email:e,password:$('#ap').value,options:{data:{name:n}}});
+ if(error)return toast(em(error));data.session?(closeModal(),boot()):toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ')}
 async function logout(){await db.auth.signOut();ch&&db.removeChannel(ch);location.reload()}
 async function boot(){const {data:{session}}=await db.auth.getSession();
  if(session){const {data}=await db.from('profiles').select('*').eq('id',session.user.id).single();
   ME=data||{id:session.user.id,email:session.user.email,name:session.user.email,role:'student',perms:[]}}
  else ME={role:'guest',name:'ผู้เยี่ยมชม',perms:[]};
  LOCK=((await db.from('locked_modules').select('module')).data||[]).map(x=>x.module);
- $('#app').innerHTML=`<header class="hero" id="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div>${isG()?'<button class="pill" onclick="loginSheet()">เข้าสู่ระบบ</button>':`<span class="pill">${esc(ME.name||ME.email)}</span>`}<h1 id="h1"></h1><p id="hp"></p><div class="mas" id="hm"></div></header><main id="main"></main><nav id="nav"></nav>`;
+ $('#app').innerHTML=`<header class="hero" id="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div>${isG()?'<button class="pill" onclick="authChoice()">เข้าสู่ระบบ / สมัคร</button>':`<span class="pill">${esc(ME.name||ME.email)}</span>`}<h1 id="h1"></h1><p id="hp"></p><div class="mas" id="hm"></div></header><main id="main"></main><nav id="nav"></nav>`;
  ch=db.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{
   const n=p.new||{};if(p.eventType==='INSERT'&&(n.module==='announce'||n.module==='homework'))toast('🔔 มี'+M[n.module][0]+'ใหม่');
   if(!n.module||n.module===cur)if(!$('#md').classList.contains('on'))show(cur,1)}).subscribe();
+ if(SB_URL.includes('YOUR-PROJECT'))toast('ยังไม่ได้ใส่ SB_URL / SB_KEY ในไฟล์ classroom.html');
  show('home')}
 
 // ====== เมนูล่าง + หัวหน้าจอ ======
@@ -160,7 +168,7 @@ async function show(m,silent){
  cur=m;if(!silent){Q='';scrollTo(0,0)}nav();
  const v=$('#main');if(!silent)v.innerHTML='<p class="mu">กำลังโหลด...</p>';
  try{if(isG()&&(LOCK.includes(m)||ADMIN_ONLY.includes(m)))return gate(v);if(ADMIN_ONLY.includes(m)&&!isA())throw Error('เฉพาะผู้ดูแล');await(SP[m]||list)(m,v)}
- catch(e){v.innerHTML='<p class="err">'+esc(e.message||e)+'</p>'}}
+ catch(e){v.innerHTML='<p class="err">'+esc(em(e))+'</p>'}}
 
 // ====== รายการทั่วไป (ใช้กับทุกเมนู) ======
 const q=m=>db.from('items').select('*').eq('module',m).is('deleted_at',null).order('created_at',{ascending:false}).limit(500);
@@ -183,14 +191,14 @@ function card(m,r){const F=M[m][2],d=r.data,ed=canEdit(m);
   h+=`<div class="acts">${o.map(c=>`<button class="b g s" ${d.status==='ปิด'||mine?'disabled':''} onclick="vote('${r.id}','${esc(c).replace(/'/g,'')}')">${esc(c)} · ${vs.filter(x=>x.data.choice===c).length}</button>`).join('')}</div>`}
  if(ed)h+=`<div class="acts"><button class="b g s" onclick="form('${m}','${r.id}')">แก้ไข</button><button class="b r s" onclick="del('${r.id}')">ลบ</button></div>`;
  return h+'</div>'}
-async function vote(poll,choice){if(isG())return loginSheet();const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
+async function vote(poll,choice){if(isG())return authChoice();const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
 
 // ====== ฟอร์ม เพิ่ม/แก้ไข/ลบ ======
 function inp(k,t='',v=''){v=esc(v);
  if(t==='ta')return `<textarea id="f_${k}">${v}</textarea>`;
  if(t.startsWith('sel:'))return `<select id="f_${k}">${t.slice(4).split(',').map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
  return `<input id="f_${k}" type="${{date:'date',num:'number',file:'file'}[t]||'text'}" ${t==='file'?'':`value="${v}"`}>`}
-function form(m,id){if(isG())return loginSheet();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
+function form(m,id){if(isG())return authChoice();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
  modal(`<h2>${r?'แก้ไข':'เพิ่ม'} ${M[m][0]}</h2>`+F.map(([k,l,t])=>`<label>${l}</label>`+inp(k,t,d[k])).join('')+`<button class="b" onclick="save('${m}','${id||''}')">บันทึก</button>`)}
 async function save(m,id){const d={...(ROWS.find(x=>x.id===id)?.data||{})};
  for(const [k,,t] of M[m][2]){const e=$('#f_'+k);if(!e)continue;
@@ -206,7 +214,7 @@ async function del(id){if(!confirm('ย้ายรายการนี้ไ�
 // ====== หน้าพิเศษ ======
 const SP={};
 SP.menu=(m,v)=>{const t=k=>`<button class="tile" onclick="show('${k}')"><i>${M[k][1]}</i>${M[k][0]}${LOCK.includes(k)?' 🔒':''}</button>`;
- v.innerHTML=`<div class="card pin"><div class="t">${esc(ME.name||ME.email)}</div><span class="tag">${{guest:'ผู้เยี่ยมชม',student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'}[ME.role]}</span></div><div class="mh">เมนูหลัก</div><div class="grid">${MAIN.filter(k=>k!=='home').map(t).join('')}</div><div class="mh">ระบบเพิ่มเติม</div><div class="grid">${MORE.map(t).join('')}</div>${isA()?`<div class="mh">ผู้ดูแล</div><div class="grid"><button class="tile" onclick="show('admin')"><i>🛠️</i>ADMIN PANEL</button></div>`:''}${isG()?'<button class="b" style="width:100%" onclick="loginSheet()">เข้าสู่ระบบ / สมัครสมาชิก</button>':'<button class="b g" style="width:100%" onclick="logout()">ออกจากระบบ</button>'}`};
+ v.innerHTML=`<div class="card pin"><div class="t">${esc(ME.name||ME.email)}</div><span class="tag">${{guest:'ผู้เยี่ยมชม',student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'}[ME.role]}</span></div><div class="mh">เมนูหลัก</div><div class="grid">${MAIN.filter(k=>k!=='home').map(t).join('')}</div><div class="mh">ระบบเพิ่มเติม</div><div class="grid">${MORE.map(t).join('')}</div>${isA()?`<div class="mh">ผู้ดูแล</div><div class="grid"><button class="tile" onclick="show('admin')"><i>🛠️</i>ADMIN PANEL</button></div>`:''}${isG()?'<button class="b" style="width:100%" onclick="authChoice()">เข้าสู่ระบบ / สมัครสมาชิก</button>':'<button class="b g" style="width:100%" onclick="logout()">ออกจากระบบ</button>'}`};
 SP.home=async(m,v)=>{const r=await Promise.all(['announce','homework','calendar'].map(k=>q(k).then(x=>(x.data||[]).slice(0,3))));
  const blk=(t,k,rs)=>`<div class="card"><div class="t">${t}</div>${rs.length?rs.map(x=>`<p onclick="show('${k}')" style="cursor:pointer">• ${esc(x.data[M[k][2][0][0]])}${x.data.due?` <span class="mu">ส่ง ${esc(x.data.due)}</span>`:''}${x.data.date&&k==='calendar'?` <span class="mu">${esc(x.data.date)}</span>`:''}</p>`).join(''):'<p class="mu">ยังไม่มีข้อมูล</p>'}</div>`;
  v.innerHTML=`<h2>สวัสดี ${esc(ME.name||'')} 👋</h2>`+blk('📢 ประกาศล่าสุด','announce',r[0])+blk('📚 การบ้านล่าสุด','homework',r[1])+blk('📆 ปฏิทินห้อง','calendar',r[2])};
