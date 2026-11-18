@@ -3,95 +3,235 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1e88e5">
+<meta name="theme-color" content="#b6f51a">
 <title>เว็บห้อง ม.4/4</title>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--ink:#1f2a44;--mu:#6b7794;--bg:#eaf3ff;--pa:#fff;--ln:#d3dbea;--bl:#1e88e5;--bl2:#5bb0f5;--yl:#f5b800;--gr:#1c6b3a;--rd:#b3261e;--or:#c8500e;--or2:#f47a20;--cr:#fffaee;--gn:#cdeed8;--ry:#ffe1e1;--yw:#fff0c2;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+:root{
+  --lime:#b6f51a;--lime-soft:#e8fca0;--green:#6fa300;--green-dark:#3f6200;
+  --bg:#f7f7f7;--card:#fff;--text:#222;--muted:#777;--line:#e6e6e6;
+  --shadow:0 4px 16px rgba(0,0,0,.06);--radius:20px;
+  --red:#ffe1e1;--redInk:#b3261e;--yellow:#fff0c2;--yellowInk:#8a5a00;
+  --sab:env(safe-area-inset-bottom,0px);--sat:env(safe-area-inset-top,0px);
+}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{font-family:Prompt,system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh;overflow-x:hidden;line-height:1.6}
-button,input,select,textarea{font:inherit;color:inherit}
-button{cursor:pointer;border:0;background:none;touch-action:manipulation}
-input,select,textarea{width:100%;padding:13px 16px;border:2px solid var(--ln);border-radius:99px;background:#fff;font-size:16px;outline:none;min-height:50px;appearance:none;-webkit-appearance:none}
-textarea{border-radius:18px;min-height:96px;resize:none;line-height:1.7}
-select{background-image:linear-gradient(45deg,transparent 50%,#6b7794 50%),linear-gradient(135deg,#6b7794 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:38px}
-input:focus,select:focus,textarea:focus{border-color:var(--bl2)}
-label{display:block;font-size:14px;color:var(--mu);margin:12px 0 6px}
-/* hero */
-.hero{color:#fff;padding:calc(18px + var(--sat)) 20px 64px;border-radius:0 0 40px 40px;position:relative;min-height:170px;background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,var(--bl),var(--bl2));background-size:18px 18px,100% 100%}
-.hero.o{background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,#f47a20,#fbb15c);background-size:18px 18px,100% 100%}
-.hero.g{background-image:radial-gradient(rgba(255,255,255,.18) 1.2px,transparent 1.2px),linear-gradient(180deg,#2e9e5b,#6fd19a);background-size:18px 18px,100% 100%}
-.lg{font-weight:700;font-size:18px;display:flex;align-items:center;gap:8px}
-.dot{width:9px;height:9px;border-radius:50%;background:#69f0ae;box-shadow:0 0 8px #69f0ae}
-.pills{position:absolute;right:20px;top:calc(18px + var(--sat));display:flex;gap:8px}.pills .pill{position:static;max-width:none}
-.pill{position:absolute;right:20px;top:calc(18px + var(--sat));background:rgba(255,255,255,.28);padding:6px 14px;border-radius:99px;font-size:13px;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hero h1{font-size:26px;font-weight:600;margin-top:16px;line-height:1.25;max-width:68%}
-.hero p{opacity:.92;margin-top:6px;font-size:14px;max-width:68%}
-.mas{position:absolute;right:16px;bottom:28px;font-size:64px;line-height:1;filter:drop-shadow(0 6px 8px rgba(0,0,0,.18));animation:bob 3s ease-in-out infinite}
-@keyframes bob{50%{transform:translateY(-6px) rotate(2deg)}}
-#main{position:relative;max-width:760px;margin:-34px auto 0;padding:0 18px calc(110px + var(--sab))}
-#main>h2:first-child{display:none}
-h2{font-size:20px;margin:6px 0 12px}
-.mh{font-size:16px;font-weight:600;margin:18px 4px 10px}
-/* cards */
-.card{background:var(--cr);border-radius:22px;padding:16px;margin-bottom:14px;box-shadow:0 12px 26px rgba(60,70,140,.12);position:relative}
-.card.pin{margin-top:24px}
-.card.pin::before{content:"";position:absolute;left:50%;top:-12px;width:24px;height:24px;margin-left:-12px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ff9a4d,var(--or));box-shadow:0 4px 6px rgba(0,0,0,.2)}
-.card p{font-size:14px}.card .t{font-size:16px;font-weight:600}
-.mu{color:var(--mu);font-size:13px}.err{color:var(--rd)}
-.n{display:block;font-size:26px;font-weight:700;letter-spacing:-.5px;font-variant-numeric:tabular-nums}
-.bar{display:flex;gap:8px;margin-bottom:14px}
-.bar input{border-color:#fff;box-shadow:0 8px 20px rgba(60,70,140,.12)}
+html{-webkit-text-size-adjust:100%;width:100%}
+body{font-family:'Noto Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;width:100%;line-height:1.55}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit;touch-action:manipulation}
+input,select,textarea{font:inherit;font-size:16px;color:var(--text)}
+img{display:block;max-width:100%}
+a{color:var(--green)}
+.hide{display:none!important}
+.sub,.mu{color:var(--muted);font-size:13px}
+.err{color:var(--redInk)}
+
+#view{width:100%;min-height:100vh;min-height:100dvh;padding-bottom:calc(104px + var(--sab))}
+
+/* ---------- top bar ---------- */
+.topbar{display:flex;align-items:center;gap:12px;padding:calc(16px + var(--sat)) 16px 8px}
+.topbar h1{font-size:24px;flex:1;line-height:1.25;min-width:0}
+.topbar .actions{display:flex;gap:10px;align-items:center}
+.icon-btn{width:42px;height:42px;border-radius:14px;background:#efeff1;display:grid;place-items:center;font-size:24px;flex:none}
+.brand-dot{display:inline-block;width:12px;height:12px;border-radius:50%;background:var(--lime);margin-right:8px;box-shadow:0 0 0 3px var(--lime-soft)}
+.topsub{padding:0 16px 6px;color:var(--muted);font-size:14px}
+.pill{background:var(--lime-soft);color:var(--green-dark);padding:6px 14px;border-radius:99px;font-size:13px;max-width:42vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+
+/* ---------- notice ---------- */
+.notice{background:#fbf6d0;padding:14px 46px 14px 18px;display:flex;gap:12px;align-items:flex-start;position:relative}
+.notice svg{flex:none;margin-top:2px}
+.notice h4{font-size:16px;margin-bottom:2px}.notice p{font-size:14px;line-height:1.5}
+.notice .close{position:absolute;right:12px;top:10px;font-size:26px;color:#8a6d00}
+
+/* ---------- profile card ---------- */
+.profile-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;margin:8px 16px}
+.profile-row{display:flex;align-items:center;gap:14px;padding:16px}
+.avatar{width:56px;height:56px;border-radius:50%;border:2px solid var(--lime);background:#f3ffd0;display:grid;place-items:center;font-weight:700;color:var(--green);font-size:20px;flex:none}
+.profile-row .info{flex:1;min-width:0}
+.profile-row .name{font-weight:700;font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-row .sub{display:block}
+.switch-btn{width:52px;height:52px;border-radius:16px;background:#eceef2;display:grid;place-items:center;flex:none}
+.switch-btn svg{width:26px;height:26px}
+.chips2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px}
+.chip2{border-radius:14px;padding:12px 14px;background:#f1f1f1;text-align:left}
+.chip2 small{display:block;font-size:12px;color:#556}
+.chip2 b{font-size:16px;font-weight:600}
+.chip2.hl{background:linear-gradient(120deg,var(--lime-soft),var(--lime))}
+.promo-strip{width:100%;background:linear-gradient(90deg,#e8fffb,#19d3c5);padding:16px 20px;display:flex;justify-content:space-between;align-items:center;text-align:left;gap:10px}
+.promo-strip div{min-width:0}
+.promo-strip b{font-size:17px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.promo-strip small{font-size:13px}.promo-strip span{font-size:28px}
+
+/* ---------- banner ---------- */
+.banner{margin:12px 16px;border-radius:var(--radius);min-height:160px;background:linear-gradient(120deg,#d9ff6a,#7de3b5 60%,#4cc9f0);padding:22px;box-shadow:var(--shadow);position:relative;overflow:hidden;display:block;width:calc(100% - 32px);text-align:left;color:#173300}
+.banner small{font-size:13px;opacity:.85}
+.banner h2{font-size:24px;line-height:1.25;margin:4px 0 8px;max-width:80%}
+.banner .circle{position:absolute;right:-30px;bottom:-40px;width:170px;height:170px;border-radius:50%;background:rgba(255,255,255,.35)}
+.banner>*{position:relative;z-index:1}.banner .circle{z-index:0}
+
+/* ---------- tiles ---------- */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:8px 16px 16px}
+.tile{background:var(--card);border-radius:14px;padding:14px 6px;text-align:center;box-shadow:var(--shadow);border:2px solid transparent;position:relative;min-height:104px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:transform .1s;color:#333}
+.tile:active{transform:scale(.96)}
+.tile .emo{font-size:30px;line-height:1;width:50px;height:50px;border-radius:16px;background:var(--lime-soft);display:grid;place-items:center}
+.tile .emo svg{width:28px;height:28px}
+.tile span.t{font-size:13px;line-height:1.25;word-break:break-word}
+.tag-new{position:absolute;top:0;right:0;background:linear-gradient(135deg,#ff9a3c,#ff5a36);color:#fff;font-size:11px;padding:3px 10px;border-radius:0 12px 0 14px}
+
+/* ---------- sections / cards ---------- */
+.section-title{display:flex;justify-content:space-between;align-items:center;padding:12px 20px 4px}
+.section-title h3{font-size:19px}
+.section-title a{color:var(--green);font-size:14px;font-weight:500;cursor:pointer}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin:12px 16px;padding:16px;position:relative}
+.card .t{font-size:16px;font-weight:600;margin-bottom:2px;overflow-wrap:anywhere}
+.card p{font-size:14px;overflow-wrap:anywhere}
+.card.pinned{border:2px solid var(--lime)}
+.cards-grid{display:grid;grid-template-columns:1fr}
+.cards-grid .card{margin:8px 16px}
+.cols3{display:grid;grid-template-columns:1fr}
+.tag{display:inline-block;font-size:12px;border-radius:99px;padding:2px 11px;white-space:nowrap;font-weight:500;background:var(--lime-soft);color:var(--green-dark)}
+.tag.ok{background:var(--lime-soft);color:var(--green-dark)}.tag.part{background:var(--yellow);color:var(--yellowInk)}.tag.no{background:var(--red);color:var(--redInk)}
+.list{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:4px 16px;margin:10px 16px}
+.item{display:flex;align-items:center;gap:12px;width:100%;padding:12px 0;border-bottom:1px dashed var(--line);text-align:left}
+.item:last-child{border:0}
+.item .nm{flex:1;min-width:0}
+.item .nm b{display:block;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sum3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 16px}
+.sum3 .chip2 b{font-size:20px;display:block}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 16px}
+.stats .chip2 b{font-size:24px;display:block}
+.in{color:#2e7d32}.out{color:#c62828}
+.empty{text-align:center;padding:26px 10px;color:var(--muted)}
+.empty b{color:var(--text);display:block}
 .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.tag{display:inline-block;font-size:12px;border-radius:99px;padding:2px 10px;white-space:nowrap;background:#e7f1ff;color:var(--bl)}
-.tag.ok{background:var(--gn);color:var(--gr)}.tag.part{background:var(--yw);color:#8a5a00}.tag.no{background:var(--ry);color:var(--rd)}
-/* buttons */
-.b{padding:11px 20px;border-radius:99px;background:var(--or);color:#fff;font-weight:500;box-shadow:0 8px 16px rgba(200,80,14,.28);white-space:nowrap;transition:.15s}
-.b:active,.tile:active{transform:scale(.97)}
-.b:disabled{opacity:.45;box-shadow:none}
-.b.g{background:#fff;color:var(--or);border:2px solid #f0d8c4;box-shadow:none}
-.b.r{background:#fff;color:var(--rd);border:2px solid #f3c7c2;box-shadow:none}
-.b.s{padding:6px 14px;font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
-.tile{background:var(--cr);border-radius:20px;padding:14px;text-align:left;box-shadow:0 8px 18px rgba(60,70,140,.1);display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:500;transition:.15s}
-.tile i{font-style:normal;width:44px;height:44px;border-radius:14px;background:#fff1e6;display:grid;place-items:center;font-size:24px}
-/* bottom nav */
-#nav{position:fixed;bottom:0;left:0;width:100%;background:#fff;border-radius:28px 28px 0 0;display:flex;justify-content:space-around;align-items:center;min-height:76px;padding:10px 4px calc(12px + var(--sab));box-shadow:0 -6px 20px rgba(0,0,0,.07);z-index:20}
-#nav button{flex:1;font-size:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:48px}
-#nav svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-#nav button.on{color:var(--or)}
-#nav .plus{transform:translateY(-18px)}
-#nav .plus span{width:56px;height:56px;border-radius:50%;background:var(--or2);display:grid;place-items:center;box-shadow:0 0 0 5px #fff,0 8px 14px rgba(244,122,32,.4)}
-#nav .plus svg{stroke:#fff;width:28px;height:28px}
-/* sheet + toast */
-#md{position:fixed;inset:0;background:rgba(20,30,60,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.25s}
-#md.on{opacity:1;pointer-events:auto}
-#mb{background:var(--cr);width:100%;max-width:640px;max-height:90dvh;overflow:auto;border-radius:28px 28px 0 0;padding:12px 20px calc(24px + var(--sab));transform:translateY(105%);transition:transform .3s}
-#md.on #mb{transform:none}
-#mb::before{content:"";display:block;width:44px;height:5px;border-radius:9px;background:#d9cfb9;margin:0 auto 14px}
-#mb h2{font-size:21px;margin:0 0 6px}
-#mb .b{width:100%;margin-top:16px;padding:16px;font-size:17px}
-#tt{position:fixed;left:50%;bottom:calc(100px + var(--sab));transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:99px;display:none;z-index:60;font-size:14px;max-width:90vw;text-align:center}
-@media print{#nav,.hero,.bar,.acts{display:none}#main{margin:0;max-width:none}}
+
+/* ---------- forms / buttons ---------- */
+label{font-size:14px;color:var(--muted);display:block;margin:12px 0 6px}
+input[type=text],input[type=email],input[type=number],input[type=date],input[type=password],select,textarea{width:100%;padding:13px 16px;border-radius:99px;border:2px solid var(--line);background:#fff;outline:none;-webkit-appearance:none;appearance:none;min-height:50px}
+input[type=file]{width:100%;padding:12px;border:2px dashed var(--line);border-radius:18px;background:#fff}
+input[type=checkbox]{width:26px;height:26px;accent-color:var(--green)}
+select{background-image:linear-gradient(45deg,transparent 50%,#777 50%),linear-gradient(135deg,#777 50%,transparent 50%);background-position:calc(100% - 20px) 55%,calc(100% - 15px) 55%;background-size:5px 5px;background-repeat:no-repeat;padding-right:38px}
+textarea{border-radius:18px;resize:none;min-height:96px;line-height:1.7}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+.search{margin:6px 16px 4px;width:calc(100% - 32px)}
+.cta{display:block;width:calc(100% - 32px);margin:12px 16px;padding:16px;border-radius:16px;background:var(--lime);color:#222;font-size:18px;font-weight:700;transition:.15s;text-align:center}
+.cta:active,.btn:active,.tile:active{transform:scale(.97)}
+.cta.inline{width:100%;margin:16px 0 0}
+.cta.ghost{background:#fff;border:2px solid var(--line)}
+.btn{padding:10px 18px;border-radius:99px;font-size:14px;background:#fff;border:2px solid var(--line);white-space:nowrap}
+.btn.p{background:var(--lime);border-color:var(--lime);font-weight:600}
+.btn.sm{padding:6px 14px;font-size:13px}
+.btn.r{color:var(--redInk);border-color:#f3c6c6}
+.btn:disabled{opacity:.5}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin:14px 16px;line-height:1.7}
+.row2{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.row2>select{width:140px}.row2>input{flex:1;min-width:140px}
+
+/* ---------- bottom nav ---------- */
+#nav{position:fixed;left:0;bottom:0;width:100%;height:calc(84px + var(--sab));background:#fff;border-top:1px solid #eee;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;padding-bottom:calc(10px + var(--sab));z-index:20}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:13px;color:#555}
+.tab svg{width:28px;height:28px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--green);font-weight:700}
+.scan{position:relative}
+.scan .bubble{position:absolute;top:-34px;left:50%;transform:translateX(-50%);width:70px;height:70px;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 -4px 14px rgba(0,0,0,.05)}
+.scan .bubble i{width:56px;height:56px;border-radius:50%;background:var(--lime);display:grid;place-items:center;color:#222}
+.scan span{margin-top:38px}
+
+/* ---------- sheet / toast ---------- */
+#sheetBg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:40;opacity:0;pointer-events:none;transition:.25s}
+#sheetBg.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;width:100%;background:#fff;border-radius:28px 28px 0 0;z-index:41;transform:translateY(105%);transition:transform .3s;max-height:90vh;max-height:90dvh;overflow:auto;-webkit-overflow-scrolling:touch;padding:12px 20px calc(24px + var(--sab))}
+#sheet.on{transform:none}
+#sheet .grab{width:48px;height:6px;border-radius:6px;background:#ddd;margin:0 auto 14px}
+#sheet h2{font-size:22px;margin-bottom:8px}
+#sheet .grid{padding:0 0 8px}
+#sheet .tile{box-shadow:none;background:#fafafa}
+#toast{position:fixed;left:50%;bottom:calc(104px + var(--sab));transform:translate(-50%,20px);background:#222;color:#fff;padding:11px 20px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+.fade{animation:fade .35s}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media print{#nav,.topbar,.cta,.search,.acts{display:none!important}body.hasNav #view{padding:0!important}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+@media(max-width:360px){
+  .grid{gap:8px;padding-left:12px;padding-right:12px}
+  .tile span.t{font-size:12px}.banner h2{font-size:20px}
+}
+
+/* ---------- tablet / iPad ---------- */
+@media(min-width:768px){
+  .topbar{padding:calc(24px + var(--sat)) 28px 8px}.topbar h1{font-size:30px}
+  .topsub{padding:0 28px 6px}
+  .profile-card,.banner,.card,.list{margin-left:28px;margin-right:28px}
+  .banner{width:calc(100% - 56px);min-height:200px;padding:30px 36px}.banner h2{font-size:32px}
+  .grid{gap:16px;padding:12px 28px 20px}
+  .tile{min-height:130px}.tile .emo{width:60px;height:60px;font-size:34px}.tile span.t{font-size:15px}
+  .chips2{grid-template-columns:repeat(4,1fr)}
+  .section-title{padding:12px 32px 4px}
+  .cards-grid{grid-template-columns:1fr 1fr;padding:0 18px}.cards-grid .card{margin:10px}
+  .cols3{grid-template-columns:repeat(3,1fr);padding:0 18px}.cols3 .card{margin:10px}
+  .cta{width:calc(100% - 56px);margin-left:28px;margin-right:28px}
+  .search{margin-left:28px;margin-right:28px;width:calc(100% - 56px)}
+  .sum3,.stats{margin-left:28px;margin-right:28px}
+  .notice{padding-left:28px}
+  #sheet{left:50%;right:auto;top:50%;bottom:auto;width:min(640px,92vw);max-height:86vh;border-radius:28px;transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:.25s}
+  #sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
+  #sheet .grab{display:none}
+}
+
+/* ---------- desktop / laptop : sidebar ---------- */
+@media(min-width:1100px){
+  body.hasNav #view{padding-left:248px;padding-bottom:40px}
+  #nav{top:0;bottom:0;left:0;width:248px;height:100vh;display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:92px 16px 20px;border-top:0;border-right:1px solid var(--line)}
+  #nav::before{content:"ห้อง ม.4/4";position:absolute;top:26px;left:34px;font-weight:700;font-size:22px;color:var(--green-dark)}
+  #nav::after{content:"";position:absolute;top:36px;left:16px;width:10px;height:10px;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px var(--lime-soft)}
+  .tab{flex-direction:row;gap:14px;font-size:16px;padding:12px 16px;border-radius:14px}
+  .tab svg{width:26px;height:26px}
+  .tab:hover{background:#f3f3f3}
+  .tab.on{background:var(--lime-soft)}
+  .scan{order:-1;margin-bottom:8px;background:var(--lime);color:#222;font-weight:700}
+  .scan:hover{background:var(--lime)}
+  .scan .bubble{position:static;transform:none;width:auto;height:auto;background:none;box-shadow:none}
+  .scan .bubble i{width:auto;height:auto;background:none}
+  .scan span{margin-top:0}
+  .tile:hover{border-color:var(--lime);transform:translateY(-2px)}
+  .cards-grid{grid-template-columns:repeat(3,1fr)}
+  .home-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:8px;align-content:start;padding:0 20px}
+  .home-grid .notice{grid-column:1/-1;border-radius:16px;margin:20px 8px 8px}
+  .home-grid .tiles,.home-grid .cols3{grid-column:1/-1}
+  .home-grid .grid{grid-template-columns:repeat(8,1fr);padding-left:8px;padding-right:8px}
+  .home-grid .profile-card,.home-grid .banner{margin-left:8px;margin-right:8px}
+  .home-grid .banner{width:auto;margin-top:8px;min-height:230px}
+  #toast{bottom:40px;left:calc(50% + 124px)}
+  #sheet .grid{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:1600px){html{font-size:17px}}
 </style>
 </head>
 <body>
-<div id="app"></div>
-<div id="md" onclick="if(event.target===this)closeModal()"><div id="mb"></div></div>
-<div id="tt"></div>
+<main id="view"><div class="card" style="text-align:center"><p class="sub">กำลังโหลด...</p></div></main>
+<nav id="nav" class="hide"></nav>
+<div id="sheetBg" data-act="closeSheet"></div><div id="sheet" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status"></div>
+
 <script>
-// ====== ตั้งค่า: ใส่ค่าจาก Supabase > Project Settings > API ======
+(function(){
+'use strict';
+// ====== ตั้งค่า Supabase ======
 const SB_URL='https://iejmwihipfvtkbvjtude.supabase.co', SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imllam13aWhpcGZ2dGtidmp0dWRlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2NzQ0MzksImV4cCI6MjEwNjI1MDQzOX0.jR6txR7ztk_iKiF6-oxjkilpVllajLN3koIPNA5uBUY';
-const db=supabase.createClient(SB_URL,SB_KEY);
+const db=(window.supabase&&typeof window.supabase.createClient==='function')?window.supabase.createClient(SB_URL,SB_KEY):null;
+
 const $=s=>document.querySelector(s);
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const today=()=>new Date().toISOString().slice(0,10);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+const TH=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const fd=k=>{if(!k)return '';const p=String(k).split('-');if(p.length<3||!TH[+p[1]-1])return String(k);return (+p[2])+' '+TH[+p[1]-1]+' '+((+p[0]+543)%100)};
 const st=v=>/^(อนุมัติ|แก้ไขแล้ว|คืนแล้ว|เปิด)$/.test(v)?'ok':v==='ไม่อนุมัติ'?'no':'part';
 const DAYS='จันทร์,อังคาร,พุธ,พฤหัสบดี,ศุกร์'.split(',');
-const toast=t=>{const e=$('#tt');e.textContent=t;e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2600)};
-const modal=h=>{$('#mb').innerHTML=h;$('#md').classList.add('on')},closeModal=()=>$('#md').classList.remove('on');
+const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),2600)};
+const openSheet=h=>{$('#sheet').innerHTML='<div class="grab"></div>'+h;$('#sheet').classList.add('on');$('#sheetBg').classList.add('on');$('#sheet').scrollTop=0};
+const closeSheet=()=>{$('#sheet').classList.remove('on');$('#sheetBg').classList.remove('on')};
 
 // ====== เมนู: key:[ชื่อ, ไอคอน, ฟิลด์[ชื่อ,ป้าย,ชนิด,'a'=เฉพาะผู้ดูแล], 'u'=นักเรียนเพิ่มเองได้] ======
 const M={
@@ -122,130 +262,321 @@ const M={
 const MAIN='home schedule attendance money homework docs announce members activity calendar chat works'.split(' ');
 const MORE='leave issue poll borrow duty role news award forms contact'.split(' ');
 const AD=[['ภาพรวมระบบ','ov'],['จัดการนักเรียน','members'],['จัดการการเช็กชื่อ','attendance'],['จัดการเงินห้อง','money'],['จัดการตารางเรียน','schedule'],['จัดการการบ้าน','homework'],['จัดการประกาศ','announce'],['จัดการตารางเวร','duty'],['จัดการกิจกรรม','activity'],['จัดการคลังไฟล์','docs'],['จัดการแชต','chat'],['จัดการแบบสำรวจ','poll'],['จัดการคำร้อง (ลา)','leave'],['จัดการแจ้งปัญหา','issue'],['จัดการอุปกรณ์','borrow'],['จัดการสิทธิ์','perms'],['รายงานและส่งออก','reports'],['ประวัติการทำงาน','logs'],['ล็อกเมนู (ต้องเข้าสู่ระบบ)','locks'],['ตั้งค่าระบบ','settings'],['ถังขยะ (กู้คืน)','trash']];
+const AD_EMO={ov:'📊',perms:'🔐',reports:'📤',logs:'🕘',locks:'🔒',trash:'🗑️'};
 const ADMIN_ONLY=['admin','locks','ov','perms','reports','logs','trash'];
+const ROLE={guest:'ผู้เยี่ยมชม',student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'};
 
-let LOCK=[],ME,cur='home',Q='',ROWS=[],VOTES=[],ch;
-const isG=()=>ME?.role==='guest';
-const gate=v=>{v.innerHTML='<div class="card pin" style="text-align:center"><div style="font-size:48px">🔒</div><div class="t">เมนูนี้ต้องเข้าสู่ระบบก่อน</div><p class="mu" style="margin:6px 0 14px">สมัครหรือเข้าสู่ระบบด้วยอีเมลเพื่อใช้งาน</p><button class="b" onclick="authChoice()">เข้าสู่ระบบ / สมัครสมาชิก</button></div>'};
-const isA=()=>ME&&['admin','super'].includes(ME.role), isS=()=>ME?.role==='super';
-const canEdit=m=>isS()||(ME?.role==='admin'&&(ME.perms||[]).includes(m));
-const title=k=>M[k]?M[k][0]:(AD.find(a=>a[1]===k)||[k])[0];
+// ====== icons ======
+const IC={
+ more:'<rect x="6" y="6" width="15" height="15" rx="3"/><rect x="27" y="6" width="15" height="15" rx="3"/><rect x="6" y="27" width="15" height="15" rx="3"/><path d="M34.5 27v15M27 34.5h15"/>',
+ lock:'<rect x="10" y="22" width="28" height="20" rx="5"/><path d="M16 22v-6a8 8 0 0 1 16 0v6M24 30v5"/>',
+ logout:'<path d="M20 6H8v36h12M18 24h24M34 16l8 8-8 8"/>',
+ login:'<path d="M28 6h12v36H28M6 24h24M22 16l8 8-8 8"/>'
+};
+const svg=n=>'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">'+IC[n]+'</svg>';
+const NAV=[
+ ['home','<svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg>','หน้าหลัก'],
+ ['homework','<svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>','การบ้าน'],
+ ['menu','<svg viewBox="0 0 24 24" style="width:30px;height:30px"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>','เมนู'],
+ ['announce','<svg viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/></svg>','ประกาศ'],
+ ['chat','<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>','แชต']
+];
+const NAVK=NAV.map(n=>n[0]);
 
-// ====== เข้าสู่ระบบ ======
-const em=e=>{const m=e?.message||'';return /Load failed|Failed to fetch|NetworkError/i.test(m)?'เชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจค่า SB_URL / SB_KEY ในไฟล์ classroom.html (ตอนนี้ตั้งไว้เป็น: '+SB_URL+')':/Invalid login/i.test(m)?'ชื่อ/อีเมล หรือรหัสผ่านไม่ถูกต้อง':m||e};
-function authChoice(){modal(`<h2>เข้าใช้งานระบบ</h2><p class="mu">เลือกสิ่งที่ต้องการทำ</p><div class="grid" style="margin-top:14px"><button class="tile" onclick="loginSheet()"><i>🔑</i>เข้าสู่ระบบ<span class="mu">มีบัญชีแล้ว</span></button><button class="tile" onclick="signupSheet()"><i>✨</i>สมัครสมาชิก<span class="mu">ใช้งานครั้งแรก</span></button></div>`)}
-function loginSheet(){modal(`<h2>เข้าสู่ระบบ</h2><label>ชื่อ-สกุล หรือ อีเมล</label><input id="ae" autocomplete="username" autocapitalize="none"><label>รหัสผ่าน</label><input id="ap" type="password" autocomplete="current-password"><button class="b" onclick="login()">เข้าสู่ระบบ</button><p class="mu" style="text-align:center;margin-top:14px"><a href="#" style="color:var(--or)" onclick="authChoice();return false">← กลับไปเลือกใหม่</a></p>`)}
-function signupSheet(){modal(`<h2>สมัครสมาชิก</h2><label>ชื่อ-สกุล (ใช้เข้าสู่ระบบได้ ห้ามซ้ำกับคนอื่น)</label><input id="an" autocomplete="name"><label>อีเมล</label><input id="ae" type="email" autocomplete="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input id="ap" type="password" autocomplete="new-password"><button class="b" onclick="signup()">สมัครสมาชิก</button><p class="mu" style="text-align:center;margin-top:14px"><a href="#" style="color:var(--or)" onclick="authChoice();return false">← กลับไปเลือกใหม่</a></p>`)}
-async function login(){let id=$('#ae').value.trim();const pw=$('#ap').value;if(!id||!pw)return toast('กรอกชื่อหรืออีเมล และรหัสผ่านก่อน');
- if(!id.includes('@')){const {data,error}=await db.rpc('login_email',{u:id});if(error)return toast(em(error));if(!data)return toast('ไม่พบชื่อนี้ ลองใช้อีเมลแทน หรือสมัครสมาชิกก่อน');id=data}
- const {error}=await db.auth.signInWithPassword({email:id,password:pw});if(error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+em(error));closeModal();boot()}
-async function signup(){const n=$('#an').value.trim(),e=$('#ae').value.trim();if(!n)return toast('กรอกชื่อ-สกุลก่อนสมัคร');if(!e)return toast('กรอกอีเมลก่อนสมัคร');
- const t=await db.rpc('name_taken',{n});if(t.error)return toast(em(t.error));if(t.data)return toast('ชื่อนี้มีคนใช้แล้ว เพิ่มนามสกุลหรือเลขท้ายให้ต่างกัน');
- const {data,error}=await db.auth.signUp({email:e,password:$('#ap').value,options:{data:{name:n}}});
- if(error)return toast(em(error));data.session?(closeModal(),boot()):toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ')}
-async function logout(){await db.auth.signOut();ch&&db.removeChannel(ch);location.reload()}
-async function boot(){const {data:{session}}=await db.auth.getSession();
- if(session){const {data}=await db.from('profiles').select('*').eq('id',session.user.id).single();
-  ME=data||{id:session.user.id,email:session.user.email,name:session.user.email,role:'student',perms:[]}}
- else ME={role:'guest',name:'ผู้เยี่ยมชม',perms:[]};
- LOCK=((await db.from('locked_modules').select('module')).data||[]).map(x=>x.module);
- $('#app').innerHTML=`<header class="hero" id="hero"><div class="lg"><span class="dot"></span>ห้อง ม.4/4</div>${isG()?'<button class="pill" onclick="authChoice()">เข้าสู่ระบบ / สมัคร</button>':`<span class="pill">${esc(ME.name||ME.email)}</span>`}<h1 id="h1"></h1><p id="hp"></p><div class="mas" id="hm"></div></header><main id="main"></main><nav id="nav"></nav>`;
- ch=db.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'items'},p=>{
-  const n=p.new||{};if(p.eventType==='INSERT'&&(n.module==='announce'||n.module==='homework'))toast('🔔 มี'+M[n.module][0]+'ใหม่');
-  if(!n.module||n.module===cur)if(!$('#md').classList.contains('on'))show(cur,1)}).subscribe();
- if(!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(SB_URL))toast('SB_URL ไม่ถูกต้อง ต้องหน้าตาแบบ https://xxxx.supabase.co (ไม่มี / ท้าย)');
- show('home')}
+// ====== state ======
+let LOCK=[],ME=null,cur='home',Q='',ROWS=[],VOTES=[],ch=null,stack=[];
+const isG=()=>!ME||ME.role==='guest';
+const isA=()=>!!ME&&['admin','super'].includes(ME.role);
+const isS=()=>!!ME&&ME.role==='super';
+const canEdit=m=>isS()||(ME&&ME.role==='admin'&&(ME.perms||[]).includes(m));
+const title=k=>k==='menu'?'เมนูทั้งหมด':k==='admin'?'ADMIN PANEL':M[k]?M[k][0]:(AD.find(a=>a[1]===k)||[k])[0];
 
-// ====== เมนูล่าง + หัวหน้าจอ ======
-const NAV=[['home','<path d="M3 11l9-8 9 8M5 10v10h14V10"/>','หน้าหลัก'],['homework','<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h8M8 12h8M8 16h5"/>','การบ้าน'],['menu','<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>','เมนู'],['announce','<path d="M6 17v-6a6 6 0 0 1 12 0v6l2 2H4zM10 21h4"/>','ประกาศ'],['chat','<path d="M4 5h16v11H9l-5 4z"/>','แชต']];
-const HP={home:'ประกาศ การบ้าน และปฏิทินล่าสุด',menu:'เลือกเมนูที่ต้องการใช้งาน',admin:'เมนูจัดการระบบและฐานข้อมูล',money:'รายรับ รายจ่าย และเงินคงเหลือ',announce:'ข่าวสารจากหัวหน้าห้อง'};
-function nav(){
- $('#nav').innerHTML=NAV.map(([k,p,l])=>{const i=`<svg viewBox="0 0 24 24">${p}</svg>`;return `<button class="${k===cur?'on':''}${k==='menu'?' plus':''}" onclick="show('${k}')">${k==='menu'?`<span>${i}</span>`:i}${l}</button>`}).join('');
- $('#h1').textContent=cur==='home'?'สวัสดี '+(ME.name||''):cur==='menu'?'เมนูทั้งหมด':cur==='admin'?'ADMIN PANEL':title(cur);
- $('#hp').textContent=HP[cur]||'';$('#hm').textContent=cur==='menu'?'🧭':(M[cur]?.[1]||'🛠️');
- $('#hero').className='hero'+(cur==='admin'?' o':['money','award'].includes(cur)?' g':'')}
+const em=e=>{const m=(e&&e.message)||'';return /Load failed|Failed to fetch|NetworkError/i.test(m)?'เชื่อมต่อฐานข้อมูลไม่ได้ — ตรวจค่า SB_URL / SB_KEY ในไฟล์ (ตอนนี้ตั้งไว้เป็น: '+SB_URL+')':/Invalid login/i.test(m)?'ชื่อ/อีเมล หรือรหัสผ่านไม่ถูกต้อง':m||String(e)};
+
+// ====== layout helpers ======
+const userPill=()=>isG()?'<button class="btn p sm" data-act="authChoice">เข้าสู่ระบบ</button>':'<span class="pill">'+esc(ME.name||ME.email)+'</span>';
+function head(t,o){o=o||{};return '<div class="topbar">'+(o.back?'<button class="icon-btn" data-act="back" aria-label="กลับ">‹</button>':'')+'<h1>'+(o.brand?'<span class="brand-dot"></span>':'')+t+'</h1><div class="actions">'+userPill()+'</div></div>'+(o.sub?'<p class="topsub">'+o.sub+'</p>':'')}
+const tile=(emo,label,act,o)=>{o=o||{};return '<button class="tile" data-act="'+act+'"'+(o.v?' data-v="'+o.v+'"':'')+'>'+(o.isNew?'<span class="tag-new">ใหม่</span>':'')+'<span class="emo">'+emo+'</span><span class="t">'+label+'</span></button>'};
+function profileCard(){
+ const g=isG();
+ return '<div class="profile-card"><div class="profile-row"><div class="avatar">'+esc((ME.name||'?').slice(0,2))+'</div><div class="info"><div class="name">'+esc(ME.name||ME.email||'')+'</div><span class="sub">'+ROLE[ME.role||'guest']+(g?' · เข้าสู่ระบบเพื่อใช้งานเต็มรูปแบบ':'')+'</span></div><button class="switch-btn" data-act="'+(g?'authChoice':'logout')+'" aria-label="'+(g?'เข้าสู่ระบบ':'ออกจากระบบ')+'">'+svg(g?'login':'logout')+'</button></div>';
+}
+function drawNav(){
+ $('#nav').innerHTML=NAV.map(function(n){const k=n[0],on=(k===cur)||(k==='menu'&&!NAVK.includes(cur));
+  return k==='menu'
+   ?'<button class="tab scan'+(on?' on':'')+'" data-act="nav" data-v="menu"><div class="bubble"><i>'+n[1]+'</i></div><span>'+n[2]+'</span></button>'
+   :'<button class="tab'+(on?' on':'')+'" data-act="nav" data-v="'+k+'">'+n[1]+n[2]+'</button>'}).join('');
+}
+function gate(v,m){v.innerHTML=head(esc(title(m)),{back:1})+'<div class="card" style="text-align:center;padding:28px 16px"><div style="width:64px;margin:0 auto;color:#bbb">'+svg('lock')+'</div><div class="t" style="margin-top:8px">เมนูนี้ต้องเข้าสู่ระบบก่อน</div><p class="mu" style="margin:6px 0 14px">สมัครหรือเข้าสู่ระบบด้วยอีเมลเพื่อใช้งาน</p><button class="btn p" data-act="authChoice">เข้าสู่ระบบ / สมัครสมาชิก</button></div>'}
+
+// ====== auth ======
+function authChoice(){openSheet('<h2>เข้าใช้งานระบบ</h2><p class="mu">เลือกสิ่งที่ต้องการทำ</p><div class="grid">'+tile('🔑','เข้าสู่ระบบ<br><span class="mu">มีบัญชีแล้ว</span>','loginSheet')+tile('✨','สมัครสมาชิก<br><span class="mu">ใช้งานครั้งแรก</span>','signupSheet')+'</div>')}
+function loginSheet(){openSheet('<h2>เข้าสู่ระบบ</h2><label>ชื่อ-สกุล หรือ อีเมล</label><input type="text" id="ae" autocomplete="username" autocapitalize="none"><label>รหัสผ่าน</label><input type="password" id="ap" autocomplete="current-password"><button class="cta inline" data-act="login">เข้าสู่ระบบ</button><p class="hint"><a href="#" data-act="authChoice">← กลับไปเลือกใหม่</a></p>')}
+function signupSheet(){openSheet('<h2>สมัครสมาชิก</h2><label>ชื่อ-สกุล (ใช้เข้าสู่ระบบได้ ห้ามซ้ำกับคนอื่น)</label><input type="text" id="an" autocomplete="name"><label>อีเมล</label><input type="email" id="ae" autocomplete="email"><label>รหัสผ่าน (อย่างน้อย 6 ตัว)</label><input type="password" id="ap" autocomplete="new-password"><button class="cta inline" data-act="signup">สมัครสมาชิก</button><p class="hint"><a href="#" data-act="authChoice">← กลับไปเลือกใหม่</a></p>')}
+async function login(){
+ let id=$('#ae').value.trim();const pw=$('#ap').value;
+ if(!id||!pw)return toast('กรอกชื่อหรืออีเมล และรหัสผ่านก่อน');
+ if(!id.includes('@')){const r=await db.rpc('login_email',{u:id});if(r.error)return toast(em(r.error));if(!r.data)return toast('ไม่พบชื่อนี้ ลองใช้อีเมลแทน หรือสมัครสมาชิกก่อน');id=r.data}
+ const r2=await db.auth.signInWithPassword({email:id,password:pw});
+ if(r2.error)return toast('เข้าสู่ระบบไม่สำเร็จ: '+em(r2.error));
+ closeSheet();boot();
+}
+async function signup(){
+ const n=$('#an').value.trim(),e=$('#ae').value.trim();
+ if(!n)return toast('กรอกชื่อ-สกุลก่อนสมัคร');if(!e)return toast('กรอกอีเมลก่อนสมัคร');
+ const t=await db.rpc('name_taken',{n:n});if(t.error)return toast(em(t.error));if(t.data)return toast('ชื่อนี้มีคนใช้แล้ว เพิ่มนามสกุลหรือเลขท้ายให้ต่างกัน');
+ const r=await db.auth.signUp({email:e,password:$('#ap').value,options:{data:{name:n}}});
+ if(r.error)return toast(em(r.error));
+ if(r.data.session){closeSheet();boot()}else toast('สมัครแล้ว กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ');
+}
+async function logout(){await db.auth.signOut();if(ch)db.removeChannel(ch);location.reload()}
+
+async function boot(){
+ const v=$('#view');
+ if(!db){v.innerHTML='<div class="card"><p class="err">โหลดไลบรารี Supabase ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรชหน้านี้</p></div>';return}
+ try{
+  const s=await db.auth.getSession(),session=s.data&&s.data.session;
+  if(session){
+   const p=await db.from('profiles').select('*').eq('id',session.user.id).single();
+   ME=p.data||{id:session.user.id,email:session.user.email,name:session.user.email,role:'student',perms:[]};
+  }else ME={role:'guest',name:'ผู้เยี่ยมชม',perms:[]};
+  LOCK=((await db.from('locked_modules').select('module')).data||[]).map(x=>x.module);
+  if(ch)db.removeChannel(ch);
+  ch=db.channel('rt').on('postgres_changes',{event:'*',schema:'public',table:'items'},function(p){
+   const n=p.new||{};
+   if(p.eventType==='INSERT'&&(n.module==='announce'||n.module==='homework'))toast('🔔 มี'+M[n.module][0]+'ใหม่');
+   if(!n.module||n.module===cur){
+    const a=document.activeElement;
+    if(!$('#sheet').classList.contains('on')&&!(a&&a.id==='qs'))show(cur,1);
+   }
+  }).subscribe();
+  if(!/^https:\/\/[a-z0-9]+\.supabase\.co$/.test(SB_URL))toast('SB_URL ไม่ถูกต้อง ต้องหน้าตาแบบ https://xxxx.supabase.co (ไม่มี / ท้าย)');
+  document.body.classList.add('hasNav');$('#nav').classList.remove('hide');
+  stack=[];show('home');
+ }catch(e){v.innerHTML='<div class="card"><p class="err">'+esc(em(e))+'</p></div>'}
+}
+
 async function show(m,silent){
- cur=m;if(!silent){Q='';scrollTo(0,0)}nav();
- const v=$('#main');if(!silent)v.innerHTML='<p class="mu">กำลังโหลด...</p>';
- try{if(isG()&&(LOCK.includes(m)||ADMIN_ONLY.includes(m)))return gate(v);if(ADMIN_ONLY.includes(m)&&!isA())throw Error('เฉพาะผู้ดูแล');await(SP[m]||list)(m,v)}
- catch(e){v.innerHTML='<p class="err">'+esc(em(e))+'</p>'}}
+ cur=m;if(!silent){Q='';scrollTo(0,0)}drawNav();
+ const v=$('#view');
+ if(!silent)v.innerHTML=head(esc(title(m)),{back:m!=='home'&&m!=='menu'})+'<p class="hint">กำลังโหลด...</p>';
+ try{
+  if(isG()&&(LOCK.includes(m)||ADMIN_ONLY.includes(m)))return gate(v,m);
+  if(ADMIN_ONLY.includes(m)&&!isA())throw Error('เฉพาะผู้ดูแล');
+  await (SP[m]||list)(m,v);
+ }catch(e){v.innerHTML=head(esc(title(m)),{back:m!=='home'&&m!=='menu'})+'<div class="card"><p class="err">'+esc(em(e))+'</p></div>'}
+}
 
-// ====== รายการทั่วไป (ใช้กับทุกเมนู) ======
+// ====== รายการทั่วไป ======
 const q=m=>db.from('items').select('*').eq('module',m).is('deleted_at',null).order('created_at',{ascending:false}).limit(500);
 async function list(m,v){
- let {data,error}=await q(m);if(error)throw error;
+ let r=await q(m);if(r.error)throw r.error;let data=r.data||[];
  if(m==='announce'){if(!canEdit(m))data=data.filter(x=>!x.data.date||x.data.date<=today());data.sort((a,b)=>(b.data.pin==='ปัก')-(a.data.pin==='ปัก'))}
  if(m==='poll')VOTES=(await q('vote')).data||[];
- ROWS=data;const [t,ic,,w]=M[m],add=canEdit(m)||w==='u';
- v.innerHTML=`<h2>${ic} ${t}</h2><div class="bar"><input id="q" placeholder="ค้นหา..." value="${esc(Q)}" oninput="Q=this.value;paint(cur)">${add?`<button class="b" onclick="openForm('${m}')">+ เพิ่ม</button>`:''}</div>${m==='money'?sum(data):''}<div id="ls"></div>`;paint(m)}
+ ROWS=data;const t=M[m][0],ic=M[m][1],w=M[m][3],add=canEdit(m)||w==='u';
+ v.innerHTML=head(ic+' '+t,{back:1})+(add?'<button class="cta" data-act="openForm" data-m="'+m+'">+ เพิ่ม'+(m==='chat'?'ข้อความ':'')+'</button>':'')+
+  (m==='money'?sum(data):'')+'<input type="text" class="search" id="qs" placeholder="ค้นหา..." value="'+esc(Q)+'" autocomplete="off"><div id="ls" class="cards-grid"></div>';
+ paint(m);
+}
 function sum(d){let i=0,o=0;d.forEach(x=>x.data.type==='รายจ่าย'?o+=+x.data.amount||0:i+=+x.data.amount||0);
- return `<div class="grid"><div class="card">รายรับ<b class="n" style="color:var(--gr)">${i.toLocaleString()}</b></div><div class="card">รายจ่าย<b class="n" style="color:var(--rd)">${o.toLocaleString()}</b></div><div class="card">คงเหลือ<b class="n">${(i-o).toLocaleString()}</b></div></div>`}
+ return '<div class="sum3"><div class="chip2"><small>รายรับ</small><b class="in">'+i.toLocaleString()+'</b></div><div class="chip2"><small>รายจ่าย</small><b class="out">'+o.toLocaleString()+'</b></div><div class="chip2 hl"><small>คงเหลือ</small><b>'+(i-o).toLocaleString()+'</b></div></div>'}
 function paint(m){const s=Q.toLowerCase(),r=ROWS.filter(x=>!s||JSON.stringify(x.data).toLowerCase().includes(s));
- $('#ls').innerHTML=r.length?r.map(x=>card(m,x)).join(''):'<p class="mu">ยังไม่มีข้อมูล'+(canEdit(m)||M[m][3]==='u'?' — กด “+ เพิ่ม” เพื่อเริ่มต้น':'')+'</p>'}
-function card(m,r){const F=M[m][2],d=r.data,ed=canEdit(m);
- const f0=F[0][0];let h=`<div class="card ${d.pin==='ปัก'?'pin':''}"><div class="t">${esc(d[f0])}</div>`;
- F.slice(1).forEach(([k,l,t])=>{let v=d[k];if(k==='status'&&!v)v='รออนุมัติ';if(!v||k==='pin')return;
-  h+=`<p><span class="mu">${l}:</span> ${t==='file'?`<a href="${esc(v)}" target="_blank" rel="noopener">เปิดไฟล์</a>`:k==='status'?`<span class="tag ${st(v)}">${esc(v)}</span>`:esc(v)}</p>`});
- if(m==='chat')h=`<div class="card"><p>${esc(d.msg)}</p><p class="mu">${new Date(r.created_at).toLocaleString('th-TH')}</p>`;
- if(m==='poll'){const o=(d.opts||'').split(',').map(s=>s.trim()).filter(Boolean),vs=VOTES.filter(x=>x.data.poll===r.id),mine=vs.some(x=>x.created_by===ME.id);
-  h+=`<div class="acts">${o.map(c=>`<button class="b g s" ${d.status==='ปิด'||mine?'disabled':''} onclick="vote('${r.id}','${esc(c).replace(/'/g,'')}')">${esc(c)} · ${vs.filter(x=>x.data.choice===c).length}</button>`).join('')}</div>`}
- if(ed)h+=`<div class="acts"><button class="b g s" onclick="openForm('${m}','${r.id}')">แก้ไข</button><button class="b r s" onclick="del('${r.id}')">ลบ</button></div>`;
- return h+'</div>'}
-async function vote(poll,choice){if(isG())return authChoice();const {error}=await db.from('items').insert({module:'vote',data:{poll,choice},created_by:ME.id});toast(error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1)}
+ $('#ls').innerHTML=r.length?r.map(x=>card(m,x)).join(''):'<div class="card empty" style="grid-column:1/-1"><b>ยังไม่มีข้อมูล</b>'+(canEdit(m)||M[m][3]==='u'?'กด “+ เพิ่ม” เพื่อเริ่มต้น':'')+'</div>'}
+const safeUrl=u=>/^https?:\/\//i.test(String(u||''));
+function card(m,r){
+ const F=M[m][2],d=r.data||{},ed=canEdit(m);let h;
+ if(m==='chat'){h='<div class="card fade"><p>'+esc(d.msg)+'</p><p class="mu">'+new Date(r.created_at).toLocaleString('th-TH')+'</p>'}
+ else{
+  h='<div class="card fade'+(d.pin==='ปัก'?' pinned':'')+'"><div class="t">'+(d.pin==='ปัก'?'📌 ':'')+esc(d[F[0][0]])+'</div>';
+  F.slice(1).forEach(function(f){
+   const k=f[0],l=f[1],t=f[2];let v=d[k];if(k==='status'&&!v)v='รออนุมัติ';if(!v||k==='pin')return;
+   let val;
+   if(t==='file')val=safeUrl(v)?'<a href="'+esc(v)+'" target="_blank" rel="noopener">เปิดไฟล์</a>':esc(v);
+   else if(k==='status')val='<span class="tag '+st(v)+'">'+esc(v)+'</span>';
+   else if(t==='date')val=esc(fd(v));
+   else val=esc(v);
+   h+='<p><span class="mu">'+l+':</span> '+val+'</p>';
+  });
+ }
+ if(m==='poll'){
+  const o=(d.opts||'').split(',').map(s=>s.trim()).filter(Boolean),vs=VOTES.filter(x=>x.data.poll===r.id),mine=ME&&vs.some(x=>x.created_by===ME.id);
+  h+='<div class="acts">'+o.map(c=>'<button class="btn sm" '+(d.status==='ปิด'||mine?'disabled':'')+' data-act="vote" data-poll="'+esc(r.id)+'" data-c="'+esc(c)+'">'+esc(c)+' · '+vs.filter(x=>x.data.choice===c).length+'</button>').join('')+'</div>';
+ }
+ if(ed)h+='<div class="acts"><button class="btn sm" data-act="openForm" data-m="'+m+'" data-id="'+esc(r.id)+'">แก้ไข</button><button class="btn sm r" data-act="del" data-id="'+esc(r.id)+'">ลบ</button></div>';
+ return h+'</div>';
+}
+async function vote(poll,choice){
+ if(isG())return authChoice();
+ const r=await db.from('items').insert({module:'vote',data:{poll:poll,choice:choice},created_by:ME.id});
+ toast(r.error?'โหวตไม่สำเร็จ (อาจโหวตไปแล้ว)':'โหวตแล้ว');show('poll',1);
+}
 
-// ====== ฟอร์ม เพิ่ม/แก้ไข/ลบ ======
-function inp(k,t='',v=''){v=esc(v);
- if(t==='ta')return `<textarea id="f_${k}">${v}</textarea>`;
- if(t.startsWith('sel:'))return `<select id="f_${k}">${t.slice(4).split(',').map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select>`;
- return `<input id="f_${k}" type="${{date:'date',num:'number',file:'file'}[t]||'text'}" ${t==='file'?'':`value="${v}"`}>`}
-function openForm(m,id){if(isG())return authChoice();const r=ROWS.find(x=>x.id===id),d=r?.data||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
- modal(`<h2>${r?'แก้ไข':'เพิ่ม'} ${M[m][0]}</h2>`+F.map(([k,l,t])=>`<label>${l}</label>`+inp(k,t,d[k])).join('')+`<button class="b" onclick="save('${m}','${id||''}')">บันทึก</button>`)}
-async function save(m,id){const d={...(ROWS.find(x=>x.id===id)?.data||{})};
- for(const [k,,t] of M[m][2]){const e=$('#f_'+k);if(!e)continue;
-  if(t==='file'){const f=e.files[0];if(f){const p=`${ME.id}/${Date.now()}-${f.name.replace(/[^\w.-]/g,'_')}`;
-   const u=await db.storage.from('files').upload(p,f);if(u.error)return toast('อัปโหลดไม่สำเร็จ: '+u.error.message);d[k]=db.storage.from('files').getPublicUrl(p).data.publicUrl}}
-  else d[k]=e.value.trim()}
+// ====== ฟอร์ม ======
+function inp(k,t,v){t=t||'';v=esc(v==null?'':v);
+ if(t==='ta')return '<textarea id="f_'+k+'">'+v+'</textarea>';
+ if(t.startsWith('sel:'))return '<select id="f_'+k+'">'+t.slice(4).split(',').map(o=>'<option '+(o===v?'selected':'')+'>'+o+'</option>').join('')+'</select>';
+ const ty={date:'date',num:'number',file:'file'}[t]||'text';
+ return '<input id="f_'+k+'" type="'+ty+'" '+(t==='file'?'':'value="'+v+'"')+' autocomplete="off">';
+}
+function openForm(m,id){
+ if(isG())return authChoice();
+ const r=ROWS.find(x=>x.id===id),d=(r&&r.data)||{},F=M[m][2].filter(f=>f[3]!=='a'||canEdit(m));
+ openSheet('<h2>'+(r?'แก้ไข':'เพิ่ม')+' '+M[m][0]+'</h2>'+F.map(f=>'<label>'+f[1]+'</label>'+inp(f[0],f[2],d[f[0]])).join('')+'<button class="cta inline" data-act="save" data-m="'+m+'" data-id="'+esc(id||'')+'">บันทึก</button>');
+}
+async function save(m,id){
+ const old=ROWS.find(x=>x.id===id),d=Object.assign({},(old&&old.data)||{});
+ for(const f of M[m][2]){
+  const k=f[0],t=f[2],e=$('#f_'+k);if(!e)continue;
+  if(t==='file'){
+   const file=e.files[0];
+   if(file){
+    const p=ME.id+'/'+Date.now()+'-'+file.name.replace(/[^\w.-]/g,'_');
+    const u=await db.storage.from('files').upload(p,file);
+    if(u.error)return toast('อัปโหลดไม่สำเร็จ: '+u.error.message);
+    d[k]=db.storage.from('files').getPublicUrl(p).data.publicUrl;
+   }
+  }else d[k]=e.value.trim();
+ }
  if(!String(d[M[m][2][0][0]]||'').trim())return toast('กรอก “'+M[m][2][0][1]+'” ก่อนบันทึก');
- const {error}=await(id?db.from('items').update({data:d}).eq('id',id):db.from('items').insert({module:m,data:d,created_by:ME.id}));
- if(error)return toast(error.message);closeModal();toast('บันทึกแล้ว');show(m,1)}
-async function del(id){if(!confirm('ย้ายรายการนี้ไปถังขยะ? (กู้คืนได้ที่ ADMIN PANEL > ถังขยะ)'))return;
- const {error}=await db.from('items').update({deleted_at:new Date().toISOString()}).eq('id',id);toast(error?error.message:'ย้ายไปถังขยะแล้ว');show(cur,1)}
+ const r=await (id?db.from('items').update({data:d}).eq('id',id):db.from('items').insert({module:m,data:d,created_by:ME.id}));
+ if(r.error)return toast(r.error.message);
+ closeSheet();toast('บันทึกแล้ว');show(m,1);
+}
+async function del(id){
+ if(!confirm('ย้ายรายการนี้ไปถังขยะ? (กู้คืนได้ที่ ADMIN PANEL > ถังขยะ)'))return;
+ const r=await db.from('items').update({deleted_at:new Date().toISOString()}).eq('id',id);
+ toast(r.error?r.error.message:'ย้ายไปถังขยะแล้ว');show(cur,1);
+}
 
 // ====== หน้าพิเศษ ======
 const SP={};
-SP.menu=(m,v)=>{const t=k=>`<button class="tile" onclick="show('${k}')"><i>${M[k][1]}</i>${M[k][0]}${LOCK.includes(k)?' 🔒':''}</button>`;
- v.innerHTML=`<div class="card pin"><div class="t">${esc(ME.name||ME.email)}</div><span class="tag">${{guest:'ผู้เยี่ยมชม',student:'นักเรียน',admin:'รองหัวหน้าห้อง',super:'หัวหน้าห้อง'}[ME.role]}</span></div><div class="mh">เมนูหลัก</div><div class="grid">${MAIN.filter(k=>k!=='home').map(t).join('')}</div><div class="mh">ระบบเพิ่มเติม</div><div class="grid">${MORE.map(t).join('')}</div>${isA()?`<div class="mh">ผู้ดูแล</div><div class="grid"><button class="tile" onclick="show('admin')"><i>🛠️</i>ADMIN PANEL</button></div>`:''}${isG()?'<button class="b" style="width:100%" onclick="authChoice()">เข้าสู่ระบบ / สมัครสมาชิก</button>':'<button class="b g" style="width:100%" onclick="logout()">ออกจากระบบ</button>'}`};
-SP.home=async(m,v)=>{const r=await Promise.all(['announce','homework','calendar'].map(k=>q(k).then(x=>(x.data||[]).slice(0,3))));
- const blk=(t,k,rs)=>`<div class="card"><div class="t">${t}</div>${rs.length?rs.map(x=>`<p onclick="show('${k}')" style="cursor:pointer">• ${esc(x.data[M[k][2][0][0]])}${x.data.due?` <span class="mu">ส่ง ${esc(x.data.due)}</span>`:''}${x.data.date&&k==='calendar'?` <span class="mu">${esc(x.data.date)}</span>`:''}</p>`).join(''):'<p class="mu">ยังไม่มีข้อมูล</p>'}</div>`;
- v.innerHTML=`<h2>สวัสดี ${esc(ME.name||'')} 👋</h2>`+blk('📢 ประกาศล่าสุด','announce',r[0])+blk('📚 การบ้านล่าสุด','homework',r[1])+blk('📆 ปฏิทินห้อง','calendar',r[2])};
-SP.admin=(m,v)=>{v.innerHTML='<h2>🛠️ ADMIN PANEL</h2><p class="mu">เฉพาะผู้ดูแล · เมนูจัดการระบบและฐานข้อมูล</p><div class="grid">'+AD.map(([t,k])=>`<button class="tile" onclick="show('${k}')">${esc(t)}</button>`).join('')+'</div><p class="mu">รองหัวหน้าห้องจะแก้ไขได้เฉพาะเมนูที่หัวหน้าห้องกำหนดสิทธิ์ให้</p>'};
-SP.ov=async(m,v)=>{const {data}=await db.from('items').select('module,data').is('deleted_at',null).limit(5000);
- const c={},bal=data.filter(x=>x.module==='money').reduce((s,x)=>s+(x.data.type==='รายจ่าย'?-1:1)*(+x.data.amount||0),0);data.forEach(x=>c[x.module]=(c[x.module]||0)+1);
- const {count}=await db.from('profiles').select('*',{count:'exact',head:true});
- v.innerHTML=`<h2>📊 ภาพรวมระบบ</h2><div class="grid"><div class="card">ผู้ใช้งานระบบ<b class="n">${count}</b></div><div class="card">เงินห้องคงเหลือ<b class="n">${bal.toLocaleString()}</b></div>`+
- ['members','announce','homework','leave','issue','chat','docs'].map(k=>`<div class="card">${M[k][1]} ${M[k][0]}<b class="n">${c[k]||0}</b></div>`).join('')+'</div>'+
- (isS()?`<h2>กิจกรรมล่าสุด</h2>${await logHtml(8)}`:'')};
-SP.locks=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');
- v.innerHTML='<p class="mu" style="margin:0 4px 12px">ติ๊ก = ต้องเข้าสู่ระบบก่อนจึงจะเปิดเมนูนั้นได้ · ไม่ติ๊ก = ใครก็ดูได้โดยไม่ต้องสมัคร (การเพิ่ม/แก้ไขข้อมูลต้องเข้าสู่ระบบเสมอ)</p>'+[...MAIN.slice(1),...MORE].map(k=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span>${M[k][1]} ${M[k][0]}</span><input type="checkbox" style="width:26px;min-height:26px;padding:0;appearance:auto;-webkit-appearance:checkbox" ${LOCK.includes(k)?'checked':''} onchange="setLock('${k}',this.checked)"></div>`).join('')};
-async function setLock(k,on){const {error}=await(on?db.from('locked_modules').upsert({module:k}):db.from('locked_modules').delete().eq('module',k));if(error)return toast(error.message);LOCK=on?[...LOCK,k]:LOCK.filter(x=>x!==k);toast('บันทึกแล้ว')}
-SP.perms=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');const {data}=await db.from('profiles').select('*').order('name');
- v.innerHTML='<h2>🔐 จัดการสิทธิ์</h2><p class="mu">student = นักเรียน · admin = รองหัวหน้า · super = หัวหน้าห้อง<br>ช่อง perms ใส่รหัสเมนูที่ admin แก้ไขได้ คั่นด้วย , เช่น money,homework,announce</p>'+
- data.map(p=>`<div class="card"><b>${esc(p.name)}</b> <span class="mu">${esc(p.email)}</span><div class="bar" style="margin-top:8px"><select id="r_${p.id}" style="width:130px">${['student','admin','super'].map(r=>`<option ${r===p.role?'selected':''}>${r}</option>`).join('')}</select><input id="p_${p.id}" value="${esc((p.perms||[]).join(','))}" placeholder="perms"><button class="b s" onclick="setRole('${p.id}')">บันทึก</button></div></div>`).join('')};
-async function setRole(id){const {error}=await db.from('profiles').update({role:$('#r_'+id).value,perms:$('#p_'+id).value.split(',').map(s=>s.trim()).filter(Boolean)}).eq('id',id);toast(error?error.message:'บันทึกสิทธิ์แล้ว')}
-async function logHtml(n){const {data,error}=await db.from('logs').select('*').order('at',{ascending:false}).limit(n);if(error)return '<p class="err">'+esc(error.message)+'</p>';
- const {data:ps}=await db.from('profiles').select('id,name'),nm=Object.fromEntries((ps||[]).map(p=>[p.id,p.name]));
- return data.map(l=>`<div class="card"><p><span class="tag">${l.action}</span> ${esc(title(l.module))} · ${esc(nm[l.who]||'ระบบ')}</p><p class="mu">${new Date(l.at).toLocaleString('th-TH')}</p></div>`).join('')||'<p class="mu">ยังไม่มีประวัติ</p>'}
-SP.logs=async(m,v)=>{if(!isS())throw Error('เฉพาะหัวหน้าห้อง');v.innerHTML='<h2>🕘 ประวัติการทำงาน</h2>'+await logHtml(100)};
-SP.trash=async(m,v)=>{const {data,error}=await db.from('items').select('*').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(100);if(error)throw error;
- v.innerHTML='<h2>🗑️ ถังขยะ</h2>'+(data.map(x=>`<div class="card"><span class="tag">${esc(title(x.module))}</span><p>${esc(Object.values(x.data)[0]||'')}</p><div class="acts"><button class="b g s" onclick="restore('${x.id}')">กู้คืน</button></div></div>`).join('')||'<p class="mu">ถังขยะว่างเปล่า</p>')};
-async function restore(id){const {error}=await db.from('items').update({deleted_at:null}).eq('id',id);toast(error?error.message:'กู้คืนแล้ว');show('trash',1)}
-SP.reports=(m,v)=>{v.innerHTML='<h2>📤 รายงานและส่งออก</h2><p class="mu">CSV เปิดใน Excel ได้ · PDF ใช้ปุ่มพิมพ์แล้วเลือก “บันทึกเป็น PDF”</p><div class="grid">'+Object.keys(M).filter(k=>M[k][2]).map(k=>`<button class="tile" onclick="csv('${k}')">${M[k][1]} ${M[k][0]}</button>`).join('')+'</div><div class="bar"><button class="b" onclick="backup()">💾 สำรองข้อมูลทั้งหมด (JSON)</button><button class="b g" onclick="print()">🖨️ พิมพ์ / PDF</button></div>'};
-function dl(n,t,s){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:t}));a.download=n;a.click()}
-async function csv(k){const {data}=await q(k),F=M[k][2],c=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
- dl(k+'-'+today()+'.csv','text/csv;charset=utf-8','\ufeff'+[F.map(f=>c(f[1])),...data.map(r=>F.map(f=>c(r.data[f[0]])))].map(r=>r.join(',')).join('\r\n'))}
-async function backup(){const {data}=await db.from('items').select('*').limit(10000);dl('backup-'+today()+'.json','application/json',JSON.stringify(data))}
+SP.menu=function(m,v){
+ const t=k=>tile(M[k][1],M[k][0]+(LOCK.includes(k)?' 🔒':''),'go',{v:k});
+ v.innerHTML=head('เมนูทั้งหมด',{sub:'เลือกเมนูที่ต้องการใช้งาน'})+profileCard()+'</div>'+
+  '<div class="section-title"><h3>เมนูหลัก</h3></div><div class="grid">'+MAIN.filter(k=>k!=='home').map(t).join('')+'</div>'+
+  '<div class="section-title"><h3>ระบบเพิ่มเติม</h3></div><div class="grid">'+MORE.map(t).join('')+'</div>'+
+  (isA()?'<div class="section-title"><h3>ผู้ดูแล</h3></div><div class="grid">'+tile('🛠️','ADMIN PANEL','go',{v:'admin'})+'</div>':'')+
+  (isG()?'<button class="cta" data-act="authChoice">เข้าสู่ระบบ / สมัครสมาชิก</button>':'<button class="cta ghost" data-act="logout">ออกจากระบบ</button>');
+};
+SP.home=async function(m,v){
+ const r=await Promise.all(['announce','homework','calendar'].map(k=>q(k).then(x=>x.data||[])));
+ let ann=r[0];if(!canEdit('announce'))ann=ann.filter(x=>!x.data.date||x.data.date<=today());
+ ann.sort((a,b)=>(b.data.pin==='ปัก')-(a.data.pin==='ปัก'));
+ const hw=r[1],cal=r[2],pinned=ann.find(x=>x.data.pin==='ปัก');
+ const upcoming=hw.filter(x=>x.data.due&&x.data.due>=today()).sort((a,b)=>a.data.due<b.data.due?-1:1)[0]||hw[0];
+ const warn='<svg width="30" height="30" viewBox="0 0 24 24" fill="#3a3000"><path d="M12 2 1 21h22L12 2zm1 15h-2v-2h2v2zm0-4h-2V9h2v4z"/></svg>';
+ const notice=pinned?'<div class="notice" id="notice">'+warn+'<div><h4>ประกาศปักหมุด</h4><p>'+esc(pinned.data.title)+'</p></div><button class="close" data-act="closeNotice" aria-label="ปิด">×</button></div>':'';
+ const banner=upcoming
+  ?'<button class="banner" data-act="go" data-v="homework"><small>การบ้านที่ใกล้ส่ง'+(upcoming.data.due?' · กำหนดส่ง '+esc(fd(upcoming.data.due)):'')+'</small><h2>'+esc(upcoming.data.task||upcoming.data.subject)+'</h2><small>วิชา '+esc(upcoming.data.subject||'-')+'</small><div class="circle"></div></button>'
+  :'<button class="banner" data-act="go" data-v="homework"><small>การบ้าน</small><h2>ยังไม่มีการบ้านในขณะนี้ 🎉</h2><small>ดูหน้าการบ้านทั้งหมด</small><div class="circle"></div></button>';
+ const chip=(k)=>'<button class="chip2" data-act="go" data-v="'+k+'"><small>ทางลัด</small><b>'+M[k][1]+' '+M[k][0]+'</b></button>';
+ const blk=(t,k,rs)=>'<div class="card"><div class="t">'+t+'</div>'+(rs.length?rs.slice(0,3).map(x=>{const d=x.data,meta=d.due?'ส่ง '+fd(d.due):(k==='calendar'&&d.date?fd(d.date):'');return '<button class="item" data-act="go" data-v="'+k+'"><div class="nm"><b>'+esc(d[M[k][2][0][0]])+'</b>'+(meta?'<span class="sub">'+esc(meta)+'</span>':'')+'</div></button>'}).join(''):'<p class="sub">ยังไม่มีข้อมูล</p>')+'</div>';
+ v.innerHTML=head('ห้อง ม.4/4',{brand:1})+'<div class="home-grid">'+notice+
+  profileCard()+'<div class="chips2">'+['schedule','attendance','money','leave'].map(chip).join('')+'</div>'+
+  '<button class="promo-strip" data-act="go" data-v="announce"><div><b>'+(ann[0]?esc(ann[0].data.title):'ยังไม่มีประกาศ')+'</b><small>ประกาศล่าสุดจากหัวหน้าห้อง</small></div><span>›</span></button></div>'+
+  banner+
+  '<div class="tiles"><div class="grid">'+
+   tile('🗓️','ตารางเรียน','go',{v:'schedule'})+tile('✅','เช็กชื่อ','go',{v:'attendance'})+tile('💰','เงินห้อง','go',{v:'money'})+tile('📚','การบ้าน','go',{v:'homework'})+
+   tile('🗂️','คลังเอกสาร','go',{v:'docs'})+tile('🎯','กิจกรรมห้อง','go',{v:'activity'})+tile('📆','ปฏิทินห้อง','go',{v:'calendar'})+tile(svg('more'),'เมนูทั้งหมด','nav',{v:'menu',isNew:1})+
+  '</div></div>'+
+  '<div class="cols3">'+blk('📢 ประกาศล่าสุด','announce',ann)+blk('📚 การบ้านล่าสุด','homework',hw)+blk('📆 ปฏิทินห้อง','calendar',cal)+'</div></div>';
+};
+SP.admin=function(m,v){
+ v.innerHTML=head('ADMIN PANEL',{back:1,sub:'เฉพาะผู้ดูแล · เมนูจัดการระบบและฐานข้อมูล'})+'<div class="grid">'+AD.map(a=>tile(AD_EMO[a[1]]||M[a[1]][1],esc(a[0]),'go',{v:a[1]})).join('')+'</div><p class="hint">รองหัวหน้าห้องจะแก้ไขได้เฉพาะเมนูที่หัวหน้าห้องกำหนดสิทธิ์ให้</p>';
+};
+SP.ov=async function(m,v){
+ const r=await db.from('items').select('module,data').is('deleted_at',null).limit(5000);if(r.error)throw r.error;
+ const data=r.data||[],c={},bal=data.filter(x=>x.module==='money').reduce((s,x)=>s+(x.data.type==='รายจ่าย'?-1:1)*(+x.data.amount||0),0);
+ data.forEach(x=>c[x.module]=(c[x.module]||0)+1);
+ const cnt=(await db.from('profiles').select('*',{count:'exact',head:true})).count||0;
+ const stat=(l,n,hl)=>'<div class="chip2'+(hl?' hl':'')+'"><small>'+l+'</small><b>'+n+'</b></div>';
+ v.innerHTML=head('📊 ภาพรวมระบบ',{back:1})+'<div class="stats">'+stat('ผู้ใช้งานระบบ',cnt)+stat('เงินห้องคงเหลือ',bal.toLocaleString(),1)+
+  ['members','announce','homework','leave','issue','chat','docs'].map(k=>stat(M[k][1]+' '+M[k][0],c[k]||0)).join('')+'</div>'+
+  (isS()?'<div class="section-title"><h3>กิจกรรมล่าสุด</h3></div>'+await logHtml(8):'');
+};
+SP.locks=async function(m,v){
+ if(!isS())throw Error('เฉพาะหัวหน้าห้อง');
+ v.innerHTML=head('🔒 ล็อกเมนู',{back:1})+'<p class="hint" style="text-align:left">ติ๊ก = ต้องเข้าสู่ระบบก่อนจึงจะเปิดเมนูนั้นได้ · ไม่ติ๊ก = ใครก็ดูได้โดยไม่ต้องสมัคร (การเพิ่ม/แก้ไขข้อมูลต้องเข้าสู่ระบบเสมอ)</p><div class="list cols3x">'+
+  MAIN.slice(1).concat(MORE).map(k=>'<div class="item"><div class="nm"><b>'+M[k][1]+' '+M[k][0]+'</b></div><input type="checkbox" data-act="setLock" data-k="'+k+'" '+(LOCK.includes(k)?'checked':'')+'></div>').join('')+'</div>';
+};
+async function setLock(k,on){
+ const r=await (on?db.from('locked_modules').upsert({module:k}):db.from('locked_modules').delete().eq('module',k));
+ if(r.error)return toast(r.error.message);
+ LOCK=on?LOCK.concat([k]):LOCK.filter(x=>x!==k);toast('บันทึกแล้ว');
+}
+SP.perms=async function(m,v){
+ if(!isS())throw Error('เฉพาะหัวหน้าห้อง');
+ const r=await db.from('profiles').select('*').order('name');if(r.error)throw r.error;
+ v.innerHTML=head('🔐 จัดการสิทธิ์',{back:1,sub:'student = นักเรียน · admin = รองหัวหน้า · super = หัวหน้าห้อง<br>ช่อง perms ใส่รหัสเมนูที่ admin แก้ไขได้ คั่นด้วย , เช่น money,homework,announce'})+
+  '<div class="cards-grid">'+(r.data||[]).map(p=>'<div class="card"><div class="t">'+esc(p.name)+'</div><span class="mu">'+esc(p.email)+'</span><div class="row2"><select id="r_'+esc(p.id)+'">'+['student','admin','super'].map(x=>'<option '+(x===p.role?'selected':'')+'>'+x+'</option>').join('')+'</select><input type="text" id="p_'+esc(p.id)+'" value="'+esc((p.perms||[]).join(','))+'" placeholder="perms"><button class="btn p sm" data-act="setRole" data-id="'+esc(p.id)+'">บันทึก</button></div></div>').join('')+'</div>';
+};
+async function setRole(id){
+ const r=await db.from('profiles').update({role:$('#r_'+id).value,perms:$('#p_'+id).value.split(',').map(s=>s.trim()).filter(Boolean)}).eq('id',id);
+ toast(r.error?r.error.message:'บันทึกสิทธิ์แล้ว');
+}
+async function logHtml(n){
+ const r=await db.from('logs').select('*').order('at',{ascending:false}).limit(n);
+ if(r.error)return '<div class="card"><p class="err">'+esc(r.error.message)+'</p></div>';
+ const ps=(await db.from('profiles').select('id,name')).data||[],nm={};ps.forEach(p=>nm[p.id]=p.name);
+ return '<div class="cards-grid">'+((r.data||[]).map(l=>'<div class="card"><p><span class="tag">'+esc(l.action)+'</span> '+esc(title(l.module))+' · '+esc(nm[l.who]||'ระบบ')+'</p><p class="mu">'+new Date(l.at).toLocaleString('th-TH')+'</p></div>').join('')||'<div class="card empty" style="grid-column:1/-1">ยังไม่มีประวัติ</div>')+'</div>';
+}
+SP.logs=async function(m,v){if(!isS())throw Error('เฉพาะหัวหน้าห้อง');v.innerHTML=head('🕘 ประวัติการทำงาน',{back:1})+await logHtml(100)};
+SP.trash=async function(m,v){
+ const r=await db.from('items').select('*').not('deleted_at','is',null).order('deleted_at',{ascending:false}).limit(100);if(r.error)throw r.error;
+ v.innerHTML=head('🗑️ ถังขยะ',{back:1})+'<div class="cards-grid">'+((r.data||[]).map(x=>'<div class="card"><span class="tag">'+esc(title(x.module))+'</span><p>'+esc(Object.values(x.data||{})[0]||'')+'</p><div class="acts"><button class="btn sm" data-act="restore" data-id="'+esc(x.id)+'">กู้คืน</button></div></div>').join('')||'<div class="card empty" style="grid-column:1/-1">ถังขยะว่างเปล่า</div>')+'</div>';
+};
+async function restore(id){
+ const r=await db.from('items').update({deleted_at:null}).eq('id',id);toast(r.error?r.error.message:'กู้คืนแล้ว');show('trash',1);
+}
+SP.reports=function(m,v){
+ v.innerHTML=head('📤 รายงานและส่งออก',{back:1,sub:'CSV เปิดใน Excel ได้ · PDF ใช้ปุ่มพิมพ์แล้วเลือก “บันทึกเป็น PDF”'})+'<div class="grid">'+
+  Object.keys(M).filter(k=>M[k][2]).map(k=>tile(M[k][1],M[k][0],'csv',{v:k})).join('')+'</div>'+
+  '<button class="cta" data-act="backup">💾 สำรองข้อมูลทั้งหมด (JSON)</button><button class="cta ghost" data-act="printPage">🖨️ พิมพ์ / PDF</button>';
+};
+function dl(n,t,s){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:t}));a.download=n;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+async function csv(k){
+ const r=await q(k),F=M[k][2],c=s=>'"'+String(s==null?'':s).replace(/"/g,'""')+'"';
+ dl(k+'-'+today()+'.csv','text/csv;charset=utf-8','﻿'+[F.map(f=>c(f[1]))].concat((r.data||[]).map(row=>F.map(f=>c(row.data[f[0]])))).map(x=>x.join(',')).join('\r\n'));
+}
+async function backup(){const r=await db.from('items').select('*').limit(10000);dl('backup-'+today()+'.json','application/json',JSON.stringify(r.data||[]))}
+
+// ====== events ======
+const A={
+ closeSheet:closeSheet,
+ closeNotice(){const n=$('#notice');if(n)n.remove()},
+ nav(t){stack=[];closeSheet();show(t.dataset.v)},
+ go(t){closeSheet();stack.push(cur);show(t.dataset.v)},
+ back(){show(stack.length?stack.pop():(NAVK.includes(cur)?'home':'menu'))},
+ authChoice:authChoice,loginSheet:loginSheet,signupSheet:signupSheet,
+ login:login,signup:signup,logout:logout,
+ openForm(t){openForm(t.dataset.m,t.dataset.id||undefined)},
+ save(t){save(t.dataset.m,t.dataset.id||'')},
+ del(t){del(t.dataset.id)},
+ vote(t){vote(t.dataset.poll,t.dataset.c)},
+ setRole(t){setRole(t.dataset.id)},
+ restore(t){restore(t.dataset.id)},
+ csv(t){csv(t.dataset.v)},
+ backup:backup,
+ printPage(){window.print()}
+};
+document.addEventListener('click',function(e){
+ const t=e.target.closest('[data-act]');if(!t||t.type==='checkbox')return;
+ const f=A[t.dataset.act];if(f){e.preventDefault();Promise.resolve(f(t,e)).catch(function(x){toast(em(x))})}
+});
+document.addEventListener('change',function(e){
+ const t=e.target;
+ if(t&&t.type==='checkbox'&&t.dataset.act==='setLock')setLock(t.dataset.k,t.checked);
+});
+document.addEventListener('input',function(e){
+ if(e.target&&e.target.id==='qs'){Q=e.target.value;paint(cur)}
+});
+document.addEventListener('keydown',function(e){
+ if(e.key==='Escape')closeSheet();
+ if(e.key==='Enter'&&e.target&&e.target.id==='ap'){e.preventDefault();($('#an')?signup:login)()}
+});
 
 boot();
+})();
 </script>
 </body>
 </html>
